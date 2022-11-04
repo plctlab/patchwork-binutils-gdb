@@ -279,15 +279,24 @@ static riscv_parse_subset_t riscv_rps_as =
   true,			/* check_unknown_prefixed_ext.  */
 };
 
+static const char *riscv_file_arch = NULL;
+
 /* Update the architecture string in the subset_list.  */
 
 static void
-riscv_reset_subsets_list_arch_str (void)
+riscv_reset_subsets_list_arch_str (bool file_level)
 {
   riscv_subset_list_t *subsets = riscv_rps_as.subset_list;
   if (subsets->arch_str != NULL)
     free ((void *) subsets->arch_str);
   subsets->arch_str = riscv_arch_str (xlen, subsets);
+
+  if (file_level)
+    {
+      if (riscv_file_arch != NULL)
+	free ((void *) riscv_file_arch);
+      riscv_file_arch = strdup (subsets->arch_str);
+    }
 }
 
 /* This structure is used to hold a stack of .option values.  */
@@ -321,7 +330,7 @@ riscv_set_arch (const char *s)
     }
   riscv_release_subset_list (riscv_rps_as.subset_list);
   riscv_parse_subset (&riscv_rps_as, s);
-  riscv_reset_subsets_list_arch_str ();
+  riscv_reset_subsets_list_arch_str (true/* file_level */);
 
   riscv_set_rvc (false);
   if (riscv_subset_supports (&riscv_rps_as, "c"))
@@ -4045,13 +4054,13 @@ s_riscv_option (int x ATTRIBUTE_UNUSED)
   if (strcmp (name, "rvc") == 0)
     {
       riscv_update_subset (&riscv_rps_as, "+c");
-      riscv_reset_subsets_list_arch_str ();
+      riscv_reset_subsets_list_arch_str (false/* file_level */);
       riscv_set_rvc (true);
     }
   else if (strcmp (name, "norvc") == 0)
     {
       riscv_update_subset (&riscv_rps_as, "-c");
-      riscv_reset_subsets_list_arch_str ();
+      riscv_reset_subsets_list_arch_str (false/* file_level */);
       riscv_set_rvc (false);
     }
   else if (strcmp (name, "pic") == 0)
@@ -4072,7 +4081,7 @@ s_riscv_option (int x ATTRIBUTE_UNUSED)
       if (ISSPACE (*name) && *name != '\0')
 	name++;
       riscv_update_subset (&riscv_rps_as, name);
-      riscv_reset_subsets_list_arch_str ();
+      riscv_reset_subsets_list_arch_str (false/* file_level */);
 
       riscv_set_rvc (false);
       if (riscv_subset_supports (&riscv_rps_as, "c"))
@@ -4526,6 +4535,7 @@ riscv_elf_final_processing (void)
 {
   riscv_set_abi_by_arch ();
   riscv_release_subset_list (riscv_rps_as.subset_list);
+  free ((void *) riscv_file_arch);
   elf_elfheader (stdoutput)->e_flags |= elf_flags;
 }
 
@@ -4610,7 +4620,7 @@ riscv_write_out_attrs (void)
   unsigned int i;
 
   /* Re-write architecture elf attribute.  */
-  arch_str = riscv_rps_as.subset_list->arch_str;
+  arch_str = riscv_file_arch;
   bfd_elf_add_proc_attr_string (stdoutput, Tag_RISCV_arch, arch_str);
 
   /* For the file without any instruction, we don't set the default_priv_spec

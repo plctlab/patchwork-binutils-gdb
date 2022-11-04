@@ -1,6 +1,6 @@
 #as: -misa-spec=2.2
+#source: option-arch.s
 #readelf: -A
-#source: option-arch-01.s
 
 Attribute Section: riscv
 File Attributes
