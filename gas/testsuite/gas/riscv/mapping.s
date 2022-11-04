@@ -1,10 +1,11 @@
-.attribute arch, "rv32ic"
+.attribute arch, "rv32ifc"
 .option norelax			# FIXME: assembler fill the paddings after parsing everything,
 				# so we probably won't fill anything for the norelax region when
 				# the riscv_opts.relax is enabled at somewhere.
 
 .section .text.cross.section.A, "ax"
 .option push
+.option arch, rv32i
 .global funcA
 funcA:
 addi	a0, zero, 1		# rv32i
@@ -20,6 +21,7 @@ j	funcB			# rv32i
 
 .section .text.data, "ax"
 .option push
+.option arch, rv32ic
 .word	0			# $d
 .long	1
 addi	a0, zero, 1		# rv32ic
@@ -35,7 +37,7 @@ addi	a0, zero, 2		# $x, but same as previous addi, so removed
 .section .text.odd.align.start.insn, "ax"
 .option push
 .option norelax
-.option arch, +c
+.option arch, rv32ic
 addi	a0, zero, 1		# $xrv32ic
 .byte	1			# $d
 .option arch, -c
@@ -46,7 +48,7 @@ addi	a0, zero, 2		# $xrv32i
 .section .text.odd.align.start.data, "ax"
 .option push
 .option norelax
-.option arch, +c
+.option arch, rv32ic
 .byte	1			# $d
 .align	2			# odd alignment, $xrv32ic replaced by $d + $xrv32ic
 addi	a0, zero, 1
@@ -55,6 +57,7 @@ addi	a0, zero, 1
 .section .text.zero.fill.first, "ax"
 .option push
 .option norelax
+.option arch, rv32ic
 .fill	1, 0, 0			# $d with zero size, removed in make_mapping_symbol
 addi	a0, zero, 1		# $xrv32ic
 .option pop
@@ -62,6 +65,7 @@ addi	a0, zero, 1		# $xrv32ic
 .section .text.zero.fill.last, "ax"
 .option push
 .option norelax
+.option arch, rv32ic
 addi	a0, zero, 1		# $xrv32ic
 .fill	1, 0, 0			# $d with zero size, removed in make_mapping_symbol
 addi	a0, zero, 2		# $x, FIXME: need find a way to remove?
@@ -71,6 +75,7 @@ addi	a0, zero, 2		# $x, FIXME: need find a way to remove?
 .section .text.zero.fill.align.A, "ax"
 .option push
 .option norelax
+.option arch, rv32ic
 .align	2			# $xrv32ic, .align and .fill are in the different frag, so neither be removed
 .fill	1, 0, 0			# $d with zero size, removed in make_mapping_symbol when adding $xrv32ic
 addi	a0, zero, 1		# $x, should be removed in riscv_check_mapping_symbols
@@ -81,6 +86,7 @@ addi	a0, zero, 2
 .section .text.zero.fill.align.B, "ax"
 .option push
 .option norelax
+.option arch, rv32ic
 .align	2			# $xrv32ic, .align and .fill are in the different frag, so neither be removed,
 				# but will be removed in riscv_check_mapping_symbols
 .fill	1, 0, 0			# $d with zero size, removed in make_mapping_symbol when adding $xrv32ic
@@ -92,7 +98,7 @@ addi	a0, zero, 2
 .section .text.last.section, "ax"
 .option push
 .option norelax
-.option arch, -c
+.option arch, rv32i
 addi	a0, zero, 1		# $xrv32i
 .word	1			# $d
 .align	2			# zero section padding, $x at the end of section, removed in riscv_check_mapping_symbols
@@ -101,6 +107,7 @@ addi	a0, zero, 1		# $xrv32i
 .section .text.section.padding, "ax"
 .option push
 .option norelax
+.option arch, rv32ic
 .align	2
 addi	a0, zero, 1		# $rv32ic
 .option arch, +a
@@ -119,3 +126,23 @@ addi	a0, zero, 1		# $x, won't added
 .align	3			# $x, won't added
 addi	a0, zero, 2		# $xrv32i
 .option pop
+
+.section .text.suppress, "ax"
+csrrs	t0, fcsr, zero		# suppress $xrv32ifc to $x
+addi	a0, zero, 1
+
+.section .text.suppress.push.pop, "ax"
+.option push
+.option arch, rv32i
+.option arch, +f, +c
+csrrs	t0, fcsr, zero		# suppress $xrv32ifc to $x
+addi	a0, zero, 1
+.option pop
+
+.section .text.no.suppress, "ax"
+csrrs   t0, fcsr, zero		# $xrv32ifc, since not only one $x+arch, so don't suppress
+.option push
+.option arch, -f
+csrrs   t0, fcsr, zero		# $xrv32ic
+.option pop
+csrrs   t0, fcsr, zero		# $xrv32ifc, likewise

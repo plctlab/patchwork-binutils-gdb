@@ -9,7 +9,8 @@ SYMBOL TABLE:
 0+00 l    d  .data	0+00 .data
 0+00 l    d  .bss	0+00 .bss
 0+00 l    d  .text.cross.section.A	0+00 .text.cross.section.A
-0+00 l       .text.cross.section.A	0+00 \$xrv32i2p1_c2p0
+0+00 l       .text.cross.section.A	0+00 \$xrv32i2p1
+0+04 l       .text.cross.section.A	0+00 \$xrv32i2p1_c2p0
 0+00 l    d  .text.corss.section.B	0+00 .text.corss.section.B
 0+00 l       .text.corss.section.B	0+00 \$xrv32i2p1_c2p0
 0+02 l       .text.corss.section.B	0+00 \$xrv32i2p1
@@ -42,6 +43,14 @@ SYMBOL TABLE:
 0+00 l    d  .text.relax.align	0+00 .text.relax.align
 0+00 l       .text.relax.align	0+00 \$xrv32i2p1_c2p0
 0+08 l       .text.relax.align	0+00 \$xrv32i2p1
+0+00 l    d  .text.suppress	0+00 .text.suppress
+0+00 l       .text.suppress	0+00 \$x
+0+00 l    d  .text.suppress.push.pop	0+00 .text.suppress.push.pop
+0+00 l       .text.suppress.push.pop	0+00 \$x
+0+00 l    d  .text.no.suppress	0+00 .text.no.suppress
+0+00 l       .text.no.suppress	0+00 \$xrv32i2p1_f2p2_c2p0_zicsr2p0
+0+04 l       .text.no.suppress	0+00 \$xrv32i2p1_c2p0_zicsr2p0
+0+08 l       .text.no.suppress	0+00 \$xrv32i2p1_f2p2_c2p0_zicsr2p0
 0+0a l       .text.section.padding	0+00 \$x
 0+03 l       .text.odd.align.start.insn	0+00 \$d
 0+04 l       .text.odd.align.start.insn	0+00 \$x

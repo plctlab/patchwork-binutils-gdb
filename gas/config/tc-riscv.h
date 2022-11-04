@@ -140,6 +140,7 @@ struct riscv_segment_info_type
   enum riscv_seg_mstate map_state;
   /* The current mapping symbol with architecture string.  */
   symbolS *arch_map_symbol;
+  bool arch_changed;
 };
 
 /* Define target fragment type.  */

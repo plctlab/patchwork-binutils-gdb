@@ -42,10 +42,11 @@ static enum riscv_spec_class default_isa_spec = ISA_SPEC_CLASS_DRAFT - 1;
    (as specified by the ELF attributes or the `priv-spec' option).  */
 static enum riscv_spec_class default_priv_spec = PRIV_SPEC_CLASS_NONE;
 
+static riscv_subset_list_t riscv_file_subsets;
 static riscv_subset_list_t riscv_subsets;
 static riscv_parse_subset_t riscv_rps_dis =
 {
-  &riscv_subsets,	/* subset_list.  */
+  NULL,			/* subset_list.  */
   opcodes_error_handler,/* error_handler.  */
   &xlen,		/* xlen.  */
   &default_isa_spec,	/* isa_spec.  */
@@ -64,6 +65,7 @@ struct riscv_private_data
 /* Used for mapping symbols.  */
 static int last_map_symbol = -1;
 static bfd_vma last_stop_offset = 0;
+static bool from_last_map_symbol = false;
 
 /* Register names as used by the disassembler.  */
 static const char * const *riscv_gpr_names;
@@ -821,7 +823,8 @@ riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
 static bool
 riscv_get_map_state (int n,
 		     enum riscv_seg_mstate *state,
-		     struct disassemble_info *info)
+		     struct disassemble_info *info,
+		     bool update)
 {
   const char *name;
 
@@ -831,15 +834,25 @@ riscv_get_map_state (int n,
     return false;
 
   name = bfd_asymbol_name(info->symtab[n]);
-  if (strcmp (name, "$x") == 0)
-    *state = MAP_INSN;
-  else if (strcmp (name, "$d") == 0)
+  if (strcmp (name, "$d") == 0)
     *state = MAP_DATA;
+  else if (strcmp (name, "$x") == 0)
+    {
+      *state = MAP_INSN;
+      /* Switch back to file-level architecture when starting from
+	 a new section.  */
+      if (update && !from_last_map_symbol)
+	riscv_rps_dis.subset_list = &riscv_file_subsets;
+    }
   else if (strncmp (name, "$xrv", 4) == 0)
     {
       *state = MAP_INSN;
-      riscv_release_subset_list (&riscv_subsets);
-      riscv_parse_subset (&riscv_rps_dis, name + 2);
+      if (update)
+	{
+	  riscv_rps_dis.subset_list = &riscv_subsets;
+	  riscv_release_subset_list (riscv_rps_dis.subset_list);
+	  riscv_parse_subset (&riscv_rps_dis, name + 2);
+	}
     }
   else
     return false;
@@ -855,7 +868,6 @@ riscv_search_mapping_symbol (bfd_vma memaddr,
 			     struct disassemble_info *info)
 {
   enum riscv_seg_mstate mstate;
-  bool from_last_map_symbol;
   bool found = false;
   int symbol = -1;
   int n;
@@ -872,7 +884,7 @@ riscv_search_mapping_symbol (bfd_vma memaddr,
       || bfd_asymbol_flavour (*info->symtab) != bfd_target_elf_flavour)
     return mstate;
 
-  /* Reset the last_map_symbol if we start to dump a new section.  */
+  /* Reset the last_map_symbol when pc <= 0.  */
   if (memaddr <= 0)
     last_map_symbol = -1;
 
@@ -895,7 +907,7 @@ riscv_search_mapping_symbol (bfd_vma memaddr,
       /* We have searched all possible symbols in the range.  */
       if (addr > memaddr)
 	break;
-      if (riscv_get_map_state (n, &mstate, info))
+      if (riscv_get_map_state (n, &mstate, info, true/* update */))
 	{
 	  symbol = n;
 	  found = true;
@@ -922,7 +934,7 @@ riscv_search_mapping_symbol (bfd_vma memaddr,
 	  if (addr < (info->section ? info->section->vma : 0))
 	    break;
 	  /* Stop searching once we find the closed mapping symbol.  */
-	  if (riscv_get_map_state (n, &mstate, info))
+	  if (riscv_get_map_state (n, &mstate, info, true/* update */))
 	    {
 	      symbol = n;
 	      found = true;
@@ -958,7 +970,7 @@ riscv_data_length (bfd_vma memaddr,
 	{
 	  bfd_vma addr = bfd_asymbol_value (info->symtab[n]);
 	  if (addr > memaddr
-	      && riscv_get_map_state (n, &m, info))
+	      && riscv_get_map_state (n, &m, info, false/* update */))
 	    {
 	      if (addr - memaddr < length)
 		length = addr - memaddr;
@@ -1106,7 +1118,8 @@ riscv_get_disassembler (bfd *abfd)
 	}
     }
 
-  riscv_release_subset_list (&riscv_subsets);
+  riscv_rps_dis.subset_list = &riscv_file_subsets;
+  riscv_release_subset_list (riscv_rps_dis.subset_list);
   riscv_parse_subset (&riscv_rps_dis, default_arch);
   return print_insn_riscv;
 }

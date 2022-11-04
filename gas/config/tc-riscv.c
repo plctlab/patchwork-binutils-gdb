@@ -598,6 +598,7 @@ riscv_mapping_state (enum riscv_seg_mstate to_state,
 		      S_GET_NAME (seg_arch_symbol) + 2) != 0)
     {
       reset_seg_arch_str = true;
+      seg_info (now_seg)->tc_segment_info_data.arch_changed = true;
     }
   else if (from_state == to_state)
     return;
@@ -638,6 +639,18 @@ riscv_check_mapping_symbols (bfd *abfd ATTRIBUTE_UNUSED,
 
   if (seginfo == NULL || seginfo->frchainP == NULL)
     return;
+
+  /* If the section only has a mapping symbol at the first instruction,
+     and it is the same as the file-level architecture, then no need to
+     add $x+arch for it, just add $x is enough.
+
+     Please see gas/testsuite/gas/riscv/mapping.s: <your testcase
+     section name>.  */
+  symbolS *arch_map_symbol = seginfo->tc_segment_info_data.arch_map_symbol;
+  if (!seginfo->tc_segment_info_data.arch_changed
+      && arch_map_symbol != 0
+      && strcmp (riscv_file_arch, S_GET_NAME (arch_map_symbol) + 2) == 0)
+    S_SET_NAME (arch_map_symbol, "$x");
 
   for (fragp = seginfo->frchainP->frch_root;
        fragp != NULL;

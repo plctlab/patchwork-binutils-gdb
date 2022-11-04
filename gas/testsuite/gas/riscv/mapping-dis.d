@@ -8,8 +8,8 @@
 Disassembly of section .text.cross.section.A:
 
 0+000 <funcA>:
-[ 	]+[0-9a-f]+:[ 	]+4505[ 	]+li[ 	]+a0,1
-[ 	]+[0-9a-f]+:[ 	]+bffd[ 	]+j[ 	]+0 <funcA>
+[ 	]+[0-9a-f]+:[ 	]+00100513[ 	]+li[ 	]+a0,1
+[ 	]+[0-9a-f]+:[ 	]+bff5[ 	]+j[ 	]+0 <funcA>
 
 Disassembly of section .text.corss.section.B:
 
@@ -91,3 +91,22 @@ Disassembly of section .text.relax.align:
 [ 	]+[0-9a-f]+:[ 	]+00000013[ 	]+nop
 [ 	]+[0-9a-f]+:[ 	]+00200513[ 	]+li[ 	]+a0,2
 [ 	]+[0-9a-f]+:[ 	]+00000013[ 	]+nop
+
+Disassembly of section .text.suppress:
+
+0+000 <.text.suppress>:
+[ 	]+[0-9a-f]+:[ 	]+003022f3[ 	]+frcsr[ 	]+t0
+[ 	]+[0-9a-f]+:[ 	]+4505[ 	]+li[ 	]+a0,1
+
+Disassembly of section .text.suppress.push.pop:
+
+0+000 <.text.suppress.push.pop>:
+[ 	]+[0-9a-f]+:[ 	]+003022f3[ 	]+frcsr[ 	]+t0
+[ 	]+[0-9a-f]+:[ 	]+4505[ 	]+li[ 	]+a0,1
+
+Disassembly of section .text.no.suppress:
+
+0+000 <.text.no.suppress>:
+[ 	]+[0-9a-f]+:[ 	]+003022f3[ 	]+frcsr[ 	]+t0
+[ 	]+[0-9a-f]+:[ 	]+003022f3[ 	]+csrr[ 	]+t0,fcsr
+[ 	]+[0-9a-f]+:[ 	]+003022f3[ 	]+frcsr[ 	]+t0
