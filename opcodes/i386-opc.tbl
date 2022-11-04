@@ -483,37 +483,37 @@ loopne, 0xe0, None, Cpu64, JumpByte|No_bSuf|No_wSuf|No_sSuf|No_ldSuf|NoRex64, { 
 set<cc>, 0xf9<cc:opc>, 0, Cpu386, Modrm|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg8|Byte|Unspecified|BaseIndex }
 
 // String manipulation.
-cmps, 0xa6, None, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, {}
+cmps, 0xa6, None, 0, W|No_sSuf|No_ldSuf|RepPrefixOk, {}
 cmps, 0xa6, None, 0, W|No_sSuf|No_ldSuf|IsStringEsOp0|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Byte|Word|Dword|Qword|Unspecified|BaseIndex }
-scmp, 0xa6, None, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, {}
+scmp, 0xa6, None, 0, W|No_sSuf|No_ldSuf|RepPrefixOk, {}
 scmp, 0xa6, None, 0, W|No_sSuf|No_ldSuf|IsStringEsOp0|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Byte|Word|Dword|Qword|Unspecified|BaseIndex }
-ins, 0x6c, None, Cpu186, W|No_sSuf|No_qSuf|No_ldSuf|IsString|RepPrefixOk, {}
+ins, 0x6c, None, Cpu186, W|No_sSuf|No_qSuf|No_ldSuf|RepPrefixOk, {}
 ins, 0x6c, None, Cpu186, W|No_sSuf|No_qSuf|No_ldSuf|IsStringEsOp1|RepPrefixOk, { InOutPortReg, Byte|Word|Dword|Unspecified|BaseIndex }
-outs, 0x6e, None, Cpu186, W|No_sSuf|No_qSuf|No_ldSuf|IsString|RepPrefixOk, {}
+outs, 0x6e, None, Cpu186, W|No_sSuf|No_qSuf|No_ldSuf|RepPrefixOk, {}
 outs, 0x6e, None, Cpu186, W|No_sSuf|No_qSuf|No_ldSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Unspecified|BaseIndex, InOutPortReg }
-lods, 0xac, None, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, {}
+lods, 0xac, None, 0, W|No_sSuf|No_ldSuf|RepPrefixOk, {}
 lods, 0xac, None, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 lods, 0xac, None, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Acc|Byte|Word|Dword|Qword }
-slod, 0xac, None, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, {}
+slod, 0xac, None, 0, W|No_sSuf|No_ldSuf|RepPrefixOk, {}
 slod, 0xac, None, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 slod, 0xac, None, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Acc|Byte|Word|Dword|Qword }
-movs, 0xa4, None, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, {}
+movs, 0xa4, None, 0, W|No_sSuf|No_ldSuf|RepPrefixOk, {}
 movs, 0xa4, None, 0, W|No_sSuf|No_ldSuf|IsStringEsOp1|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Byte|Word|Dword|Qword|Unspecified|BaseIndex }
-smov, 0xa4, None, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, {}
+smov, 0xa4, None, 0, W|No_sSuf|No_ldSuf|RepPrefixOk, {}
 smov, 0xa4, None, 0, W|No_sSuf|No_ldSuf|IsStringEsOp1|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Byte|Word|Dword|Qword|Unspecified|BaseIndex }
-scas, 0xae, None, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, {}
+scas, 0xae, None, 0, W|No_sSuf|No_ldSuf|RepPrefixOk, {}
 scas, 0xae, None, 0, W|No_sSuf|No_ldSuf|IsStringEsOp0|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 scas, 0xae, None, 0, W|No_sSuf|No_ldSuf|IsStringEsOp0|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Acc|Byte|Word|Dword|Qword }
-ssca, 0xae, None, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, {}
+ssca, 0xae, None, 0, W|No_sSuf|No_ldSuf|RepPrefixOk, {}
 ssca, 0xae, None, 0, W|No_sSuf|No_ldSuf|IsStringEsOp0|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 ssca, 0xae, None, 0, W|No_sSuf|No_ldSuf|IsStringEsOp0|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Acc|Byte|Word|Dword|Qword }
-stos, 0xaa, None, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, {}
+stos, 0xaa, None, 0, W|No_sSuf|No_ldSuf|RepPrefixOk, {}
 stos, 0xaa, None, 0, W|No_sSuf|No_ldSuf|IsStringEsOp0|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 stos, 0xaa, None, 0, W|No_sSuf|No_ldSuf|IsStringEsOp1|RepPrefixOk, { Acc|Byte|Word|Dword|Qword, Byte|Word|Dword|Qword|Unspecified|BaseIndex }
-ssto, 0xaa, None, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, {}
+ssto, 0xaa, None, 0, W|No_sSuf|No_ldSuf|RepPrefixOk, {}
 ssto, 0xaa, None, 0, W|No_sSuf|No_ldSuf|IsStringEsOp0|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 ssto, 0xaa, None, 0, W|No_sSuf|No_ldSuf|IsStringEsOp1|RepPrefixOk, { Acc|Byte|Word|Dword|Qword, Byte|Word|Dword|Qword|Unspecified|BaseIndex }
-xlat, 0xd7, None, 0, No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString, {}
+xlat, 0xd7, None, 0, No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
 xlat, 0xd7, None, 0, No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString, { Byte|Unspecified|BaseIndex }
 
 // Bit manipulation.
@@ -1968,24 +1968,24 @@ lzcnt, 0xf30fbd, None, CpuLZCNT, Modrm|CheckRegSize|No_bSuf|No_sSuf|No_ldSuf, { 
 popcnt, 0xf30fb8, None, CpuPOPCNT, Modrm|CheckRegSize|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 
 // VIA PadLock extensions.
-xstore-rng, 0xfa7c0, None, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|RepPrefixOk, {}
-xcrypt-ecb, 0xf30fa7c8, None, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|RepPrefixOk, {}
-xcrypt-cbc, 0xf30fa7d0, None, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|RepPrefixOk, {}
-xcrypt-ctr, 0xf30fa7d8, None, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|RepPrefixOk, {}
-xcrypt-cfb, 0xf30fa7e0, None, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|RepPrefixOk, {}
-xcrypt-ofb, 0xf30fa7e8, None, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|RepPrefixOk, {}
-montmul, 0xf30fa6c0, None, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|RepPrefixOk, {}
-xsha1, 0xf30fa6c8, None, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|RepPrefixOk, {}
-xsha256, 0xf30fa6d0, None, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|RepPrefixOk, {}
+xstore-rng, 0xfa7c0, None, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|RepPrefixOk, {}
+xcrypt-ecb, 0xf30fa7c8, None, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|RepPrefixOk, {}
+xcrypt-cbc, 0xf30fa7d0, None, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|RepPrefixOk, {}
+xcrypt-ctr, 0xf30fa7d8, None, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|RepPrefixOk, {}
+xcrypt-cfb, 0xf30fa7e0, None, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|RepPrefixOk, {}
+xcrypt-ofb, 0xf30fa7e8, None, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|RepPrefixOk, {}
+montmul, 0xf30fa6c0, None, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|RepPrefixOk, {}
+xsha1, 0xf30fa6c8, None, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|RepPrefixOk, {}
+xsha256, 0xf30fa6d0, None, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|RepPrefixOk, {}
 // Aliases without hyphens.
-xstorerng, 0xfa7c0, None, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|RepPrefixOk, {}
-xcryptecb, 0xf30fa7c8, None, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|RepPrefixOk, {}
-xcryptcbc, 0xf30fa7d0, None, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|RepPrefixOk, {}
-xcryptctr, 0xf30fa7d8, None, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|RepPrefixOk, {}
-xcryptcfb, 0xf30fa7e0, None, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|RepPrefixOk, {}
-xcryptofb, 0xf30fa7e8, None, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|RepPrefixOk, {}
+xstorerng, 0xfa7c0, None, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|RepPrefixOk, {}
+xcryptecb, 0xf30fa7c8, None, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|RepPrefixOk, {}
+xcryptcbc, 0xf30fa7d0, None, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|RepPrefixOk, {}
+xcryptctr, 0xf30fa7d8, None, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|RepPrefixOk, {}
+xcryptcfb, 0xf30fa7e0, None, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|RepPrefixOk, {}
+xcryptofb, 0xf30fa7e8, None, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|RepPrefixOk, {}
 // Alias for xstore-rng.
-xstore, 0xfa7c0, None, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|RepPrefixOk, {}
+xstore, 0xfa7c0, None, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|RepPrefixOk, {}
 
 // Multy-precision Add Carry, rdseed instructions.
 adcx, 0x660f38f6, None, CpuADX, Modrm|CheckRegSize|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_ldSuf, { Reg32|Reg64|Unspecified|BaseIndex, Reg32|Reg64 }
