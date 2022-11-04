@@ -311,6 +311,10 @@ struct _i386_insn
     /* The operand to a branch insn indicates an absolute branch.  */
     bool jumpabsolute;
 
+    /* There is a memory operand of (%dx) which should be only used
+       with input/output instructions.  */
+    bool input_output_operand;
+
     /* Extended states.  */
     enum
       {
@@ -5041,6 +5045,15 @@ md_assemble (char *line)
       if (!check_string ())
 	return;
       i.disp_operands = 0;
+    }
+
+  /* The memory operand of (%dx) should be only used with input/output
+     instructions (base opcodes: 0x6c, 0x6e, 0xec, 0xee).  */
+  if (i.input_output_operand && (i.tm.base_opcode | 0x82) != 0xee)
+    {
+      as_bad (_("input/output port address isn't allowed with `%s'"),
+	      i.tm.name);
+      return;
     }
 
   if (optimize && !i.no_optimize && i.tm.opcode_modifier.optimize)
@@ -11750,6 +11763,7 @@ i386_att_operand (char *operand_string)
 	  && !operand_type_check (i.types[this_operand], disp))
 	{
 	  i.types[this_operand] = i.base_reg->reg_type;
+	  i.input_output_operand = true;
 	  return 1;
 	}
 

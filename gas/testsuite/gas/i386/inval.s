@@ -112,3 +112,7 @@ movnti word ptr [eax], ax
 	inb	%dx, %ax
 	outb	%ax, %dx
 	movb	%ax, %bx
+
+	incl	(%dx)
+	mov	(%dx), %ax
+	mov	%ax, (%dx)
