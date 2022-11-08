@@ -18,6 +18,11 @@
    Foundation, 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
+#ifndef _CPUIDENT_H
+#define _CPUIDENT_H
+
+#include <stdint.h>
+
 #if defined(__i386__) || defined(__x86_64)
 #include <cpuid.h>  /* GCC-provided */
 #elif defined(__aarch64__)
@@ -85,7 +90,7 @@ typedef struct
 
 
 #if defined(__i386__) || defined(__x86_64)
-static uint_t
+static unsigned int
 cpuid_vendorstr_to_vendorcode (char *vendorstr)
 {
   if (strcmp (vendorstr, X86_VENDORSTR_Intel) == 0)
@@ -101,8 +106,10 @@ my_cpuid (unsigned int op, cpuid_regs_t *regs)
 {
   regs->eax = regs->ebx = regs->ecx = regs->edx = 0;
   int ret = __get_cpuid (op, &regs->eax, &regs->ebx, &regs->ecx, &regs->edx);
+#ifdef DBG_LT1
   TprintfT (DBG_LT1, "my_cpuid: __get_cpuid(0x%x, 0x%x, 0x%x, 0x%x, 0x%x) returns %d\n",
 	    op, regs->eax, regs->ebx, regs->ecx, regs->edx, ret);
+#endif
   return ret;
 }
 #endif
@@ -184,20 +191,22 @@ get_cpuid_info ()
   return cpi;
 }
 
-static inline uint_t
+static inline unsigned int
 cpuid_getvendor ()
 {
   return get_cpuid_info ()->cpi_vendor;
 }
 
-static inline uint_t
+static inline unsigned int
 cpuid_getfamily ()
 {
   return get_cpuid_info ()->cpi_family;
 }
 
-static inline uint_t
+static inline unsigned int
 cpuid_getmodel ()
 {
   return get_cpuid_info ()->cpi_model;
 }
+
+#endif /* _CPUIDENT_H */
