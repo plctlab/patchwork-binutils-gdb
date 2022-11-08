@@ -32,7 +32,7 @@
 /* macros */
 #define IS_GLOBAL /* Mark global symbols */
 
-#include "cpuid.c" /* ftns for identifying a chip */
+#include "cpuident.h" /* ftns for identifying a chip */
 
 static hdrv_pcbe_api_t hdrv_pcbe_core_api;
 static hdrv_pcbe_api_t hdrv_pcbe_opteron_api;
