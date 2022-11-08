@@ -23,7 +23,7 @@
 #include "linux-btrace.h"
 #include "gdbsupport/common-regcache.h"
 #include "gdbsupport/gdb_wait.h"
-#include "x86-cpuid.h"
+#include "include/cpuident.h"
 #include "gdbsupport/filestuff.h"
 #include "gdbsupport/scoped_fd.h"
 #include "gdbsupport/scoped_mmap.h"
@@ -65,37 +65,22 @@ static struct btrace_cpu
 btrace_this_cpu (void)
 {
   struct btrace_cpu cpu;
-  unsigned int eax, ebx, ecx, edx;
-  int ok;
-
   memset (&cpu, 0, sizeof (cpu));
 
-  ok = x86_cpuid (0, &eax, &ebx, &ecx, &edx);
-  if (ok != 0)
+  unsigned int vendor = cpuid_getvendor ();
+  switch (vendor)
     {
-      if (ebx == signature_INTEL_ebx && ecx == signature_INTEL_ecx
-	  && edx == signature_INTEL_edx)
-	{
-	  unsigned int cpuid, ignore;
+    case X86_VENDOR_Intel:
+      cpu.vendor = CV_INTEL;
+      break;
 
-	  ok = x86_cpuid (1, &cpuid, &ignore, &ignore, &ignore);
-	  if (ok != 0)
-	    {
-	      cpu.vendor = CV_INTEL;
-
-	      cpu.family = (cpuid >> 8) & 0xf;
-	      if (cpu.family == 0xf)
-		cpu.family += (cpuid >> 20) & 0xff;
-
-	      cpu.model = (cpuid >> 4) & 0xf;
-	      if ((cpu.family == 0x6) || ((cpu.family & 0xf) == 0xf))
-		cpu.model += (cpuid >> 12) & 0xf0;
-	    }
-	}
-      else if (ebx == signature_AMD_ebx && ecx == signature_AMD_ecx
-	       && edx == signature_AMD_edx)
-	cpu.vendor = CV_AMD;
+    case X86_VENDOR_AMD:
+      cpu.vendor = CV_AMD;
+      break;
     }
+
+  cpu.family = (unsigned short) cpuid_getfamily ();
+  cpu.model = (unsigned char) cpuid_getmodel ();
 
   return cpu;
 }
