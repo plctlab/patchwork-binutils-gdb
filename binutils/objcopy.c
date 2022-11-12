@@ -4052,6 +4052,7 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
   if (new_name != name)
     {
       name = new_name;
+      flags |= bfd_section_flags (isection) & SEC_RELOC;
       flags = check_new_section_flags (flags, obfd, name);
     }
 
