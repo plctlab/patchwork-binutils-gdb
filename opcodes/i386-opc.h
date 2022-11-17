@@ -1009,5 +1009,3 @@ typedef struct
 #define Dw2Inval (-1)
 }
 reg_entry;
-
-extern const unsigned char i386_seg_prefixes[6];

@@ -447,6 +447,16 @@ struct _i386_insn
 
 typedef struct _i386_insn i386_insn;
 
+/* To be indexed by segment register number.  */
+static const unsigned char i386_seg_prefixes[] = {
+  ES_PREFIX_OPCODE,
+  CS_PREFIX_OPCODE,
+  SS_PREFIX_OPCODE,
+  DS_PREFIX_OPCODE,
+  FS_PREFIX_OPCODE,
+  GS_PREFIX_OPCODE
+};
+
 /* Link RC type with corresponding string, that'll be looked for in
    asm.  */
 struct RC_name

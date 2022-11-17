@@ -162,7 +162,6 @@ TARGET32_LIBOPCODES_CFILES = \
 	h8300-dis.c \
 	hppa-dis.c \
 	i386-dis.c \
-	i386-opc.c \
 	ip2k-asm.c \
 	ip2k-desc.c \
 	ip2k-dis.c \
@@ -564,7 +563,7 @@ $(srcdir)/i386%tbl.h $(srcdir)/i386%init.h: @MAINT@ i386-gen$(EXEEXT_FOR_BUILD) 
 
 # While not really dependencies, specify i386-{init,tbl}.h here as well to
 # make sure they are re-generated as necessary.
-i386-opc.lo: $(srcdir)/i386-tbl.h $(srcdir)/i386-init.h
+i386-dis.lo: $(srcdir)/i386-tbl.h $(srcdir)/i386-init.h
 
 ia64-gen$(EXEEXT_FOR_BUILD): ia64-gen.o $(BUILD_LIB_DEPS)
 	$(AM_V_CCLD)$(LINK_FOR_BUILD) ia64-gen.o $(BUILD_LIBS)
