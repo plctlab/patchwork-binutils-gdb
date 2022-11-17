@@ -924,7 +924,7 @@ typedef union i386_operand_type
 typedef struct insn_template
 {
   /* instruction name sans width suffix ("mov" for movl insns) */
-  char *name;
+  const char *name;
 
   /* Bitfield arrangement is such that individual fields can be easily
      extracted (in native builds at least) - either by at most a masking
@@ -990,8 +990,6 @@ typedef struct insn_template
 }
 insn_template;
 
-extern const insn_template i386_optab[];
-
 /* these are for register name --> number & type hash lookup */
 typedef struct
 {
@@ -1012,6 +1010,4 @@ typedef struct
 }
 reg_entry;
 
-extern const reg_entry i386_regtab[];
-extern const unsigned int i386_regtab_size;
 extern const unsigned char i386_seg_prefixes[6];
