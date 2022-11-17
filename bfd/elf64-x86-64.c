@@ -51,13 +51,13 @@ static reloc_howto_type x86_64_elf_howto_table[] =
 	bfd_elf_generic_reloc, "R_X86_64_64", false, 0, MINUS_ONE,
 	false),
   HOWTO(R_X86_64_PC32, 0, 4, 32, true, 0, complain_overflow_signed,
-	bfd_elf_generic_reloc, "R_X86_64_PC32", false, 0, 0xffffffff,
+	bfd_elf_generic_reloc, "R_X86_64_PC32", false, 0xffffffff, 0xffffffff,
 	true),
   HOWTO(R_X86_64_GOT32, 0, 4, 32, false, 0, complain_overflow_signed,
-	bfd_elf_generic_reloc, "R_X86_64_GOT32", false, 0, 0xffffffff,
+	bfd_elf_generic_reloc, "R_X86_64_GOT32", false, 0xffffffff, 0xffffffff,
 	false),
   HOWTO(R_X86_64_PLT32, 0, 4, 32, true, 0, complain_overflow_signed,
-	bfd_elf_generic_reloc, "R_X86_64_PLT32", false, 0, 0xffffffff,
+	bfd_elf_generic_reloc, "R_X86_64_PLT32", false, 0xffffffff, 0xffffffff,
 	true),
   HOWTO(R_X86_64_COPY, 0, 4, 32, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_X86_64_COPY", false, 0, 0xffffffff,
@@ -75,10 +75,10 @@ static reloc_howto_type x86_64_elf_howto_table[] =
 	bfd_elf_generic_reloc, "R_X86_64_GOTPCREL", false, 0, 0xffffffff,
 	true),
   HOWTO(R_X86_64_32, 0, 4, 32, false, 0, complain_overflow_unsigned,
-	bfd_elf_generic_reloc, "R_X86_64_32", false, 0, 0xffffffff,
+	bfd_elf_generic_reloc, "R_X86_64_32", false, 0xffffffff, 0xffffffff,
 	false),
   HOWTO(R_X86_64_32S, 0, 4, 32, false, 0, complain_overflow_signed,
-	bfd_elf_generic_reloc, "R_X86_64_32S", false, 0, 0xffffffff,
+	bfd_elf_generic_reloc, "R_X86_64_32S", false, 0xffffffff, 0xffffffff,
 	false),
   HOWTO(R_X86_64_16, 0, 2, 16, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_X86_64_16", false, 0, 0xffff, false),
@@ -137,7 +137,7 @@ static reloc_howto_type x86_64_elf_howto_table[] =
 	bfd_elf_generic_reloc, "R_X86_64_PLTOFF64", false, 0, MINUS_ONE,
 	false),
   HOWTO(R_X86_64_SIZE32, 0, 4, 32, false, 0, complain_overflow_unsigned,
-	bfd_elf_generic_reloc, "R_X86_64_SIZE32", false, 0, 0xffffffff,
+	bfd_elf_generic_reloc, "R_X86_64_SIZE32", false, 0xffffffff, 0xffffffff,
 	false),
   HOWTO(R_X86_64_SIZE64, 0, 8, 64, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_X86_64_SIZE64", false, 0, MINUS_ONE,
@@ -189,7 +189,7 @@ static reloc_howto_type x86_64_elf_howto_table[] =
 
 /* Use complain_overflow_bitfield on R_X86_64_32 for x32.  */
   HOWTO(R_X86_64_32, 0, 4, 32, false, 0, complain_overflow_bitfield,
-	bfd_elf_generic_reloc, "R_X86_64_32", false, 0, 0xffffffff,
+	bfd_elf_generic_reloc, "R_X86_64_32", false, 0xffffffff, 0xffffffff,
 	false)
 };
 
