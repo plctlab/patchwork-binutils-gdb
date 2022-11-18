@@ -337,6 +337,28 @@
 	csr vsip
 	csr vsatp
 
+	# Smaia
+	csr miselect
+	csr mireg
+	csr mtopei
+	csr mtopi
+	csr mvien
+	csr mvip
+	csr midelegh
+	csr mieh
+	csr mvienh
+	csr mviph
+	csr miph
+	csr hvien
+	csr hvictl
+	csr hviprio1
+	csr hviprio2
+	csr hidelegh
+	csr hvienh
+	csr hviph
+	csr hviprio1h
+	csr hviprio2h
+
 	# Smstateen extension
 	csr mstateen0
 	csr mstateen1
@@ -358,6 +380,20 @@
 	csr hstateen1h
 	csr hstateen2h
 	csr hstateen3h
+
+	# Ssaia
+	csr siselect
+	csr sireg
+	csr stopei
+	csr stopi
+	csr sieh
+	csr siph
+	csr vsiselect
+	csr vsireg
+	csr vstopei
+	csr vstopi
+	csr vsieh
+	csr vsiph
 
 	# Sscofpmf extension
 	csr scountovf
