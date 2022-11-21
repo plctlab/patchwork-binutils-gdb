@@ -1,3 +1,20 @@
+2022-11-20  Jaydeep Patil <jaydeep.patil@imgtec.com>
+            Faraz Shahbazker <faraz.shahbazker@mips.com>
+            Maciej W. Rozycki <macro@mips.com>
+            Dragan Mladjenovic <dragan.mladjenovic@syrmia.com>
+            Aleksandar Rikalo <aleksandar.rikalo@syrmia.com>
+
+    * Makefile.am: Add nanoMIPS objects.
+    * Makefile.in: Regenerate.
+    * configure: Regenerate.
+    * configure.ac: Add nanoMIPS support.
+    * dis-buf.c (generic_predict_insn_length): New function.
+    * dis-init.c (init_disassemble_info): Use generic_predict_insn_length().
+    * disassemble.c (disassemble_init_for_target): Initialization for nanoMIPS.
+    * nanomips-dis.c: New file.
+    * nanomips-formats.h: New file.
+    * nanomips-opc.c: New file.
+
 2022-10-31  Yoshinori Sato  <ysato@users.sourceforge.jp>
 
 	* rx-decode.opc: Switch arguments of the MVTACGU insn.
