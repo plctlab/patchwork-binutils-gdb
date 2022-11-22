@@ -446,6 +446,12 @@ development.exp: $(BFDDIR)/development.sh
 	$(EGREP) "(development|experimental)=" $(BFDDIR)/development.sh  \
 	  | $(AWK) -F= '{ print "set " $$1 " " $$2 }' > $@
 
+$(srcdir)/../opcodes/i386-init.h $(srcdir)/../opcodes/i386-tbl.h: \
+	@MAINT@ $(srcdir)/../opcodes/i386-opc.tbl \
+	$(srcdir)/../opcodes/i386-reg.tbl \
+	$(srcdir)/../opcodes/i386-opc.h
+	cd ../opcodes; make gen-i386-tbl
+
 EXTRA_as_new_SOURCES += config/m68k-parse.y
 config/m68k-parse.c: $(srcdir)/config/m68k-parse.y
 	$(SHELL) $(YLWRAP) $(srcdir)/config/m68k-parse.y y.tab.c $@ -- $(YACCCOMPILE)
