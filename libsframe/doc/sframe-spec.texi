@@ -1,9 +1,6 @@
 \input texinfo       @c                    -*- Texinfo -*-
 @setfilename sframe-spec.info
 @settitle The SFrame Format
-@ifnottex
-@xrefautomaticsectiontitle on
-@end ifnottex
 
 @copying
 Copyright @copyright{} 2021-2022 Free Software Foundation, Inc.
