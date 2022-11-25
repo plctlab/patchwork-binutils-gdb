@@ -45,6 +45,9 @@ struct riscv_cl_insn
   /* The encoded instruction bits.  */
   insn_t insn_opcode;
 
+  /* The long encoded instruction bits ([0] is non-zero if used).  */
+  char insn_long_opcode[RISCV_MAX_INSN_LEN];
+
   /* The frag that contains the instruction.  */
   struct frag *frag;
 
@@ -720,6 +723,7 @@ create_insn (struct riscv_cl_insn *insn, const struct riscv_opcode *mo)
 {
   insn->insn_mo = mo;
   insn->insn_opcode = mo->match;
+  insn->insn_long_opcode[0] = 0;  /* Long insn has non-zero value.  */
   insn->frag = NULL;
   insn->where = 0;
   insn->fixp = NULL;
@@ -731,7 +735,10 @@ static void
 install_insn (const struct riscv_cl_insn *insn)
 {
   char *f = insn->frag->fr_literal + insn->where;
-  number_to_chars_littleendian (f, insn->insn_opcode, insn_length (insn));
+  if (insn->insn_long_opcode[0] != 0)
+    memcpy (f, insn->insn_long_opcode, insn_length (insn));
+  else
+    number_to_chars_littleendian (f, insn->insn_opcode, insn_length (insn));
 }
 
 /* Move INSN to offset WHERE in FRAG.  Adjust the fixups accordingly
@@ -3503,7 +3510,9 @@ riscv_ip_hardcode (char *str,
 	  values[num++] = (insn_t) imm_expr->X_add_number;
 	  break;
 	case O_big:
-	  values[num++] = generic_bignum[0];
+	  /* Extract lower 32-bits of a big number.
+	     Assume that generic_bignum_to_int32 work on such number.  */
+	  values[num++] = (insn_t) generic_bignum_to_int32 ();
 	  break;
 	default:
 	  /* The first value isn't constant, so it should be
@@ -3530,12 +3539,25 @@ riscv_ip_hardcode (char *str,
 
   if (imm_expr->X_op == O_big)
     {
-      if (bytes != imm_expr->X_add_number * CHARS_PER_LITTLENUM)
+      unsigned int llen = 0;
+      for (LITTLENUM_TYPE lval = generic_bignum[imm_expr->X_add_number - 1];
+	   lval != 0; llen++)
+	lval >>= BITS_PER_CHAR;
+      unsigned int repr_bytes
+	  = (imm_expr->X_add_number - 1) * CHARS_PER_LITTLENUM + llen;
+      if (bytes < repr_bytes)
 	return _("value conflicts with instruction length");
-      char *f = frag_more (bytes);
-      for (num = 0; num < imm_expr->X_add_number; ++num)
-	number_to_chars_littleendian (f + num * CHARS_PER_LITTLENUM,
-	                              generic_bignum[num], CHARS_PER_LITTLENUM);
+      for (num = 0; num < imm_expr->X_add_number - 1; ++num)
+	number_to_chars_littleendian (
+	    ip->insn_long_opcode + num * CHARS_PER_LITTLENUM,
+	    generic_bignum[num],
+	    CHARS_PER_LITTLENUM);
+      if (llen != 0)
+	number_to_chars_littleendian (
+	    ip->insn_long_opcode + num * CHARS_PER_LITTLENUM,
+	    generic_bignum[num],
+	    llen);
+      memset(ip->insn_long_opcode + repr_bytes, 0, bytes - repr_bytes);
       return NULL;
     }
 
@@ -4612,7 +4634,7 @@ s_riscv_insn (int x ATTRIBUTE_UNUSED)
       else
 	as_bad ("%s `%s'", error.msg, error.statement);
     }
-  else if (imm_expr.X_op != O_big)
+  else
     {
       gas_assert (insn.insn_mo->pinfo != INSN_MACRO);
       append_insn (&insn, &imm_expr, imm_reloc);
