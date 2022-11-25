@@ -388,6 +388,38 @@ change_output_section (lang_statement_union_type **head,
   return false;
 }
 
+static bool
+has_upper_or_lower (const char *secname)
+{
+  char * lower_name;
+  char * upper_name;
+  char * name;
+  bool ret = false;
+  /* Compute the names of the corresponding upper and lower
+     sections.  If the input section name contains another period,
+     only use the part of the name before the second dot.  */
+  if (strchr (secname + 1, '.') != NULL)
+    {
+      name = xstrdup (secname);
+
+      * strchr (name + 1, '.') = 0;
+    }
+  else
+    name = (char *) secname;
+
+  lower_name = concat (".lower", name, NULL);
+  upper_name = concat (".upper", name, NULL);
+  if (lang_output_section_find (lower_name)
+      || lang_output_section_find (upper_name))
+    ret = true;
+
+  free (upper_name);
+  free (lower_name);
+  if (name != (char*) secname)
+    free (name);
+  return ret;
+}
+
 static void
 add_region_prefix (bfd *abfd ATTRIBUTE_UNUSED, asection *s,
 		   void *unused ATTRIBUTE_UNUSED)
@@ -417,7 +449,8 @@ add_region_prefix (bfd *abfd ATTRIBUTE_UNUSED, asection *s,
       bfd_rename_section (s, concat (".lower", curr_name, NULL));
       break;
     case REGION_EITHER:
-      s->name = concat (".either", curr_name, NULL);
+      if (has_upper_or_lower (curr_name))
+	bfd_rename_section (s, concat (".either", curr_name, NULL));
       break;
     default:
       /* Unreachable.  */

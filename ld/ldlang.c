@@ -839,6 +839,7 @@ analyze_walk_wild_section_handler (lang_wild_statement_type *ptr)
   ptr->handler_data[2] = NULL;
   ptr->handler_data[3] = NULL;
   ptr->tree = NULL;
+  return;
 
   /* Count how many wildcard_specs there are, and how many of those
      actually use wildcards in the name.  Also, bail out if any of the
