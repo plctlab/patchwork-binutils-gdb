@@ -316,6 +316,8 @@ walk_wild_consider_section (lang_wild_statement_type *ptr,
 			    callback_t callback,
 			    void *data)
 {
+  if (s->id < ptr->max_section_id)
+    return;
   /* Don't process sections from files which were excluded.  */
   if (walk_wild_file_in_exclude_list (sec->spec.exclude_name_list, file))
     return;
@@ -337,6 +339,9 @@ walk_wild_section_general (lang_wild_statement_type *ptr,
 
   for (s = file->the_bfd->sections; s != NULL; s = s->next)
     {
+      if (s->id < ptr->max_section_id)
+	continue;
+      //printf ("YYY checking %s:%s\n", s->owner->filename, s->name);
       sec = ptr->section_list;
       if (sec == NULL)
 	(*callback) (ptr, sec, s, file, data);
@@ -1015,11 +1020,14 @@ walk_wild (lang_wild_statement_type *s, callback_t callback, void *data)
   const char *file_spec = s->filename;
   //char *p;
 
-  if (!s->resolved)
+#if 1
+  //if (!s->resolved)
+  if (s->max_section_id < bfd_get_max_section_id ())
     {
       //printf("XXX %s\n", file_spec ? file_spec : "<null>");
       walk_wild_resolve (s);
       s->resolved = true;
+      s->max_section_id = bfd_get_max_section_id ();
     }
 
     {
@@ -1030,6 +1038,7 @@ walk_wild (lang_wild_statement_type *s, callback_t callback, void *data)
 	}
       return;
     }
+#endif
 
 #if 0
   if (file_spec == NULL)
@@ -8424,6 +8433,7 @@ lang_add_wild (struct wildcard_spec *filespec,
   new_stmt->keep_sections = keep_sections;
   lang_list_init (&new_stmt->children);
   new_stmt->resolved = false;
+  new_stmt->max_section_id = 0;
   lang_list_init (&new_stmt->matching_sections);
   analyze_walk_wild_section_handler (new_stmt);
 }

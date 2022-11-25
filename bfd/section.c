@@ -851,6 +851,25 @@ These are the functions exported by the section handling part of BFD.
 
 /*
 FUNCTION
+	bfd_get_max_section_id
+
+SYNOPSIS
+	unsigned int bfd_get_max_section_id (void);
+
+DESCRIPTION
+	Returns an internal number representing the maximum value of
+	any SECTION->id member.  Whenever a new section is created that
+	value increases.  It never decreases.
+*/
+
+unsigned int
+bfd_get_max_section_id (void)
+{
+  return _bfd_section_id;
+}
+
+/*
+FUNCTION
 	bfd_section_list_clear
 
 SYNOPSIS

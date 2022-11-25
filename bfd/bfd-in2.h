@@ -1330,6 +1330,8 @@ discarded_section (const asection *sec)
   { 0, NAME, 0, BSF_SECTION_SYM, SECTION }
 #endif
 
+unsigned int bfd_get_max_section_id (void);
+
 void bfd_section_list_clear (bfd *);
 
 asection *bfd_get_section_by_name (bfd *abfd, const char *name);
