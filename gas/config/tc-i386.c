@@ -2965,6 +2965,8 @@ i386_mach (void)
     as_fatal (_("unknown architecture"));
 }
 
+#include "opcodes/i386-tbl.h"
+
 void
 md_begin (void)
 {
