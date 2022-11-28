@@ -1801,7 +1801,7 @@ process_i386_opcodes (FILE *table)
 {
   FILE *fp;
   char buf[2048];
-  unsigned int i, j;
+  unsigned int i, j, nr;
   char *str, *p, *last, *name;
   htab_t opcode_hash_table;
   struct opcode_hash_entry **opcode_array = NULL;
@@ -1915,6 +1915,26 @@ process_i386_opcodes (FILE *table)
     }
 
   fclose (fp);
+
+  fprintf (table, "};\n");
+
+  /* Generate opcode sets array.  */
+  fprintf (table, "\n/* i386 opcode sets table.  */\n\n");
+  fprintf (table, "static const insn_template *i386_op_sets[] =\n{\n");
+  fprintf (table, "  i386_optab,\n");
+
+  for (nr = j = 0; j < i; j++)
+    {
+      struct opcode_hash_entry *next = opcode_array[j];
+
+      do
+	{
+	  ++nr;
+	  next = next->next;
+	}
+      while (next);
+      fprintf (table, "  i386_optab + %u,\n", nr);
+    }
 
   fprintf (table, "};\n");
 }
