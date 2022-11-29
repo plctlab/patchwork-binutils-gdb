@@ -324,6 +324,24 @@ Contents of the .* section:
   DW_CFA_offset_extended_sf: r4888 \(mvienh\) at cfa\+3168
   DW_CFA_offset_extended_sf: r4889 \(mviph\) at cfa\+3172
   DW_CFA_offset_extended_sf: r4948 \(miph\) at cfa\+3408
+  DW_CFA_offset_extended_sf: r4871 \(mtvt\) at cfa\+3100
+  DW_CFA_offset_extended_sf: r4933 \(mnxti\) at cfa\+3348
+  DW_CFA_offset_extended_sf: r8006 \(mintstatus\) at cfa\+15640
+  DW_CFA_offset_extended_sf: r4935 \(mintthresh\) at cfa\+3356
+  DW_CFA_offset_extended_sf: r4936 \(mscratchcsw\) at cfa\+3360
+  DW_CFA_offset_extended_sf: r4937 \(mscratchcswl\) at cfa\+3364
+  DW_CFA_offset_extended_sf: r4359 \(stvt\) at cfa\+1052
+  DW_CFA_offset_extended_sf: r4421 \(snxti\) at cfa\+1300
+  DW_CFA_offset_extended_sf: r7494 \(sintstatus\) at cfa\+13592
+  DW_CFA_offset_extended_sf: r4423 \(sintthresh\) at cfa\+1308
+  DW_CFA_offset_extended_sf: r4424 \(sscratchcsw\) at cfa\+1312
+  DW_CFA_offset_extended_sf: r4425 \(sscratchcswl\) at cfa\+1316
+  DW_CFA_offset_extended_sf: r4103 \(utvt\) at cfa\+28
+  DW_CFA_offset_extended_sf: r4165 \(unxti\) at cfa\+276
+  DW_CFA_offset_extended_sf: r7238 \(uintstatus\) at cfa\+12568
+  DW_CFA_offset_extended_sf: r4167 \(uintthresh\) at cfa\+284
+  DW_CFA_offset_extended_sf: r4168 \(uscratchcsw\) at cfa\+288
+  DW_CFA_offset_extended_sf: r4169 \(uscratchcswl\) at cfa\+292
   DW_CFA_offset_extended_sf: r4876 \(mstateen0\) at cfa\+3120
   DW_CFA_offset_extended_sf: r4877 \(mstateen1\) at cfa\+3124
   DW_CFA_offset_extended_sf: r4878 \(mstateen2\) at cfa\+3128

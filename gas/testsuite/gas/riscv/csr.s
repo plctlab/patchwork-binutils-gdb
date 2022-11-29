@@ -350,6 +350,26 @@
 	csr mviph
 	csr miph
 
+	# Smclic extension
+	csr mtvt
+	csr mnxti
+	csr mintstatus
+	csr mintthresh
+	csr mscratchcsw
+	csr mscratchcswl
+	csr stvt
+	csr snxti
+	csr sintstatus
+	csr sintthresh
+	csr sscratchcsw
+	csr sscratchcswl
+	csr utvt
+	csr unxti
+	csr uintstatus
+	csr uintthresh
+	csr uscratchcsw
+	csr uscratchcswl
+
 	# Smstateen/Ssstateen extensions
 	csr mstateen0
 	csr mstateen1

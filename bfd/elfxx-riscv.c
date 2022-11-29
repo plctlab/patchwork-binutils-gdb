@@ -1103,6 +1103,7 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
   {"zks", "zksh",	check_implicit_always},
   {"smaia", "ssaia",		check_implicit_always},
   {"smstateen", "ssstateen",	check_implicit_always},
+  {"smclic", "zicsr",		check_implicit_always},
   {"smepmp", "zicsr",		check_implicit_always},
   {"ssaia", "zicsr",		check_implicit_always},
   {"sscofpmf", "zicsr",		check_implicit_always},
@@ -1224,6 +1225,7 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
 static struct riscv_supported_ext riscv_supported_std_s_ext[] =
 {
   {"smaia",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
+  {"smclic",		ISA_SPEC_CLASS_DRAFT,		0, 9, 0 },
   {"smepmp",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"smstateen",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"ssaia",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
