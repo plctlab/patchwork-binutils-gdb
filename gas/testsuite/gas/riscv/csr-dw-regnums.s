@@ -321,6 +321,11 @@ _start:
 	.cfi_offset mvienh, 3168
 	.cfi_offset mviph, 3172
 	.cfi_offset miph, 3408
+	# Smrnmi extension
+	.cfi_offset mnscratch, 7424
+	.cfi_offset mnepc, 7428
+	.cfi_offset mncause, 7432
+	.cfi_offset mnstatus, 7440
 	# Smstateen extension
 	.cfi_offset mstateen0, 3120
 	.cfi_offset mstateen1, 3124
