@@ -172,6 +172,12 @@ match_rd_nonzero (const struct riscv_opcode *op, insn_t insn)
 }
 
 static int
+match_rs1_nonzero (const struct riscv_opcode *op, insn_t insn)
+{
+  return match_opcode (op, insn) && ((insn & MASK_RS1) != 0);
+}
+
+static int
 match_c_add (const struct riscv_opcode *op, insn_t insn)
 {
   return match_rd_nonzero (op, insn) && ((insn & MASK_CRS2) != 0);
@@ -934,6 +940,19 @@ const struct riscv_opcode riscv_opcodes[] =
 {"cbo.flush",  0, INSN_CLASS_ZICBOM, "0(s)", MATCH_CBO_FLUSH, MASK_CBO_FLUSH, match_opcode, 0 },
 {"cbo.inval",  0, INSN_CLASS_ZICBOM, "0(s)", MATCH_CBO_INVAL, MASK_CBO_INVAL, match_opcode, 0 },
 {"cbo.zero",   0, INSN_CLASS_ZICBOZ, "0(s)", MATCH_CBO_ZERO, MASK_CBO_ZERO, match_opcode, 0 },
+
+/* Zisslpcfi instructions.  */
+{"sspush",     0, INSN_CLASS_ZISSLPCFI, "s",      MATCH_SSPUSH, MASK_SSPUSH, match_rs1_nonzero, INSN_DREF },
+{"sspop",      0, INSN_CLASS_ZISSLPCFI, "d",      MATCH_SSPOP, MASK_SSPOP, match_rd_nonzero, INSN_DREF },
+{"ssprr",      0, INSN_CLASS_ZISSLPCFI, "d",      MATCH_SSPRR, MASK_SSPRR, match_opcode, 0 },
+{"ssamoswap",  0, INSN_CLASS_ZISSLPCFI, "d,s,t",  MATCH_SSAMOSWAP, MASK_SSAMOSWAP, match_rd_nonzero, INSN_DREF },
+{"sschkra",    0, INSN_CLASS_ZISSLPCFI, "s,t",    MATCH_SSCHKRA, MASK_SSCHKRA, match_opcode, 0 },
+{"lpsll",      0, INSN_CLASS_ZISSLPCFI, "XU9@15", MATCH_LPSLL, MASK_LPSLL, match_opcode, 0 },
+{"lpcll",      0, INSN_CLASS_ZISSLPCFI, "XU9@15", MATCH_LPCLL, MASK_LPCLL, match_opcode, 0 },
+{"lpsml",      0, INSN_CLASS_ZISSLPCFI, "XU8@15", MATCH_LPSML, MASK_LPSML, match_opcode, 0 },
+{"lpcml",      0, INSN_CLASS_ZISSLPCFI, "XU8@15", MATCH_LPCML, MASK_LPCML, match_opcode, 0 },
+{"lpsul",      0, INSN_CLASS_ZISSLPCFI, "XU8@15", MATCH_LPSUL, MASK_LPSUL, match_opcode, 0 },
+{"lpcul",      0, INSN_CLASS_ZISSLPCFI, "XU8@15", MATCH_LPCUL, MASK_LPCUL, match_opcode, 0 },
 
 /* Zawrs instructions.  */
 {"wrs.nto",    0, INSN_CLASS_ZAWRS, "", MATCH_WRS_NTO, MASK_WRS_NTO, match_opcode, 0 },
