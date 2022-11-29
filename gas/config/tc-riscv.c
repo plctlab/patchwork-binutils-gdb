@@ -80,6 +80,8 @@ enum riscv_csr_class
   CSR_CLASS_SSAIA_AND_H,	/* Ssaia with H */
   CSR_CLASS_SSAIA_32,		/* Ssaia, rv32 only */
   CSR_CLASS_SSAIA_AND_H_32,	/* Ssaia with H, rv32 only */
+  CSR_CLASS_SSPMP,		/* Sspmp only */
+  CSR_CLASS_SSPMP_32,		/* Sspmp RV32 only */
   CSR_CLASS_SSSTATEEN,		/* S[ms]stateen only */
   CSR_CLASS_SSSTATEEN_AND_H,	/* S[ms]stateen only (with H) */
   CSR_CLASS_SSSTATEEN_AND_H_32,	/* S[ms]stateen RV32 only (with H) */
@@ -1063,6 +1065,11 @@ riscv_csr_address (const char *csr_name,
       is_h_required = (csr_class == CSR_CLASS_SSAIA_AND_H
 		       || csr_class == CSR_CLASS_SSAIA_AND_H_32);
       extension = "ssaia";
+      break;
+    case CSR_CLASS_SSPMP:
+    case CSR_CLASS_SSPMP_32:
+      is_rv32_only = (csr_class == CSR_CLASS_SSPMP_32);
+      extension = "sspmp";
       break;
     case CSR_CLASS_SSSTATEEN:
     case CSR_CLASS_SSSTATEEN_AND_H:
