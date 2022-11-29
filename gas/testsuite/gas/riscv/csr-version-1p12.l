@@ -603,6 +603,10 @@
 .*Warning: invalid CSR `vstimecmph', needs rv32i extension
 .*Warning: invalid CSR `vstimecmph', needs `h' extension
 .*Warning: invalid CSR `vstimecmph', needs `sstc' extension
+.*Warning: invalid CSR `lplr', needs `zisslpcfi' extension
+.*Warning: invalid CSR `lplr', needs `zisslpcfi' extension
+.*Warning: invalid CSR `ssp', needs `zisslpcfi' extension
+.*Warning: invalid CSR `ssp', needs `zisslpcfi' extension
 .*Warning: invalid CSR `ubadaddr' for the privileged spec `1.12'
 .*Warning: invalid CSR `ubadaddr' for the privileged spec `1.12'
 .*Warning: invalid CSR `sbadaddr' for the privileged spec `1.12'

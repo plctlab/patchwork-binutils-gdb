@@ -793,6 +793,10 @@
 .*Warning: invalid CSR `vstimecmph', needs rv32i extension
 .*Warning: invalid CSR `vstimecmph', needs `h' extension
 .*Warning: invalid CSR `vstimecmph', needs `sstc' extension
+.*Warning: invalid CSR `lplr', needs `zisslpcfi' extension
+.*Warning: invalid CSR `lplr', needs `zisslpcfi' extension
+.*Warning: invalid CSR `ssp', needs `zisslpcfi' extension
+.*Warning: invalid CSR `ssp', needs `zisslpcfi' extension
 .*Warning: invalid CSR `utval' for the privileged spec `1.9.1'
 .*Warning: invalid CSR `utval' for the privileged spec `1.9.1'
 .*Warning: invalid CSR `fflags', needs `f' extension
