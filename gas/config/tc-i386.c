@@ -34,6 +34,7 @@
 #include "sframe.h"
 #include "elf/x86-64.h"
 #include "opcodes/i386-init.h"
+#include "opcodes/i386-tbl.h"
 #include <limits.h>
 
 #ifndef INFER_ADDR_PREFIX

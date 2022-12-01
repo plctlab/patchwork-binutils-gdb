@@ -918,7 +918,7 @@ typedef union i386_operand_type
 typedef struct insn_template
 {
   /* instruction name sans width suffix ("mov" for movl insns) */
-  char *name;
+  const char *name;
 
   /* Bitfield arrangement is such that individual fields can be easily
      extracted (in native builds at least) - either by at most a masking
@@ -1005,6 +1005,3 @@ typedef struct
 #define Dw2Inval (-1)
 }
 reg_entry;
-
-extern const reg_entry i386_regtab[];
-extern const unsigned int i386_regtab_size;
