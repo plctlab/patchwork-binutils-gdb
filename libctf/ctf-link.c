@@ -430,8 +430,6 @@ ctf_link_add_cu_mapping (ctf_dict_t *fp, const char *from, const char *to)
 	  goto oom_noerrno;
 	}
     }
-  else
-    free (t);
 
   if (ctf_dynhash_insert (one_out, f, NULL) < 0)
     {
