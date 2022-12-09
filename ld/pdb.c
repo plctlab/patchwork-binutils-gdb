@@ -1123,13 +1123,16 @@ is_name_anonymous (char *name, size_t len)
    already seen add it to types (for TPI types) or ids (for IPI types).  */
 static bool
 handle_type (uint8_t *data, struct type_entry **map, uint32_t type_num,
-	     uint32_t num_types, struct types *types)
+	     uint32_t num_types, struct types *types,
+	     struct types *ids)
 {
   uint16_t size, type;
   void **slot;
   hashval_t hash;
   bool other_hash = false;
   uint32_t cv_hash;
+  struct types *t;
+  bool ipi = false;
 
   size = bfd_getl16 (data) + sizeof (uint16_t);
   type = bfd_getl16 (data + sizeof (uint16_t));
@@ -1910,6 +1913,168 @@ handle_type (uint8_t *data, struct type_entry **map, uint32_t type_num,
       /* Does not reference any types, nothing to be done.  */
       break;
 
+    case LF_STRING_ID:
+      {
+	struct lf_string_id *str = (struct lf_string_id *) data;
+	size_t string_len;
+
+	if (size < offsetof (struct lf_string_id, string))
+	  {
+	    einfo (_("%P: warning: truncated CodeView type record"
+		     " LF_STRING_ID\n"));
+	    return false;
+	  }
+
+	if (!remap_type (&str->substring, map, type_num, num_types))
+	  return false;
+
+	string_len = strnlen (str->string,
+			      size - offsetof (struct lf_string_id, string));
+
+	if (string_len == size - offsetof (struct lf_string_id, string))
+	  {
+	    einfo (_("%P: warning: string for LF_STRING_ID has no"
+		     " terminating zero\n"));
+	    return false;
+	  }
+
+	ipi = true;
+
+	break;
+      }
+
+    case LF_SUBSTR_LIST:
+      {
+	uint32_t num_entries;
+	struct lf_arglist *ssl = (struct lf_arglist *) data;
+
+	if (size < offsetof (struct lf_arglist, args))
+	  {
+	    einfo (_("%P: warning: truncated CodeView type record"
+		     " LF_SUBSTR_LIST\n"));
+	    return false;
+	  }
+
+	num_entries = bfd_getl32 (&ssl->num_entries);
+
+	if (size < offsetof (struct lf_arglist, args)
+		   + (num_entries * sizeof (uint32_t)))
+	  {
+	    einfo (_("%P: warning: truncated CodeView type record"
+		     " LF_SUBSTR_LIST\n"));
+	    return false;
+	  }
+
+	for (uint32_t i = 0; i < num_entries; i++)
+	  {
+	    if (!remap_type (&ssl->args[i], map, type_num, num_types))
+	      return false;
+	  }
+
+	ipi = true;
+
+	break;
+      }
+
+    case LF_BUILDINFO:
+      {
+	uint16_t num_entries;
+	struct lf_build_info *bi = (struct lf_build_info *) data;
+
+	if (size < offsetof (struct lf_build_info, strings))
+	  {
+	    einfo (_("%P: warning: truncated CodeView type record"
+		     " LF_BUILDINFO\n"));
+	    return false;
+	  }
+
+	num_entries = bfd_getl16 (&bi->count);
+
+	if (size < offsetof (struct lf_build_info, strings)
+		   + (num_entries * sizeof (uint32_t)))
+	  {
+	    einfo (_("%P: warning: truncated CodeView type record"
+		     " LF_BUILDINFO\n"));
+	    return false;
+	  }
+
+	for (uint32_t i = 0; i < num_entries; i++)
+	  {
+	    if (!remap_type (&bi->strings[i], map, type_num, num_types))
+	      return false;
+	  }
+
+	ipi = true;
+
+	break;
+      }
+
+    case LF_FUNC_ID:
+      {
+	struct lf_func_id *func = (struct lf_func_id *) data;
+	size_t name_len;
+
+	if (size < offsetof (struct lf_func_id, name))
+	  {
+	    einfo (_("%P: warning: truncated CodeView type record"
+		     " LF_FUNC_ID\n"));
+	    return false;
+	  }
+
+	if (!remap_type (&func->parent_scope, map, type_num, num_types))
+	  return false;
+
+	if (!remap_type (&func->function_type, map, type_num, num_types))
+	  return false;
+
+	name_len = strnlen (func->name,
+			    size - offsetof (struct lf_func_id, name));
+
+	if (name_len == size - offsetof (struct lf_func_id, name))
+	  {
+	    einfo (_("%P: warning: string for LF_FUNC_ID has no"
+		     " terminating zero\n"));
+	    return false;
+	  }
+
+	ipi = true;
+
+	break;
+      }
+
+    case LF_MFUNC_ID:
+      {
+	struct lf_mfunc_id *mfunc = (struct lf_mfunc_id *) data;
+	size_t name_len;
+
+	if (size < offsetof (struct lf_mfunc_id, name))
+	  {
+	    einfo (_("%P: warning: truncated CodeView type record"
+		     " LF_MFUNC_ID\n"));
+	    return false;
+	  }
+
+	if (!remap_type (&mfunc->parent_type, map, type_num, num_types))
+	  return false;
+
+	if (!remap_type (&mfunc->function_type, map, type_num, num_types))
+	  return false;
+
+	name_len = strnlen (mfunc->name,
+			    size - offsetof (struct lf_mfunc_id, name));
+
+	if (name_len == size - offsetof (struct lf_mfunc_id, name))
+	  {
+	    einfo (_("%P: warning: string for LF_MFUNC_ID has no"
+		     " terminating zero\n"));
+	    return false;
+	  }
+
+	ipi = true;
+
+	break;
+      }
+
     default:
       einfo (_("%P: warning: unrecognized CodeView type %v\n"), type);
       return false;
@@ -1917,7 +2082,9 @@ handle_type (uint8_t *data, struct type_entry **map, uint32_t type_num,
 
   hash = iterative_hash (data, size, 0);
 
-  slot = htab_find_slot_with_hash (types->hashmap, data, hash, INSERT);
+  t = ipi ? ids : types;
+
+  slot = htab_find_slot_with_hash (t->hashmap, data, hash, INSERT);
   if (!slot)
     return false;
 
@@ -1930,7 +2097,7 @@ handle_type (uint8_t *data, struct type_entry **map, uint32_t type_num,
       e = (struct type_entry *) *slot;
 
       e->next = NULL;
-      e->index = types->num_types;
+      e->index = t->num_types;
 
       if (other_hash)
 	e->cv_hash = cv_hash;
@@ -1939,16 +2106,16 @@ handle_type (uint8_t *data, struct type_entry **map, uint32_t type_num,
 
       memcpy (e->data, data, size);
 
-      if (types->last)
-	types->last->next = e;
+      if (t->last)
+	t->last->next = e;
       else
-	types->first = e;
+	t->first = e;
 
-      types->last = e;
+      t->last = e;
 
       map[type_num] = e;
 
-      types->num_types++;
+      t->num_types++;
     }
   else /* duplicate */
     {
@@ -1961,7 +2128,8 @@ handle_type (uint8_t *data, struct type_entry **map, uint32_t type_num,
 /* Parse the .debug$T section of a module, and pass any type definitions
    found to handle_type.  */
 static bool
-handle_debugt_section (asection *s, bfd *mod, struct types *types)
+handle_debugt_section (asection *s, bfd *mod, struct types *types,
+		       struct types *ids)
 {
   bfd_byte *data = NULL;
   size_t off;
@@ -2018,7 +2186,7 @@ handle_debugt_section (asection *s, bfd *mod, struct types *types)
 
       size = bfd_getl16 (data + off);
 
-      if (!handle_type (data + off, map, type_num, num_types, types))
+      if (!handle_type (data + off, map, type_num, num_types, types, ids))
 	{
 	  free (data);
 	  free (map);
@@ -2043,7 +2211,8 @@ populate_module_stream (bfd *stream, bfd *mod, uint32_t *sym_byte_size,
 			struct string_table *strings,
 			uint32_t *c13_info_size,
 			struct mod_source_files *mod_source,
-			bfd *abfd, struct types *types)
+			bfd *abfd, struct types *types,
+			struct types *ids)
 {
   uint8_t int_buf[sizeof (uint32_t)];
   uint8_t *c13_info = NULL;
@@ -2067,7 +2236,7 @@ populate_module_stream (bfd *stream, bfd *mod, uint32_t *sym_byte_size,
 	}
       else if (!strcmp (s->name, ".debug$T") && s->size >= sizeof (uint32_t))
 	{
-	  if (!handle_debugt_section (s, mod, types))
+	  if (!handle_debugt_section (s, mod, types, ids))
 	    {
 	      free (c13_info);
 	      free (mod_source->files);
@@ -2112,7 +2281,7 @@ static bool
 create_module_info_substream (bfd *abfd, bfd *pdb, void **data,
 			      uint32_t *size, struct string_table *strings,
 			      struct source_files_info *source,
-			      struct types *types)
+			      struct types *types, struct types *ids)
 {
   uint8_t *ptr;
   unsigned int mod_num;
@@ -2201,7 +2370,7 @@ create_module_info_substream (bfd *abfd, bfd *pdb, void **data,
       if (!populate_module_stream (stream, in, &sym_byte_size,
 				   strings, &c13_info_size,
 				   &source->mods[mod_num], abfd,
-				   types))
+				   types, ids))
 	{
 	  for (unsigned int i = 0; i < source->mod_count; i++)
 	    {
@@ -2524,7 +2693,8 @@ populate_dbi_stream (bfd *stream, bfd *abfd, bfd *pdb,
 		     uint16_t sym_rec_stream_num,
 		     uint16_t publics_stream_num,
 		     struct string_table *strings,
-		     struct types *types)
+		     struct types *types,
+		     struct types *ids)
 {
   struct pdb_dbi_stream_header h;
   struct optional_dbg_header opt;
@@ -2536,7 +2706,7 @@ populate_dbi_stream (bfd *stream, bfd *abfd, bfd *pdb,
   source.mods = NULL;
 
   if (!create_module_info_substream (abfd, pdb, &mod_info, &mod_info_size,
-				     strings, &source, types))
+				     strings, &source, types, ids))
     return false;
 
   if (!create_section_contrib_substream (abfd, &sc, &sc_size))
@@ -3209,7 +3379,7 @@ create_pdb_file (bfd *abfd, const char *pdb_name, const unsigned char *guid)
 
   if (!populate_dbi_stream (dbi_stream, abfd, pdb, section_header_stream_num,
 			    sym_rec_stream_num, publics_stream_num,
-			    &strings, &types))
+			    &strings, &types, &ids))
     {
       einfo (_("%P: warning: cannot populate DBI stream "
 	       "in PDB file: %E\n"));
