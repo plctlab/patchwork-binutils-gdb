@@ -136,21 +136,36 @@
 // operands may allow to switch from 3-byte to 2-byte VEX encoding.
 #define C StaticRounding
 
-#define CpuFP Cpu387|Cpu287|Cpu8087
+#define FP 387|287|8087
+
+// To avoid CPU specifiers to look like plain number tokens in the table,
+// introduce some aliases.
+#define i186 186
+#define i286 286
+#undef i386
+#define i386 386
+#define i486 486
+#define i586 586
+#define i686 686
+#define i8087 8087
+#define i287 287
+#define i387 387
+#define i687 687
+#define x64 64
 
 ### MARKER ###
 
 // Move instructions.
-mov, 0xa0, CpuNo64, D|W|CheckRegSize|No_sSuf|No_qSuf, { Disp16|Disp32|Unspecified|Byte|Word|Dword, Acc|Byte|Word|Dword }
-mov, 0xa0, Cpu64, D|W|CheckRegSize|No_sSuf, { Disp64|Unspecified|Byte|Word|Dword|Qword, Acc|Byte|Word|Dword|Qword }
-movabs, 0xa0, Cpu64, D|W|CheckRegSize|No_sSuf, { Disp64|Unspecified|Byte|Word|Dword|Qword, Acc|Byte|Word|Dword|Qword }
+mov, 0xa0, No64, D|W|CheckRegSize|No_sSuf|No_qSuf, { Disp16|Disp32|Unspecified|Byte|Word|Dword, Acc|Byte|Word|Dword }
+mov, 0xa0, x64, D|W|CheckRegSize|No_sSuf, { Disp64|Unspecified|Byte|Word|Dword|Qword, Acc|Byte|Word|Dword|Qword }
+movabs, 0xa0, x64, D|W|CheckRegSize|No_sSuf, { Disp64|Unspecified|Byte|Word|Dword|Qword, Acc|Byte|Word|Dword|Qword }
 mov, 0x88, 0, D|W|CheckRegSize|Modrm|No_sSuf|HLEPrefixRelease, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 // In the 64bit mode the short form mov immediate is redefined to have
 // 64bit value.
 mov, 0xb0, 0, W|No_sSuf|No_qSuf, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32 }
 mov, 0xc6/0, 0, W|Modrm|No_sSuf|HLEPrefixRelease|Optimize, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
-mov, 0xb8, Cpu64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|Optimize, { Imm64, Reg64 }
-movabs, 0xb8, Cpu64, No_bSuf|No_wSuf|No_lSuf|No_sSuf, { Imm64, Reg64 }
+mov, 0xb8, x64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|Optimize, { Imm64, Reg64 }
+movabs, 0xb8, x64, No_bSuf|No_wSuf|No_lSuf|No_sSuf, { Imm64, Reg64 }
 // The segment register moves accept WordReg so that a segment register
 // can be copied to a 32 bit register, and vice versa, without using a
 // size prefix.  When moving to a 32 bit register, the upper 16 bits
@@ -161,57 +176,57 @@ mov, 0x8c, 0, D|Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { SReg, Word|U
 mov, 0x8e, 0, Modrm|IgnoreSize|No_bSuf|No_sSuf|NoRex64, { Reg16|Reg32|Reg64, SReg }
 // Move to/from control debug registers.  In the 16 or 32bit modes
 // they are 32bit.  In the 64bit mode they are 64bit.
-mov, 0xf20, Cpu386|CpuNo64, D|RegMem|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_qSuf, { Control, Reg32 }
-mov, 0xf20, Cpu64, D|RegMem|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64, { Control, Reg64 }
-mov, 0xf21, Cpu386|CpuNo64, D|RegMem|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_qSuf, { Debug, Reg32 }
-mov, 0xf21, Cpu64, D|RegMem|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64, { Debug, Reg64 }
-mov, 0xf24, Cpu386|CpuNo64, D|RegMem|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_qSuf, { Test, Reg32 }
+mov, 0xf20, i386|No64, D|RegMem|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_qSuf, { Control, Reg32 }
+mov, 0xf20, x64, D|RegMem|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64, { Control, Reg64 }
+mov, 0xf21, i386|No64, D|RegMem|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_qSuf, { Debug, Reg32 }
+mov, 0xf21, x64, D|RegMem|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64, { Debug, Reg64 }
+mov, 0xf24, i386|No64, D|RegMem|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_qSuf, { Test, Reg32 }
 
 // Move after swapping the bytes
-movbe, 0x0f38f0, CpuMovbe, D|Modrm|CheckRegSize|No_bSuf|No_sSuf, { Word|Dword|Qword|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+movbe, 0x0f38f0, Movbe, D|Modrm|CheckRegSize|No_bSuf|No_sSuf, { Word|Dword|Qword|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 
 // Move with sign extend.
-movsb, 0xfbe, Cpu386, Modrm|No_bSuf|No_sSuf, { Reg8|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
-movsw, 0xfbf, Cpu386, Modrm|No_bSuf|No_wSuf|No_sSuf, { Reg16|Unspecified|BaseIndex, Reg32|Reg64 }
-movsl, 0x63, Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf, { Reg32|Unspecified|BaseIndex, Reg64 }
-movsx, 0xfbe, Cpu386, W|Modrm|No_lSuf|No_sSuf|No_qSuf, { Reg8|Reg16|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
-movsx, 0x63, Cpu64, Modrm|No_bSuf|No_wSuf|No_sSuf|No_qSuf, { Reg32|Unspecified|BaseIndex, Reg32|Reg64 }
-movsxd, 0x63, Cpu64, Modrm|NoSuf, { Reg32|Unspecified|BaseIndex, Reg32|Reg64 }
-movsxd, 0x63, Cpu64, Amd64|Modrm|NoSuf, { Reg32|Unspecified|BaseIndex, Reg16 }
-movsxd, 0x63, Cpu64, Intel64|Modrm|NoSuf, { Reg16|Unspecified|BaseIndex, Reg16 }
+movsb, 0xfbe, i386, Modrm|No_bSuf|No_sSuf, { Reg8|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+movsw, 0xfbf, i386, Modrm|No_bSuf|No_wSuf|No_sSuf, { Reg16|Unspecified|BaseIndex, Reg32|Reg64 }
+movsl, 0x63, x64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf, { Reg32|Unspecified|BaseIndex, Reg64 }
+movsx, 0xfbe, i386, W|Modrm|No_lSuf|No_sSuf|No_qSuf, { Reg8|Reg16|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+movsx, 0x63, x64, Modrm|No_bSuf|No_wSuf|No_sSuf|No_qSuf, { Reg32|Unspecified|BaseIndex, Reg32|Reg64 }
+movsxd, 0x63, x64, Modrm|NoSuf, { Reg32|Unspecified|BaseIndex, Reg32|Reg64 }
+movsxd, 0x63, x64, Amd64|Modrm|NoSuf, { Reg32|Unspecified|BaseIndex, Reg16 }
+movsxd, 0x63, x64, Intel64|Modrm|NoSuf, { Reg16|Unspecified|BaseIndex, Reg16 }
 
 // Move with zero extend.
-movzb, 0xfb6, Cpu386, Modrm|No_bSuf|No_sSuf, { Reg8|Byte|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
-movzw, 0xfb7, Cpu386, Modrm|No_bSuf|No_wSuf|No_sSuf, { Reg16|Word|Unspecified|BaseIndex, Reg32|Reg64 }
+movzb, 0xfb6, i386, Modrm|No_bSuf|No_sSuf, { Reg8|Byte|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+movzw, 0xfb7, i386, Modrm|No_bSuf|No_wSuf|No_sSuf, { Reg16|Word|Unspecified|BaseIndex, Reg32|Reg64 }
 // The 64-bit variant is not particularly useful since the zero extend
 // 32->64 is implicit, but we can encode them.
-movzx, 0xfb6, Cpu386, W|Modrm|No_lSuf|No_sSuf|No_qSuf, { Reg8|Reg16|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+movzx, 0xfb6, i386, W|Modrm|No_lSuf|No_sSuf|No_qSuf, { Reg8|Reg16|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 
 // Push instructions.
-push, 0x50, CpuNo64, No_bSuf|No_sSuf|No_qSuf, { Reg16|Reg32 }
-push, 0xff/6, CpuNo64, Modrm|DefaultSize|No_bSuf|No_sSuf|No_qSuf, { Reg16|Reg32|Word|Dword|Unspecified|BaseIndex }
-push, 0x6a, Cpu186|CpuNo64, DefaultSize|No_bSuf|No_sSuf|No_qSuf, { Imm8S }
-push, 0x68, Cpu186|CpuNo64, DefaultSize|No_bSuf|No_sSuf|No_qSuf, { Imm16|Imm32 }
-push, 0x6, CpuNo64, DefaultSize|No_bSuf|No_sSuf|No_qSuf, { SReg }
+push, 0x50, No64, No_bSuf|No_sSuf|No_qSuf, { Reg16|Reg32 }
+push, 0xff/6, No64, Modrm|DefaultSize|No_bSuf|No_sSuf|No_qSuf, { Reg16|Reg32|Word|Dword|Unspecified|BaseIndex }
+push, 0x6a, i186|No64, DefaultSize|No_bSuf|No_sSuf|No_qSuf, { Imm8S }
+push, 0x68, i186|No64, DefaultSize|No_bSuf|No_sSuf|No_qSuf, { Imm16|Imm32 }
+push, 0x6, No64, DefaultSize|No_bSuf|No_sSuf|No_qSuf, { SReg }
 // In 64bit mode, the operand size is implicitly 64bit.
-push, 0x50, Cpu64, No_bSuf|No_lSuf|No_sSuf|NoRex64, { Reg16|Reg64 }
-push, 0xff/6, Cpu64, Modrm|DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64, { Reg16|Reg64|Word|Qword|Unspecified|BaseIndex }
-push, 0x6a, Cpu64, DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64, { Imm8S }
-push, 0x68, Cpu64, DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64, { Imm16|Imm32S }
-push, 0xfa0, Cpu64, DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64, { SReg }
+push, 0x50, x64, No_bSuf|No_lSuf|No_sSuf|NoRex64, { Reg16|Reg64 }
+push, 0xff/6, x64, Modrm|DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64, { Reg16|Reg64|Word|Qword|Unspecified|BaseIndex }
+push, 0x6a, x64, DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64, { Imm8S }
+push, 0x68, x64, DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64, { Imm16|Imm32S }
+push, 0xfa0, x64, DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64, { SReg }
 
-pusha, 0x60, Cpu186|CpuNo64, DefaultSize|No_bSuf|No_sSuf|No_qSuf, {}
+pusha, 0x60, i186|No64, DefaultSize|No_bSuf|No_sSuf|No_qSuf, {}
 
 // Pop instructions.
-pop, 0x58, CpuNo64, No_bSuf|No_sSuf|No_qSuf, { Reg16|Reg32 }
-pop, 0x8f/0, CpuNo64, Modrm|DefaultSize|No_bSuf|No_sSuf|No_qSuf, { Reg16|Reg32|Word|Dword|Unspecified|BaseIndex }
-pop, 0x7, CpuNo64, DefaultSize|No_bSuf|No_sSuf|No_qSuf, { SReg }
+pop, 0x58, No64, No_bSuf|No_sSuf|No_qSuf, { Reg16|Reg32 }
+pop, 0x8f/0, No64, Modrm|DefaultSize|No_bSuf|No_sSuf|No_qSuf, { Reg16|Reg32|Word|Dword|Unspecified|BaseIndex }
+pop, 0x7, No64, DefaultSize|No_bSuf|No_sSuf|No_qSuf, { SReg }
 // In 64bit mode, the operand size is implicitly 64bit.
-pop, 0x58, Cpu64, No_bSuf|No_lSuf|No_sSuf|NoRex64, { Reg16|Reg64 }
-pop, 0x8f/0, Cpu64, Modrm|DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64, { Reg16|Reg64|Word|Qword|Unspecified|BaseIndex }
-pop, 0xfa1, Cpu64, DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64, { SReg }
+pop, 0x58, x64, No_bSuf|No_lSuf|No_sSuf|NoRex64, { Reg16|Reg64 }
+pop, 0x8f/0, x64, Modrm|DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64, { Reg16|Reg64|Word|Qword|Unspecified|BaseIndex }
+pop, 0xfa1, x64, DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64, { SReg }
 
-popa, 0x61, Cpu186|CpuNo64, DefaultSize|No_bSuf|No_sSuf|No_qSuf, {}
+popa, 0x61, i186|No64, DefaultSize|No_bSuf|No_sSuf|No_qSuf, {}
 
 // Exchange instructions.
 // xchg commutes:  we allow both operand orders.
@@ -234,27 +249,27 @@ out, 0xee, 0, W|No_sSuf|No_qSuf, { InOutPortReg }
 lea, 0x8d, 0, Modrm|Anysize|No_bSuf|No_sSuf|Optimize, { BaseIndex, Reg16|Reg32|Reg64 }
 
 // Load segment registers from memory.
-lds, 0xc5, CpuNo64, Modrm|No_bSuf|No_sSuf|No_qSuf, { DWord|Fword|Unspecified|BaseIndex, Reg16|Reg32 }
-les, 0xc4, CpuNo64, Modrm|No_bSuf|No_sSuf|No_qSuf, { DWord|Fword|Unspecified|BaseIndex, Reg16|Reg32 }
-lfs, 0xfb4, Cpu386, Amd64|Modrm|No_bSuf|No_sSuf|No_qSuf, { Dword|Fword|Unspecified|BaseIndex, Reg16|Reg32 }
-lfs, 0xfb4, Cpu64, Intel64|Modrm|No_bSuf|No_sSuf, { Dword|Fword|Tbyte|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
-lgs, 0xfb5, Cpu386, Amd64|Modrm|No_bSuf|No_sSuf|No_qSuf, { Dword|Fword|Unspecified|BaseIndex, Reg16|Reg32 }
-lgs, 0xfb5, Cpu64, Intel64|Modrm|No_bSuf|No_sSuf, { Dword|Fword|Tbyte|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
-lss, 0xfb2, Cpu386, Amd64|Modrm|No_bSuf|No_sSuf|No_qSuf, { Dword|Fword|Unspecified|BaseIndex, Reg16|Reg32 }
-lss, 0xfb2, Cpu64, Intel64|Modrm|No_bSuf|No_sSuf, { Dword|Fword|Tbyte|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+lds, 0xc5, No64, Modrm|No_bSuf|No_sSuf|No_qSuf, { DWord|Fword|Unspecified|BaseIndex, Reg16|Reg32 }
+les, 0xc4, No64, Modrm|No_bSuf|No_sSuf|No_qSuf, { DWord|Fword|Unspecified|BaseIndex, Reg16|Reg32 }
+lfs, 0xfb4, i386, Amd64|Modrm|No_bSuf|No_sSuf|No_qSuf, { Dword|Fword|Unspecified|BaseIndex, Reg16|Reg32 }
+lfs, 0xfb4, x64, Intel64|Modrm|No_bSuf|No_sSuf, { Dword|Fword|Tbyte|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+lgs, 0xfb5, i386, Amd64|Modrm|No_bSuf|No_sSuf|No_qSuf, { Dword|Fword|Unspecified|BaseIndex, Reg16|Reg32 }
+lgs, 0xfb5, x64, Intel64|Modrm|No_bSuf|No_sSuf, { Dword|Fword|Tbyte|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+lss, 0xfb2, i386, Amd64|Modrm|No_bSuf|No_sSuf|No_qSuf, { Dword|Fword|Unspecified|BaseIndex, Reg16|Reg32 }
+lss, 0xfb2, x64, Intel64|Modrm|No_bSuf|No_sSuf, { Dword|Fword|Tbyte|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 
 // Flags register instructions.
 clc, 0xf8, 0, NoSuf, {}
 cld, 0xfc, 0, NoSuf, {}
 cli, 0xfa, 0, NoSuf, {}
-clts, 0xf06, Cpu286, NoSuf, {}
+clts, 0xf06, i286, NoSuf, {}
 cmc, 0xf5, 0, NoSuf, {}
 lahf, 0x9f, 0, NoSuf, {}
 sahf, 0x9e, 0, NoSuf, {}
-pushf, 0x9c, CpuNo64, DefaultSize|No_bSuf|No_sSuf|No_qSuf, {}
-pushf, 0x9c, Cpu64, DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64, {}
-popf, 0x9d, CpuNo64, DefaultSize|No_bSuf|No_sSuf|No_qSuf, {}
-popf, 0x9d, Cpu64, DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64, {}
+pushf, 0x9c, No64, DefaultSize|No_bSuf|No_sSuf|No_qSuf, {}
+pushf, 0x9c, x64, DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64, {}
+popf, 0x9d, No64, DefaultSize|No_bSuf|No_sSuf|No_qSuf, {}
+popf, 0x9d, x64, DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64, {}
 stc, 0xf9, 0, NoSuf, {}
 std, 0xfd, 0, NoSuf, {}
 sti, 0xfb, 0, NoSuf, {}
@@ -265,7 +280,7 @@ add, 0x83/0, 0, Modrm|No_bSuf|No_sSuf|HLEPrefixLock, { Imm8S, Reg16|Reg32|Reg64|
 add, 0x4, 0, W|No_sSuf, { Imm8|Imm16|Imm32|Imm32S, Acc|Byte|Word|Dword|Qword }
 add, 0x80/0, 0, W|Modrm|No_sSuf|HLEPrefixLock, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 
-inc, 0x40, CpuNo64, No_bSuf|No_sSuf|No_qSuf, { Reg16|Reg32 }
+inc, 0x40, No64, No_bSuf|No_sSuf|No_qSuf, { Reg16|Reg32 }
 inc, 0xfe/0, 0, W|Modrm|No_sSuf|HLEPrefixLock, { Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 
 sub, 0x28, 0, D|W|CheckRegSize|Modrm|No_sSuf|HLEPrefixLock|Optimize, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
@@ -273,7 +288,7 @@ sub, 0x83/5, 0, Modrm|No_bSuf|No_sSuf|HLEPrefixLock, { Imm8S, Reg16|Reg32|Reg64|
 sub, 0x2c, 0, W|No_sSuf, { Imm8|Imm16|Imm32|Imm32S, Acc|Byte|Word|Dword|Qword }
 sub, 0x80/5, 0, W|Modrm|No_sSuf|HLEPrefixLock, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 
-dec, 0x48, CpuNo64, No_bSuf|No_sSuf|No_qSuf, { Reg16|Reg32 }
+dec, 0x48, No64, No_bSuf|No_sSuf|No_qSuf, { Reg16|Reg32 }
 dec, 0xfe/1, 0, W|Modrm|No_sSuf|HLEPrefixLock, { Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 
 sbb, 0x18, 0, D|W|CheckRegSize|Modrm|No_sSuf|HLEPrefixLock, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
@@ -316,30 +331,30 @@ adc, 0x80/2, 0, W|Modrm|No_sSuf|HLEPrefixLock, { Imm8|Imm16|Imm32|Imm32S, Reg8|R
 neg, 0xf6/3, 0, W|Modrm|No_sSuf|HLEPrefixLock, { Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 not, 0xf6/2, 0, W|Modrm|No_sSuf|HLEPrefixLock, { Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 
-aaa, 0x37, CpuNo64, NoSuf, {}
-aas, 0x3f, CpuNo64, NoSuf, {}
-daa, 0x27, CpuNo64, NoSuf, {}
-das, 0x2f, CpuNo64, NoSuf, {}
-aad, 0xd50a, CpuNo64, NoSuf, {}
-aad, 0xd5, CpuNo64, NoSuf, { Imm8 }
-aam, 0xd40a, CpuNo64, NoSuf, {}
-aam, 0xd4, CpuNo64, NoSuf, { Imm8 }
+aaa, 0x37, No64, NoSuf, {}
+aas, 0x3f, No64, NoSuf, {}
+daa, 0x27, No64, NoSuf, {}
+das, 0x2f, No64, NoSuf, {}
+aad, 0xd50a, No64, NoSuf, {}
+aad, 0xd5, No64, NoSuf, { Imm8 }
+aam, 0xd40a, No64, NoSuf, {}
+aam, 0xd4, No64, NoSuf, { Imm8 }
 
 // Conversion insns.
 // Intel naming
 cbw, 0x98, 0, Size16|NoSuf, {}
-cwde, 0x98, Cpu386, Size32|NoSuf, {}
-cdqe, 0x98, Cpu64, Size64|NoSuf, {}
+cwde, 0x98, i386, Size32|NoSuf, {}
+cdqe, 0x98, x64, Size64|NoSuf, {}
 cwd, 0x99, 0, Size16|NoSuf, {}
-cdq, 0x99, Cpu386, Size32|NoSuf, {}
-cqo, 0x99, Cpu64, Size64|NoSuf, {}
+cdq, 0x99, i386, Size32|NoSuf, {}
+cqo, 0x99, x64, Size64|NoSuf, {}
 // AT&T naming
 cbtw, 0x98, 0, Size16|NoSuf, {}
-cwtl, 0x98, Cpu386, Size32|NoSuf, {}
-cltq, 0x98, Cpu64, Size64|NoSuf, {}
+cwtl, 0x98, i386, Size32|NoSuf, {}
+cltq, 0x98, x64, Size64|NoSuf, {}
 cwtd, 0x99, 0, Size16|NoSuf, {}
-cltd, 0x99, Cpu386, Size32|NoSuf, {}
-cqto, 0x99, Cpu64, Size64|NoSuf, {}
+cltd, 0x99, i386, Size32|NoSuf, {}
+cqto, 0x99, x64, Size64|NoSuf, {}
 
 // Warning! the mul/imul (opcode 0xf6) must only have 1 operand!  They are
 // expanding 64-bit multiplies, and *cannot* be selected to accomplish
@@ -347,14 +362,14 @@ cqto, 0x99, Cpu64, Size64|NoSuf, {}
 // These multiplies can only be selected with single operand forms.
 mul, 0xf6/4, 0, W|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 imul, 0xf6/5, 0, W|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
-imul, 0xfaf, Cpu386, Modrm|CheckRegSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64|Unspecified|Word|Dword|Qword|BaseIndex, Reg16|Reg32|Reg64 }
-imul, 0x6b, Cpu186, Modrm|CheckRegSize|No_bSuf|No_sSuf, { Imm8S, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
-imul, 0x69, Cpu186, Modrm|CheckRegSize|No_bSuf|No_sSuf, { Imm16|Imm32|Imm32S, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+imul, 0xfaf, i386, Modrm|CheckRegSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64|Unspecified|Word|Dword|Qword|BaseIndex, Reg16|Reg32|Reg64 }
+imul, 0x6b, i186, Modrm|CheckRegSize|No_bSuf|No_sSuf, { Imm8S, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+imul, 0x69, i186, Modrm|CheckRegSize|No_bSuf|No_sSuf, { Imm16|Imm32|Imm32S, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 // imul with 2 operands mimics imul with 3 by putting the register in
 // both i.rm.reg & i.rm.regmem fields.  RegKludge enables this
 // transformation.
-imul, 0x6b, Cpu186, Modrm|No_bSuf|No_sSuf|RegKludge, { Imm8S, Reg16|Reg32|Reg64 }
-imul, 0x69, Cpu186, Modrm|No_bSuf|No_sSuf|RegKludge, { Imm16|Imm32|Imm32S, Reg16|Reg32|Reg64 }
+imul, 0x6b, i186, Modrm|No_bSuf|No_sSuf|RegKludge, { Imm8S, Reg16|Reg32|Reg64 }
+imul, 0x69, i186, Modrm|No_bSuf|No_sSuf|RegKludge, { Imm16|Imm32|Imm32S, Reg16|Reg32|Reg64 }
 
 div, 0xf6/6, 0, W|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 div, 0xf6/6, 0, W|CheckRegSize|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex, Acc|Byte|Word|Dword|Qword }
@@ -362,97 +377,97 @@ idiv, 0xf6/7, 0, W|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword
 idiv, 0xf6/7, 0, W|CheckRegSize|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex, Acc|Byte|Word|Dword|Qword }
 
 rol, 0xd0/0, 0, W|Modrm|No_sSuf, { Imm1, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
-rol, 0xc0/0, Cpu186, W|Modrm|No_sSuf, { Imm8, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
+rol, 0xc0/0, i186, W|Modrm|No_sSuf, { Imm8, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 rol, 0xd2/0, 0, W|Modrm|No_sSuf, { ShiftCount, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 rol, 0xd0/0, 0, W|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 
 ror, 0xd0/1, 0, W|Modrm|No_sSuf, { Imm1, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
-ror, 0xc0/1, Cpu186, W|Modrm|No_sSuf, { Imm8, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
+ror, 0xc0/1, i186, W|Modrm|No_sSuf, { Imm8, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 ror, 0xd2/1, 0, W|Modrm|No_sSuf, { ShiftCount, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 ror, 0xd0/1, 0, W|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 
 rcl, 0xd0/2, 0, W|Modrm|No_sSuf, { Imm1, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
-rcl, 0xc0/2, Cpu186, W|Modrm|No_sSuf, { Imm8, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
+rcl, 0xc0/2, i186, W|Modrm|No_sSuf, { Imm8, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 rcl, 0xd2/2, 0, W|Modrm|No_sSuf, { ShiftCount, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 rcl, 0xd0/2, 0, W|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 
 rcr, 0xd0/3, 0, W|Modrm|No_sSuf, { Imm1, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
-rcr, 0xc0/3, Cpu186, W|Modrm|No_sSuf, { Imm8, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
+rcr, 0xc0/3, i186, W|Modrm|No_sSuf, { Imm8, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 rcr, 0xd2/3, 0, W|Modrm|No_sSuf, { ShiftCount, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 rcr, 0xd0/3, 0, W|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 
 sal, 0xd0/4, 0, W|Modrm|No_sSuf, { Imm1, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
-sal, 0xc0/4, Cpu186, W|Modrm|No_sSuf, { Imm8, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
+sal, 0xc0/4, i186, W|Modrm|No_sSuf, { Imm8, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 sal, 0xd2/4, 0, W|Modrm|No_sSuf, { ShiftCount, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 sal, 0xd0/4, 0, W|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 
 shl, 0xd0/4, 0, W|Modrm|No_sSuf, { Imm1, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
-shl, 0xc0/4, Cpu186, W|Modrm|No_sSuf, { Imm8, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
+shl, 0xc0/4, i186, W|Modrm|No_sSuf, { Imm8, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 shl, 0xd2/4, 0, W|Modrm|No_sSuf, { ShiftCount, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 shl, 0xd0/4, 0, W|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 
 shr, 0xd0/5, 0, W|Modrm|No_sSuf, { Imm1, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
-shr, 0xc0/5, Cpu186, W|Modrm|No_sSuf, { Imm8, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
+shr, 0xc0/5, i186, W|Modrm|No_sSuf, { Imm8, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 shr, 0xd2/5, 0, W|Modrm|No_sSuf, { ShiftCount, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 shr, 0xd0/5, 0, W|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 
 sar, 0xd0/7, 0, W|Modrm|No_sSuf, { Imm1, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
-sar, 0xc0/7, Cpu186, W|Modrm|No_sSuf, { Imm8, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
+sar, 0xc0/7, i186, W|Modrm|No_sSuf, { Imm8, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 sar, 0xd2/7, 0, W|Modrm|No_sSuf, { ShiftCount, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 sar, 0xd0/7, 0, W|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 
-shld, 0xfa4, Cpu386, Modrm|CheckRegSize|No_bSuf|No_sSuf, { Imm8, Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex }
-shld, 0xfa5, Cpu386, Modrm|CheckRegSize|No_bSuf|No_sSuf, { ShiftCount, Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex }
-shld, 0xfa5, Cpu386, Modrm|CheckRegSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex }
+shld, 0xfa4, i386, Modrm|CheckRegSize|No_bSuf|No_sSuf, { Imm8, Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex }
+shld, 0xfa5, i386, Modrm|CheckRegSize|No_bSuf|No_sSuf, { ShiftCount, Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex }
+shld, 0xfa5, i386, Modrm|CheckRegSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex }
 
-shrd, 0xfac, Cpu386, Modrm|CheckRegSize|No_bSuf|No_sSuf, { Imm8, Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex }
-shrd, 0xfad, Cpu386, Modrm|CheckRegSize|No_bSuf|No_sSuf, { ShiftCount, Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex }
-shrd, 0xfad, Cpu386, Modrm|CheckRegSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex }
+shrd, 0xfac, i386, Modrm|CheckRegSize|No_bSuf|No_sSuf, { Imm8, Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex }
+shrd, 0xfad, i386, Modrm|CheckRegSize|No_bSuf|No_sSuf, { ShiftCount, Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex }
+shrd, 0xfad, i386, Modrm|CheckRegSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex }
 
 // Control transfer instructions.
-call, 0xe8, CpuNo64, JumpDword|DefaultSize|No_bSuf|No_sSuf|No_qSuf|BNDPrefixOk, { Disp16|Disp32 }
-call, 0xe8, Cpu64, Amd64|JumpDword|DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64|BNDPrefixOk, { Disp16|Disp32 }
-call, 0xe8, Cpu64, Intel64|JumpDword|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64|BNDPrefixOk, { Disp32 }
-call, 0xff/2, CpuNo64, Modrm|JumpAbsolute|DefaultSize|No_bSuf|No_sSuf|No_qSuf|BNDPrefixOk|NoTrackPrefixOk, { Reg16|Reg32|Unspecified|BaseIndex }
-call, 0xff/2, Cpu64, Amd64|Modrm|JumpAbsolute|DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64|BNDPrefixOk|NoTrackPrefixOk, { Reg16|Reg64|Unspecified|BaseIndex }
-call, 0xff/2, Cpu64, Intel64|Modrm|JumpAbsolute|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64|BNDPrefixOk|NoTrackPrefixOk, { Reg64|Unspecified|BaseIndex }
+call, 0xe8, No64, JumpDword|DefaultSize|No_bSuf|No_sSuf|No_qSuf|BNDPrefixOk, { Disp16|Disp32 }
+call, 0xe8, x64, Amd64|JumpDword|DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64|BNDPrefixOk, { Disp16|Disp32 }
+call, 0xe8, x64, Intel64|JumpDword|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64|BNDPrefixOk, { Disp32 }
+call, 0xff/2, No64, Modrm|JumpAbsolute|DefaultSize|No_bSuf|No_sSuf|No_qSuf|BNDPrefixOk|NoTrackPrefixOk, { Reg16|Reg32|Unspecified|BaseIndex }
+call, 0xff/2, x64, Amd64|Modrm|JumpAbsolute|DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64|BNDPrefixOk|NoTrackPrefixOk, { Reg16|Reg64|Unspecified|BaseIndex }
+call, 0xff/2, x64, Intel64|Modrm|JumpAbsolute|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64|BNDPrefixOk|NoTrackPrefixOk, { Reg64|Unspecified|BaseIndex }
 // Intel Syntax remaining call instances.
-call, 0x9a, CpuNo64, JumpInterSegment|DefaultSize|No_bSuf|No_sSuf|No_qSuf, { Imm16, Imm16|Imm32 }
+call, 0x9a, No64, JumpInterSegment|DefaultSize|No_bSuf|No_sSuf|No_qSuf, { Imm16, Imm16|Imm32 }
 call, 0xff/3, 0, Amd64|Modrm|JumpAbsolute|DefaultSize|NoSuf, { Dword|Fword|BaseIndex }
-call, 0xff/3, Cpu64, Intel64|Modrm|JumpAbsolute|NoSuf, { Dword|Fword|Tbyte|BaseIndex }
-lcall, 0x9a, CpuNo64, JumpInterSegment|DefaultSize|No_bSuf|No_sSuf|No_qSuf, { Imm16, Imm16|Imm32 }
+call, 0xff/3, x64, Intel64|Modrm|JumpAbsolute|NoSuf, { Dword|Fword|Tbyte|BaseIndex }
+lcall, 0x9a, No64, JumpInterSegment|DefaultSize|No_bSuf|No_sSuf|No_qSuf, { Imm16, Imm16|Imm32 }
 lcall, 0xff/3, 0, Amd64|Modrm|JumpAbsolute|DefaultSize|No_bSuf|No_sSuf|No_qSuf, { Unspecified|BaseIndex }
-lcall, 0xff/3, Cpu64, Intel64|Modrm|JumpAbsolute|No_bSuf|No_sSuf, { Unspecified|BaseIndex }
+lcall, 0xff/3, x64, Intel64|Modrm|JumpAbsolute|No_bSuf|No_sSuf, { Unspecified|BaseIndex }
 
 jmp, 0xeb, 0, Amd64|Jump|NoSuf|BNDPrefixOk, { Disp8|Disp16|Disp32 }
-jmp, 0xeb, Cpu64, Intel64|Jump|NoSuf|BNDPrefixOk, { Disp8|Disp32 }
-jmp, 0xff/4, CpuNo64, Modrm|JumpAbsolute|No_bSuf|No_sSuf|No_qSuf|BNDPrefixOk|NoTrackPrefixOk, { Reg16|Reg32|Unspecified|BaseIndex }
-jmp, 0xff/4, Cpu64, Amd64|Modrm|JumpAbsolute|No_bSuf|No_lSuf|No_sSuf|NoRex64|BNDPrefixOk|NoTrackPrefixOk, { Reg16|Reg64|Unspecified|BaseIndex }
-jmp, 0xff/4, Cpu64, Intel64|Modrm|JumpAbsolute|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64|BNDPrefixOk|NoTrackPrefixOk, { Reg64|Unspecified|BaseIndex }
+jmp, 0xeb, x64, Intel64|Jump|NoSuf|BNDPrefixOk, { Disp8|Disp32 }
+jmp, 0xff/4, No64, Modrm|JumpAbsolute|No_bSuf|No_sSuf|No_qSuf|BNDPrefixOk|NoTrackPrefixOk, { Reg16|Reg32|Unspecified|BaseIndex }
+jmp, 0xff/4, x64, Amd64|Modrm|JumpAbsolute|No_bSuf|No_lSuf|No_sSuf|NoRex64|BNDPrefixOk|NoTrackPrefixOk, { Reg16|Reg64|Unspecified|BaseIndex }
+jmp, 0xff/4, x64, Intel64|Modrm|JumpAbsolute|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64|BNDPrefixOk|NoTrackPrefixOk, { Reg64|Unspecified|BaseIndex }
 // Intel Syntax remaining jmp instances.
-jmp, 0xea, CpuNo64, JumpInterSegment|No_bSuf|No_sSuf|No_qSuf, { Imm16, Imm16|Imm32 }
+jmp, 0xea, No64, JumpInterSegment|No_bSuf|No_sSuf|No_qSuf, { Imm16, Imm16|Imm32 }
 jmp, 0xff/5, 0, Amd64|Modrm|JumpAbsolute|NoSuf, { Dword|Fword|BaseIndex }
-jmp, 0xff/5, Cpu64, Intel64|Modrm|JumpAbsolute|NoSuf, { Dword|Fword|Tbyte|BaseIndex }
-ljmp, 0xea, CpuNo64, JumpInterSegment|No_bSuf|No_sSuf|No_qSuf, { Imm16, Imm16|Imm32 }
+jmp, 0xff/5, x64, Intel64|Modrm|JumpAbsolute|NoSuf, { Dword|Fword|Tbyte|BaseIndex }
+ljmp, 0xea, No64, JumpInterSegment|No_bSuf|No_sSuf|No_qSuf, { Imm16, Imm16|Imm32 }
 ljmp, 0xff/5, 0, Amd64|Modrm|JumpAbsolute|No_bSuf|No_sSuf|No_qSuf, { Unspecified|BaseIndex }
-ljmp, 0xff/5, Cpu64, Intel64|Modrm|JumpAbsolute|No_bSuf|No_sSuf, { Unspecified|BaseIndex }
+ljmp, 0xff/5, x64, Intel64|Modrm|JumpAbsolute|No_bSuf|No_sSuf, { Unspecified|BaseIndex }
 
-ret, 0xc3, CpuNo64, DefaultSize|No_bSuf|No_sSuf|No_qSuf|RepPrefixOk|BNDPrefixOk, {}
-ret, 0xc2, CpuNo64, DefaultSize|No_bSuf|No_sSuf|No_qSuf|RepPrefixOk|BNDPrefixOk, { Imm16 }
-ret, 0xc3, Cpu64, Amd64|DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64|RepPrefixOk|BNDPrefixOk, {}
-ret, 0xc2, Cpu64, Amd64|DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64|RepPrefixOk|BNDPrefixOk, { Imm16 }
-ret, 0xc3, Cpu64, Intel64|Size64|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64|RepPrefixOk|BNDPrefixOk, {}
-ret, 0xc2, Cpu64, Intel64|Size64|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64|RepPrefixOk|BNDPrefixOk, { Imm16 }
+ret, 0xc3, No64, DefaultSize|No_bSuf|No_sSuf|No_qSuf|RepPrefixOk|BNDPrefixOk, {}
+ret, 0xc2, No64, DefaultSize|No_bSuf|No_sSuf|No_qSuf|RepPrefixOk|BNDPrefixOk, { Imm16 }
+ret, 0xc3, x64, Amd64|DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64|RepPrefixOk|BNDPrefixOk, {}
+ret, 0xc2, x64, Amd64|DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64|RepPrefixOk|BNDPrefixOk, { Imm16 }
+ret, 0xc3, x64, Intel64|Size64|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64|RepPrefixOk|BNDPrefixOk, {}
+ret, 0xc2, x64, Intel64|Size64|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64|RepPrefixOk|BNDPrefixOk, { Imm16 }
 lret, 0xcb, 0, DefaultSize|No_bSuf|No_sSuf, {}
 lret, 0xca, 0, DefaultSize|No_bSuf|No_sSuf, { Imm16 }
 // Intel Syntax.
 retf, 0xcb, 0, DefaultSize|No_bSuf|No_sSuf, {}
 retf, 0xca, 0, DefaultSize|No_bSuf|No_sSuf, { Imm16 }
 
-enter, 0xc8, Cpu186|CpuNo64, DefaultSize|No_bSuf|No_sSuf|No_qSuf, { Imm16, Imm8 }
-enter, 0xc8, Cpu64, DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64, { Imm16, Imm8 }
-leave, 0xc9, Cpu186|CpuNo64, DefaultSize|No_bSuf|No_sSuf|No_qSuf, {}
-leave, 0xc9, Cpu64, DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64, {}
+enter, 0xc8, i186|No64, DefaultSize|No_bSuf|No_sSuf|No_qSuf, { Imm16, Imm8 }
+enter, 0xc8, x64, DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64, { Imm16, Imm8 }
+leave, 0xc9, i186|No64, DefaultSize|No_bSuf|No_sSuf|No_qSuf, {}
+leave, 0xc9, x64, DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64, {}
 
 <cc:opc, o:0, no:1, b:2, c:2, nae:2, nb:3, nc:3, ae:3, e:4, z:4, ne:5, nz:5, be:6, na:6, nbe:7, a:7, +
          s:8, ns:9, p:a, pe:a, np:b, po:b, l:c, nge:c, nl:d, ge:d, le:e, ng:e, nle:f, g:f>
@@ -461,37 +476,37 @@ leave, 0xc9, Cpu64, DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64, {}
 j<cc>, 0x7<cc:opc>, 0, Jump|NoSuf|BNDPrefixOk, { Disp8|Disp16|Disp32 }
 
 // jcxz vs. jecxz is chosen on the basis of the address size prefix.
-jcxz, 0xe3, CpuNo64, JumpByte|Size16|NoSuf, { Disp8 }
-jecxz, 0xe3, Cpu386, JumpByte|Size32|NoSuf, { Disp8 }
-jrcxz, 0xe3, Cpu64, JumpByte|Size64|NoSuf|NoRex64, { Disp8 }
+jcxz, 0xe3, No64, JumpByte|Size16|NoSuf, { Disp8 }
+jecxz, 0xe3, i386, JumpByte|Size32|NoSuf, { Disp8 }
+jrcxz, 0xe3, x64, JumpByte|Size64|NoSuf|NoRex64, { Disp8 }
 
 // The loop instructions also use the address size prefix to select
 // %cx rather than %ecx for the loop count, so the `w' form of these
 // instructions emit an address size prefix rather than a data size
 //  prefix.
-loop, 0xe2, CpuNo64, JumpByte|No_bSuf|No_sSuf|No_qSuf, { Disp8 }
-loop, 0xe2, Cpu64, JumpByte|No_bSuf|No_wSuf|No_sSuf|NoRex64, { Disp8 }
-loopz, 0xe1, CpuNo64, JumpByte|No_bSuf|No_sSuf|No_qSuf, { Disp8 }
-loopz, 0xe1, Cpu64, JumpByte|No_bSuf|No_wSuf|No_sSuf|NoRex64, { Disp8 }
-loope, 0xe1, CpuNo64, JumpByte|No_bSuf|No_sSuf|No_qSuf, { Disp8 }
-loope, 0xe1, Cpu64, JumpByte|No_bSuf|No_wSuf|No_sSuf|NoRex64, { Disp8 }
-loopnz, 0xe0, CpuNo64, JumpByte|No_bSuf|No_sSuf|No_qSuf, { Disp8 }
-loopnz, 0xe0, Cpu64, JumpByte|No_bSuf|No_wSuf|No_sSuf|NoRex64, { Disp8 }
-loopne, 0xe0, CpuNo64, JumpByte|No_bSuf|No_sSuf|No_qSuf, { Disp8 }
-loopne, 0xe0, Cpu64, JumpByte|No_bSuf|No_wSuf|No_sSuf|NoRex64, { Disp8 }
+loop, 0xe2, No64, JumpByte|No_bSuf|No_sSuf|No_qSuf, { Disp8 }
+loop, 0xe2, x64, JumpByte|No_bSuf|No_wSuf|No_sSuf|NoRex64, { Disp8 }
+loopz, 0xe1, No64, JumpByte|No_bSuf|No_sSuf|No_qSuf, { Disp8 }
+loopz, 0xe1, x64, JumpByte|No_bSuf|No_wSuf|No_sSuf|NoRex64, { Disp8 }
+loope, 0xe1, No64, JumpByte|No_bSuf|No_sSuf|No_qSuf, { Disp8 }
+loope, 0xe1, x64, JumpByte|No_bSuf|No_wSuf|No_sSuf|NoRex64, { Disp8 }
+loopnz, 0xe0, No64, JumpByte|No_bSuf|No_sSuf|No_qSuf, { Disp8 }
+loopnz, 0xe0, x64, JumpByte|No_bSuf|No_wSuf|No_sSuf|NoRex64, { Disp8 }
+loopne, 0xe0, No64, JumpByte|No_bSuf|No_sSuf|No_qSuf, { Disp8 }
+loopne, 0xe0, x64, JumpByte|No_bSuf|No_wSuf|No_sSuf|NoRex64, { Disp8 }
 
 // Set byte on flag instructions.
-set<cc>, 0xf9<cc:opc>/0, Cpu386, Modrm|No_wSuf|No_lSuf|No_sSuf|No_qSuf, { Reg8|Byte|Unspecified|BaseIndex }
+set<cc>, 0xf9<cc:opc>/0, i386, Modrm|No_wSuf|No_lSuf|No_sSuf|No_qSuf, { Reg8|Byte|Unspecified|BaseIndex }
 
 // String manipulation.
 cmps, 0xa6, 0, W|No_sSuf|RepPrefixOk, {}
 cmps, 0xa6, 0, W|No_sSuf|IsStringEsOp0|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 scmp, 0xa6, 0, W|No_sSuf|RepPrefixOk, {}
 scmp, 0xa6, 0, W|No_sSuf|IsStringEsOp0|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Byte|Word|Dword|Qword|Unspecified|BaseIndex }
-ins, 0x6c, Cpu186, W|No_sSuf|No_qSuf|RepPrefixOk, {}
-ins, 0x6c, Cpu186, W|No_sSuf|No_qSuf|IsStringEsOp1|RepPrefixOk, { InOutPortReg, Byte|Word|Dword|Unspecified|BaseIndex }
-outs, 0x6e, Cpu186, W|No_sSuf|No_qSuf|RepPrefixOk, {}
-outs, 0x6e, Cpu186, W|No_sSuf|No_qSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Unspecified|BaseIndex, InOutPortReg }
+ins, 0x6c, i186, W|No_sSuf|No_qSuf|RepPrefixOk, {}
+ins, 0x6c, i186, W|No_sSuf|No_qSuf|IsStringEsOp1|RepPrefixOk, { InOutPortReg, Byte|Word|Dword|Unspecified|BaseIndex }
+outs, 0x6e, i186, W|No_sSuf|No_qSuf|RepPrefixOk, {}
+outs, 0x6e, i186, W|No_sSuf|No_qSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Unspecified|BaseIndex, InOutPortReg }
 lods, 0xac, 0, W|No_sSuf|RepPrefixOk, {}
 lods, 0xac, 0, W|No_sSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 lods, 0xac, 0, W|No_sSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Acc|Byte|Word|Dword|Qword }
@@ -518,16 +533,16 @@ xlat, 0xd7, 0, No_wSuf|No_lSuf|No_sSuf|No_qSuf, {}
 xlat, 0xd7, 0, No_wSuf|No_lSuf|No_sSuf|No_qSuf|IsString, { Byte|Unspecified|BaseIndex }
 
 // Bit manipulation.
-bsf, 0xfbc, Cpu386, Modrm|CheckRegSize|No_bSuf|No_sSuf|RepPrefixOk, { Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
-bsr, 0xfbd, Cpu386, Modrm|CheckRegSize|No_bSuf|No_sSuf|RepPrefixOk, { Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
-bt, 0xfa3, Cpu386, Modrm|CheckRegSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex }
-bt, 0xfba/4, Cpu386, Modrm|No_bSuf|No_sSuf, { Imm8, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex }
-btc, 0xfbb, Cpu386, Modrm|CheckRegSize|No_bSuf|No_sSuf|HLEPrefixLock, { Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex }
-btc, 0xfba/7, Cpu386, Modrm|No_bSuf|No_sSuf|HLEPrefixLock, { Imm8, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex }
-btr, 0xfb3, Cpu386, Modrm|CheckRegSize|No_bSuf|No_sSuf|HLEPrefixLock, { Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex }
-btr, 0xfba/6, Cpu386, Modrm|No_bSuf|No_sSuf|HLEPrefixLock, { Imm8, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex }
-bts, 0xfab, Cpu386, Modrm|CheckRegSize|No_bSuf|No_sSuf|HLEPrefixLock, { Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex }
-bts, 0xfba/5, Cpu386, Modrm|No_bSuf|No_sSuf|HLEPrefixLock, { Imm8, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex }
+bsf, 0xfbc, i386, Modrm|CheckRegSize|No_bSuf|No_sSuf|RepPrefixOk, { Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+bsr, 0xfbd, i386, Modrm|CheckRegSize|No_bSuf|No_sSuf|RepPrefixOk, { Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+bt, 0xfa3, i386, Modrm|CheckRegSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex }
+bt, 0xfba/4, i386, Modrm|No_bSuf|No_sSuf, { Imm8, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex }
+btc, 0xfbb, i386, Modrm|CheckRegSize|No_bSuf|No_sSuf|HLEPrefixLock, { Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex }
+btc, 0xfba/7, i386, Modrm|No_bSuf|No_sSuf|HLEPrefixLock, { Imm8, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex }
+btr, 0xfb3, i386, Modrm|CheckRegSize|No_bSuf|No_sSuf|HLEPrefixLock, { Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex }
+btr, 0xfba/6, i386, Modrm|No_bSuf|No_sSuf|HLEPrefixLock, { Imm8, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex }
+bts, 0xfab, i386, Modrm|CheckRegSize|No_bSuf|No_sSuf|HLEPrefixLock, { Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex }
+bts, 0xfba/5, i386, Modrm|No_bSuf|No_sSuf|HLEPrefixLock, { Imm8, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex }
 
 // Interrupts & op. sys insns.
 // See gas/config/tc-i386.c for conversion of 'int $3' into the special
@@ -535,291 +550,291 @@ bts, 0xfba/5, Cpu386, Modrm|No_bSuf|No_sSuf|HLEPrefixLock, { Imm8, Reg16|Reg32|R
 int, 0xcd, 0, NoSuf, { Imm8 }
 int1, 0xf1, 0, NoSuf, {}
 int3, 0xcc, 0, NoSuf, {}
-into, 0xce, CpuNo64, NoSuf, {}
+into, 0xce, No64, NoSuf, {}
 iret, 0xcf, 0, DefaultSize|No_bSuf|No_sSuf, {}
 // i386sl, i486sl, later 486, and Pentium.
-rsm, 0xfaa, Cpu386, NoSuf, {}
+rsm, 0xfaa, i386, NoSuf, {}
 
-bound, 0x62, Cpu186|CpuNo64, Modrm|No_bSuf|No_sSuf|No_qSuf, { Reg16|Reg32, Dword|Qword|Unspecified|BaseIndex }
+bound, 0x62, i186|No64, Modrm|No_bSuf|No_sSuf|No_qSuf, { Reg16|Reg32, Dword|Qword|Unspecified|BaseIndex }
 
 hlt, 0xf4, 0, NoSuf, {}
 
-nop, 0xf1f/0, CpuNop, Modrm|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex }
+nop, 0xf1f/0, Nop, Modrm|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex }
 
 // nop is actually "xchg %ax,%ax" in 16bit mode, "xchg %eax,%eax" in
 // 32bit mode and "xchg %rax,%rax" in 64bit mode.
 nop, 0x90, 0, NoSuf|RepPrefixOk, {}
 
 // Protection control.
-arpl, 0x63, Cpu286|CpuNo64, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Reg16, Reg16|Word|Unspecified|BaseIndex }
-lar, 0xf02, Cpu286, Modrm|CheckRegSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64, Reg16|Reg32|Reg64 }
-lar, 0xf02, Cpu286, Modrm|No_bSuf|No_sSuf, { Reg16|Word|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
-lgdt, 0xf01/2, Cpu286|CpuNo64, Modrm|No_bSuf|No_sSuf|No_qSuf, { Fword|Unspecified|BaseIndex }
-lgdt, 0xf01/2, Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64, { Tbyte|Unspecified|BaseIndex }
-lidt, 0xf01/3, Cpu286|CpuNo64, Modrm|No_bSuf|No_sSuf|No_qSuf, { Fword|Unspecified|BaseIndex }
-lidt, 0xf01/3, Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64, { Tbyte|Unspecified|BaseIndex }
-lldt, 0xf00/2, Cpu286, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Reg16|Word|Unspecified|BaseIndex }
-lmsw, 0xf01/6, Cpu286, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Reg16|Word|Unspecified|BaseIndex }
-lsl, 0xf03, Cpu286, Modrm|CheckRegSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64, Reg16|Reg32|Reg64 }
-lsl, 0xf03, Cpu286, Modrm|No_bSuf|No_sSuf, { Reg16|Word|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
-ltr, 0xf00/3, Cpu286, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Reg16|Word|Unspecified|BaseIndex }
+arpl, 0x63, i286|No64, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Reg16, Reg16|Word|Unspecified|BaseIndex }
+lar, 0xf02, i286, Modrm|CheckRegSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64, Reg16|Reg32|Reg64 }
+lar, 0xf02, i286, Modrm|No_bSuf|No_sSuf, { Reg16|Word|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+lgdt, 0xf01/2, i286|No64, Modrm|No_bSuf|No_sSuf|No_qSuf, { Fword|Unspecified|BaseIndex }
+lgdt, 0xf01/2, x64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64, { Tbyte|Unspecified|BaseIndex }
+lidt, 0xf01/3, i286|No64, Modrm|No_bSuf|No_sSuf|No_qSuf, { Fword|Unspecified|BaseIndex }
+lidt, 0xf01/3, x64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64, { Tbyte|Unspecified|BaseIndex }
+lldt, 0xf00/2, i286, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Reg16|Word|Unspecified|BaseIndex }
+lmsw, 0xf01/6, i286, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Reg16|Word|Unspecified|BaseIndex }
+lsl, 0xf03, i286, Modrm|CheckRegSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64, Reg16|Reg32|Reg64 }
+lsl, 0xf03, i286, Modrm|No_bSuf|No_sSuf, { Reg16|Word|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+ltr, 0xf00/3, i286, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Reg16|Word|Unspecified|BaseIndex }
 
-sgdt, 0xf01/0, Cpu286|CpuNo64, Modrm|No_bSuf|No_sSuf|No_qSuf, { Fword|Unspecified|BaseIndex }
-sgdt, 0xf01/0, Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64, { Tbyte|Unspecified|BaseIndex }
-sidt, 0xf01/1, Cpu286|CpuNo64, Modrm|No_bSuf|No_sSuf|No_qSuf, { Fword|Unspecified|BaseIndex }
-sidt, 0xf01/1, Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64, { Tbyte|Unspecified|BaseIndex }
-sldt, 0xf00/0, Cpu286, Modrm|No_bSuf|No_sSuf|NoRex64, { Reg16|Reg32|Reg64 }
-sldt, 0xf00/0, Cpu286, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Word|Unspecified|BaseIndex }
-smsw, 0xf01/4, Cpu286, Modrm|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64 }
-smsw, 0xf01/4, Cpu286, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Word|Unspecified|BaseIndex }
-str, 0xf00/1, Cpu286, Modrm|No_bSuf|No_sSuf|NoRex64, { Reg16|Reg32|Reg64 }
-str, 0xf00/1, Cpu286, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Word|Unspecified|BaseIndex }
+sgdt, 0xf01/0, i286|No64, Modrm|No_bSuf|No_sSuf|No_qSuf, { Fword|Unspecified|BaseIndex }
+sgdt, 0xf01/0, x64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64, { Tbyte|Unspecified|BaseIndex }
+sidt, 0xf01/1, i286|No64, Modrm|No_bSuf|No_sSuf|No_qSuf, { Fword|Unspecified|BaseIndex }
+sidt, 0xf01/1, x64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64, { Tbyte|Unspecified|BaseIndex }
+sldt, 0xf00/0, i286, Modrm|No_bSuf|No_sSuf|NoRex64, { Reg16|Reg32|Reg64 }
+sldt, 0xf00/0, i286, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Word|Unspecified|BaseIndex }
+smsw, 0xf01/4, i286, Modrm|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64 }
+smsw, 0xf01/4, i286, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Word|Unspecified|BaseIndex }
+str, 0xf00/1, i286, Modrm|No_bSuf|No_sSuf|NoRex64, { Reg16|Reg32|Reg64 }
+str, 0xf00/1, i286, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Word|Unspecified|BaseIndex }
 
-verr, 0xf00/4, Cpu286, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Reg16|Word|Unspecified|BaseIndex }
-verw, 0xf00/5, Cpu286, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Reg16|Word|Unspecified|BaseIndex }
+verr, 0xf00/4, i286, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Reg16|Word|Unspecified|BaseIndex }
+verw, 0xf00/5, i286, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Reg16|Word|Unspecified|BaseIndex }
 
 // Floating point instructions.
 
 // load
-fld, 0xd9c0, CpuFP, NoSuf, { FloatReg }
-fld, 0xd9/0, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Dword|Qword|Unspecified|BaseIndex }
-fld, 0xd9c0, CpuFP, IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_qSuf|Ugh, { FloatReg }
+fld, 0xd9c0, FP, NoSuf, { FloatReg }
+fld, 0xd9/0, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Dword|Qword|Unspecified|BaseIndex }
+fld, 0xd9c0, FP, IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_qSuf|Ugh, { FloatReg }
 // Intel Syntax
-fld, 0xdb/5, CpuFP, Modrm|NoSuf, { Tbyte|Unspecified|BaseIndex }
-fild, 0xdf/0, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Word|Dword|Unspecified|BaseIndex }
-fild, 0xdf/5, CpuFP, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64, { Qword|Unspecified|BaseIndex }
-fildll, 0xdf/5, CpuFP, Modrm|NoSuf|ATTSyntax, { Unspecified|BaseIndex }
-fldt, 0xdb/5, CpuFP, Modrm|NoSuf, { Unspecified|BaseIndex }
-fbld, 0xdf/4, CpuFP, Modrm|NoSuf, { Tbyte|Unspecified|BaseIndex }
+fld, 0xdb/5, FP, Modrm|NoSuf, { Tbyte|Unspecified|BaseIndex }
+fild, 0xdf/0, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Word|Dword|Unspecified|BaseIndex }
+fild, 0xdf/5, FP, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64, { Qword|Unspecified|BaseIndex }
+fildll, 0xdf/5, FP, Modrm|NoSuf|ATTSyntax, { Unspecified|BaseIndex }
+fldt, 0xdb/5, FP, Modrm|NoSuf, { Unspecified|BaseIndex }
+fbld, 0xdf/4, FP, Modrm|NoSuf, { Tbyte|Unspecified|BaseIndex }
 
 // store (no pop)
-fst, 0xddd0, CpuFP, NoSuf, { FloatReg }
-fst, 0xd9/2, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Dword|Qword|Unspecified|BaseIndex }
-fst, 0xddd0, CpuFP, IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_qSuf|Ugh, { FloatReg }
-fist, 0xdf/2, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Word|Dword|Unspecified|BaseIndex }
+fst, 0xddd0, FP, NoSuf, { FloatReg }
+fst, 0xd9/2, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Dword|Qword|Unspecified|BaseIndex }
+fst, 0xddd0, FP, IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_qSuf|Ugh, { FloatReg }
+fist, 0xdf/2, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Word|Dword|Unspecified|BaseIndex }
 
 // store (with pop)
-fstp, 0xddd8, CpuFP, NoSuf, { FloatReg }
-fstp, 0xd9/3, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Dword|Qword|Unspecified|BaseIndex }
-fstp, 0xddd8, CpuFP, IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_qSuf|Ugh, { FloatReg }
+fstp, 0xddd8, FP, NoSuf, { FloatReg }
+fstp, 0xd9/3, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Dword|Qword|Unspecified|BaseIndex }
+fstp, 0xddd8, FP, IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_qSuf|Ugh, { FloatReg }
 // Intel Syntax
-fstp, 0xdb/7, CpuFP, Modrm|NoSuf, { Tbyte|Unspecified|BaseIndex }
-fistp, 0xdf/3, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Word|Dword|Unspecified|BaseIndex }
-fistp, 0xdf/7, CpuFP, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64, { Qword|Unspecified|BaseIndex }
-fistpll, 0xdf/7, CpuFP, Modrm|NoSuf|ATTSyntax, { Unspecified|BaseIndex }
-fstpt, 0xdb/7, CpuFP, Modrm|NoSuf, { Unspecified|BaseIndex }
-fbstp, 0xdf/6, CpuFP, Modrm|NoSuf, { Tbyte|Unspecified|BaseIndex }
+fstp, 0xdb/7, FP, Modrm|NoSuf, { Tbyte|Unspecified|BaseIndex }
+fistp, 0xdf/3, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Word|Dword|Unspecified|BaseIndex }
+fistp, 0xdf/7, FP, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64, { Qword|Unspecified|BaseIndex }
+fistpll, 0xdf/7, FP, Modrm|NoSuf|ATTSyntax, { Unspecified|BaseIndex }
+fstpt, 0xdb/7, FP, Modrm|NoSuf, { Unspecified|BaseIndex }
+fbstp, 0xdf/6, FP, Modrm|NoSuf, { Tbyte|Unspecified|BaseIndex }
 
 // exchange %st<n> with %st0
-fxch, 0xd9c8, CpuFP, NoSuf, { FloatReg }
+fxch, 0xd9c8, FP, NoSuf, { FloatReg }
 // alias for fxch %st(1)
-fxch, 0xd9c9, CpuFP, NoSuf, {}
+fxch, 0xd9c9, FP, NoSuf, {}
 
 // comparison (without pop)
-fcom, 0xd8d0, CpuFP, NoSuf, { FloatReg }
+fcom, 0xd8d0, FP, NoSuf, { FloatReg }
 // alias for fcom %st(1)
-fcom, 0xd8d1, CpuFP, NoSuf, {}
-fcom, 0xd8/2, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Dword|Qword|Unspecified|BaseIndex }
-fcom, 0xd8d0, CpuFP, IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_qSuf|Ugh, { FloatReg }
-ficom, 0xde/2, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Word|Dword|Unspecified|BaseIndex }
+fcom, 0xd8d1, FP, NoSuf, {}
+fcom, 0xd8/2, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Dword|Qword|Unspecified|BaseIndex }
+fcom, 0xd8d0, FP, IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_qSuf|Ugh, { FloatReg }
+ficom, 0xde/2, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Word|Dword|Unspecified|BaseIndex }
 
 // comparison (with pop)
-fcomp, 0xd8d8, CpuFP, NoSuf, { FloatReg }
+fcomp, 0xd8d8, FP, NoSuf, { FloatReg }
 // alias for fcomp %st(1)
-fcomp, 0xd8d9, CpuFP, NoSuf, {}
-fcomp, 0xd8/3, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Dword|Qword|Unspecified|BaseIndex }
-fcomp, 0xd8d8, CpuFP, IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_qSuf|Ugh, { FloatReg }
-ficomp, 0xde/3, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Word|Dword|Unspecified|BaseIndex }
-fcompp, 0xded9, CpuFP, NoSuf, {}
+fcomp, 0xd8d9, FP, NoSuf, {}
+fcomp, 0xd8/3, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Dword|Qword|Unspecified|BaseIndex }
+fcomp, 0xd8d8, FP, IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_qSuf|Ugh, { FloatReg }
+ficomp, 0xde/3, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Word|Dword|Unspecified|BaseIndex }
+fcompp, 0xded9, FP, NoSuf, {}
 
 // unordered comparison (with pop)
-fucom, 0xdde0, Cpu387, NoSuf, { FloatReg }
+fucom, 0xdde0, i387, NoSuf, { FloatReg }
 // alias for fucom %st(1)
-fucom, 0xdde1, Cpu387, NoSuf, {}
-fucomp, 0xdde8, Cpu387, NoSuf, { FloatReg }
+fucom, 0xdde1, i387, NoSuf, {}
+fucomp, 0xdde8, i387, NoSuf, { FloatReg }
 // alias for fucomp %st(1)
-fucomp, 0xdde9, Cpu387, NoSuf, {}
-fucompp, 0xdae9, Cpu387, NoSuf, {}
+fucomp, 0xdde9, i387, NoSuf, {}
+fucompp, 0xdae9, i387, NoSuf, {}
 
-ftst, 0xd9e4, CpuFP, NoSuf, {}
-fxam, 0xd9e5, CpuFP, NoSuf, {}
+ftst, 0xd9e4, FP, NoSuf, {}
+fxam, 0xd9e5, FP, NoSuf, {}
 
 // load constants into %st0
-fld1, 0xd9e8, CpuFP, NoSuf, {}
-fldl2t, 0xd9e9, CpuFP, NoSuf, {}
-fldl2e, 0xd9ea, CpuFP, NoSuf, {}
-fldpi, 0xd9eb, CpuFP, NoSuf, {}
-fldlg2, 0xd9ec, CpuFP, NoSuf, {}
-fldln2, 0xd9ed, CpuFP, NoSuf, {}
-fldz, 0xd9ee, CpuFP, NoSuf, {}
+fld1, 0xd9e8, FP, NoSuf, {}
+fldl2t, 0xd9e9, FP, NoSuf, {}
+fldl2e, 0xd9ea, FP, NoSuf, {}
+fldpi, 0xd9eb, FP, NoSuf, {}
+fldlg2, 0xd9ec, FP, NoSuf, {}
+fldln2, 0xd9ed, FP, NoSuf, {}
+fldz, 0xd9ee, FP, NoSuf, {}
 
 // Arithmetic.
 
 // add
-fadd, 0xd8c0, CpuFP, D|NoSuf, { FloatReg, FloatAcc }
+fadd, 0xd8c0, FP, D|NoSuf, { FloatReg, FloatAcc }
 // alias for fadd %st(i), %st
-fadd, 0xd8c0, CpuFP, NoSuf, { FloatReg }
+fadd, 0xd8c0, FP, NoSuf, { FloatReg }
 // alias for faddp
-fadd, 0xdec1, CpuFP, NoSuf|Ugh|ATTMnemonic, {}
-fadd, 0xd8/0, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Dword|Qword|Unspecified|BaseIndex }
-fiadd, 0xde/0, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Word|Dword|Unspecified|BaseIndex }
+fadd, 0xdec1, FP, NoSuf|Ugh|ATTMnemonic, {}
+fadd, 0xd8/0, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Dword|Qword|Unspecified|BaseIndex }
+fiadd, 0xde/0, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Word|Dword|Unspecified|BaseIndex }
 
-faddp, 0xdec0, CpuFP, D|NoSuf|Ugh, { FloatAcc, FloatReg }
-faddp, 0xdec0, CpuFP, NoSuf, { FloatReg }
+faddp, 0xdec0, FP, D|NoSuf|Ugh, { FloatAcc, FloatReg }
+faddp, 0xdec0, FP, NoSuf, { FloatReg }
 // alias for faddp %st, %st(1)
-faddp, 0xdec1, CpuFP, NoSuf, {}
+faddp, 0xdec1, FP, NoSuf, {}
 
 // subtract
-fsub, 0xd8e0, CpuFP, NoSuf, { FloatReg }
-fsub, 0xd8e0, CpuFP, D|NoSuf, { FloatReg, FloatAcc }
+fsub, 0xd8e0, FP, NoSuf, { FloatReg }
+fsub, 0xd8e0, FP, D|NoSuf, { FloatReg, FloatAcc }
 // alias for fsubp
-fsub, 0xdee1, CpuFP, NoSuf|Ugh|ATTMnemonic|ATTSyntax, {}
-fsub, 0xdee9, CpuFP, NoSuf|Ugh|ATTMnemonic, {}
-fsub, 0xd8/4, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Dword|Qword|Unspecified|BaseIndex }
-fisub, 0xde/4, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Word|Dword|Unspecified|BaseIndex }
+fsub, 0xdee1, FP, NoSuf|Ugh|ATTMnemonic|ATTSyntax, {}
+fsub, 0xdee9, FP, NoSuf|Ugh|ATTMnemonic, {}
+fsub, 0xd8/4, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Dword|Qword|Unspecified|BaseIndex }
+fisub, 0xde/4, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Word|Dword|Unspecified|BaseIndex }
 
-fsubp, 0xdee0, CpuFP, NoSuf|ATTMnemonic|ATTSyntax, { FloatAcc, FloatReg }
-fsubp, 0xdee0, CpuFP, NoSuf|ATTMnemonic|ATTSyntax, { FloatReg }
-fsubp, 0xdee1, CpuFP, NoSuf|ATTMnemonic|ATTSyntax, {}
-fsubp, 0xdee8, CpuFP, NoSuf, { FloatAcc, FloatReg }
-fsubp, 0xdee8, CpuFP, NoSuf, { FloatReg }
-fsubp, 0xdee9, CpuFP, NoSuf, {}
+fsubp, 0xdee0, FP, NoSuf|ATTMnemonic|ATTSyntax, { FloatAcc, FloatReg }
+fsubp, 0xdee0, FP, NoSuf|ATTMnemonic|ATTSyntax, { FloatReg }
+fsubp, 0xdee1, FP, NoSuf|ATTMnemonic|ATTSyntax, {}
+fsubp, 0xdee8, FP, NoSuf, { FloatAcc, FloatReg }
+fsubp, 0xdee8, FP, NoSuf, { FloatReg }
+fsubp, 0xdee9, FP, NoSuf, {}
 
 // subtract reverse
-fsubr, 0xd8e8, CpuFP, NoSuf, { FloatReg }
-fsubr, 0xd8e8, CpuFP, D|NoSuf, { FloatReg, FloatAcc }
+fsubr, 0xd8e8, FP, NoSuf, { FloatReg }
+fsubr, 0xd8e8, FP, D|NoSuf, { FloatReg, FloatAcc }
 // alias for fsubrp
-fsubr, 0xdee9, CpuFP, NoSuf|Ugh|ATTMnemonic|ATTSyntax, {}
-fsubr, 0xdee1, CpuFP, NoSuf|Ugh|ATTMnemonic, {}
-fsubr, 0xd8/5, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Dword|Qword|Unspecified|BaseIndex }
-fisubr, 0xde/5, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Word|Dword|Unspecified|BaseIndex }
+fsubr, 0xdee9, FP, NoSuf|Ugh|ATTMnemonic|ATTSyntax, {}
+fsubr, 0xdee1, FP, NoSuf|Ugh|ATTMnemonic, {}
+fsubr, 0xd8/5, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Dword|Qword|Unspecified|BaseIndex }
+fisubr, 0xde/5, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Word|Dword|Unspecified|BaseIndex }
 
-fsubrp, 0xdee8, CpuFP, NoSuf|ATTMnemonic|ATTSyntax, { FloatAcc, FloatReg }
-fsubrp, 0xdee8, CpuFP, NoSuf|ATTMnemonic|ATTSyntax, { FloatReg }
-fsubrp, 0xdee9, CpuFP, NoSuf|ATTMnemonic|ATTSyntax, {}
-fsubrp, 0xdee0, CpuFP, NoSuf, { FloatAcc, FloatReg }
-fsubrp, 0xdee0, CpuFP, NoSuf, { FloatReg }
-fsubrp, 0xdee1, CpuFP, NoSuf, {}
+fsubrp, 0xdee8, FP, NoSuf|ATTMnemonic|ATTSyntax, { FloatAcc, FloatReg }
+fsubrp, 0xdee8, FP, NoSuf|ATTMnemonic|ATTSyntax, { FloatReg }
+fsubrp, 0xdee9, FP, NoSuf|ATTMnemonic|ATTSyntax, {}
+fsubrp, 0xdee0, FP, NoSuf, { FloatAcc, FloatReg }
+fsubrp, 0xdee0, FP, NoSuf, { FloatReg }
+fsubrp, 0xdee1, FP, NoSuf, {}
 
 // multiply
-fmul, 0xd8c8, CpuFP, D|NoSuf, { FloatReg, FloatAcc }
-fmul, 0xd8c8, CpuFP, NoSuf, { FloatReg }
+fmul, 0xd8c8, FP, D|NoSuf, { FloatReg, FloatAcc }
+fmul, 0xd8c8, FP, NoSuf, { FloatReg }
 // alias for fmulp
-fmul, 0xdec9, CpuFP, NoSuf|Ugh|ATTMnemonic, {}
-fmul, 0xd8/1, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Dword|Qword|Unspecified|BaseIndex }
-fimul, 0xde/1, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Word|Dword|Unspecified|BaseIndex }
+fmul, 0xdec9, FP, NoSuf|Ugh|ATTMnemonic, {}
+fmul, 0xd8/1, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Dword|Qword|Unspecified|BaseIndex }
+fimul, 0xde/1, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Word|Dword|Unspecified|BaseIndex }
 
-fmulp, 0xdec8, CpuFP, D|NoSuf|Ugh, { FloatAcc, FloatReg }
-fmulp, 0xdec8, CpuFP, NoSuf, { FloatReg }
+fmulp, 0xdec8, FP, D|NoSuf|Ugh, { FloatAcc, FloatReg }
+fmulp, 0xdec8, FP, NoSuf, { FloatReg }
 // alias for fmulp %st, %st(1)
-fmulp, 0xdec9, CpuFP, NoSuf, {}
+fmulp, 0xdec9, FP, NoSuf, {}
 
 // divide
-fdiv, 0xd8f0, CpuFP, NoSuf, { FloatReg }
-fdiv, 0xd8f0, CpuFP, D|NoSuf, { FloatReg, FloatAcc }
+fdiv, 0xd8f0, FP, NoSuf, { FloatReg }
+fdiv, 0xd8f0, FP, D|NoSuf, { FloatReg, FloatAcc }
 // alias for fdivp
-fdiv, 0xdef1, CpuFP, NoSuf|Ugh|ATTMnemonic|ATTSyntax, {}
-fdiv, 0xdef9, CpuFP, NoSuf|Ugh|ATTMnemonic, {}
-fdiv, 0xd8/6, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Dword|Qword|Unspecified|BaseIndex }
-fidiv, 0xde/6, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Word|Dword|Unspecified|BaseIndex }
+fdiv, 0xdef1, FP, NoSuf|Ugh|ATTMnemonic|ATTSyntax, {}
+fdiv, 0xdef9, FP, NoSuf|Ugh|ATTMnemonic, {}
+fdiv, 0xd8/6, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Dword|Qword|Unspecified|BaseIndex }
+fidiv, 0xde/6, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Word|Dword|Unspecified|BaseIndex }
 
-fdivp, 0xdef0, CpuFP, NoSuf|ATTMnemonic|ATTSyntax, { FloatAcc, FloatReg }
-fdivp, 0xdef0, CpuFP, NoSuf|ATTMnemonic|ATTSyntax, { FloatReg }
-fdivp, 0xdef1, CpuFP, NoSuf|ATTMnemonic|ATTSyntax, {}
-fdivp, 0xdef8, CpuFP, NoSuf, { FloatAcc, FloatReg }
-fdivp, 0xdef8, CpuFP, NoSuf, { FloatReg }
-fdivp, 0xdef9, CpuFP, NoSuf, {}
+fdivp, 0xdef0, FP, NoSuf|ATTMnemonic|ATTSyntax, { FloatAcc, FloatReg }
+fdivp, 0xdef0, FP, NoSuf|ATTMnemonic|ATTSyntax, { FloatReg }
+fdivp, 0xdef1, FP, NoSuf|ATTMnemonic|ATTSyntax, {}
+fdivp, 0xdef8, FP, NoSuf, { FloatAcc, FloatReg }
+fdivp, 0xdef8, FP, NoSuf, { FloatReg }
+fdivp, 0xdef9, FP, NoSuf, {}
 
 // divide reverse
-fdivr, 0xd8f8, CpuFP, NoSuf, { FloatReg }
-fdivr, 0xd8f8, CpuFP, D|NoSuf, { FloatReg, FloatAcc }
+fdivr, 0xd8f8, FP, NoSuf, { FloatReg }
+fdivr, 0xd8f8, FP, D|NoSuf, { FloatReg, FloatAcc }
 // alias for fdivrp
-fdivr, 0xdef9, CpuFP, NoSuf|Ugh|ATTMnemonic|ATTSyntax, {}
-fdivr, 0xdef1, CpuFP, NoSuf|Ugh|ATTMnemonic, {}
-fdivr, 0xd8/7, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Dword|Qword|Unspecified|BaseIndex }
-fidivr, 0xde/7, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Word|Dword|Unspecified|BaseIndex }
+fdivr, 0xdef9, FP, NoSuf|Ugh|ATTMnemonic|ATTSyntax, {}
+fdivr, 0xdef1, FP, NoSuf|Ugh|ATTMnemonic, {}
+fdivr, 0xd8/7, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Dword|Qword|Unspecified|BaseIndex }
+fidivr, 0xde/7, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Word|Dword|Unspecified|BaseIndex }
 
-fdivrp, 0xdef8, CpuFP, NoSuf|ATTMnemonic|ATTSyntax, { FloatAcc, FloatReg }
-fdivrp, 0xdef8, CpuFP, NoSuf|ATTMnemonic|ATTSyntax, { FloatReg }
-fdivrp, 0xdef9, CpuFP, NoSuf|ATTMnemonic|ATTSyntax, {}
-fdivrp, 0xdef0, CpuFP, NoSuf, { FloatAcc, FloatReg }
-fdivrp, 0xdef0, CpuFP, NoSuf, { FloatReg }
-fdivrp, 0xdef1, CpuFP, NoSuf, {}
+fdivrp, 0xdef8, FP, NoSuf|ATTMnemonic|ATTSyntax, { FloatAcc, FloatReg }
+fdivrp, 0xdef8, FP, NoSuf|ATTMnemonic|ATTSyntax, { FloatReg }
+fdivrp, 0xdef9, FP, NoSuf|ATTMnemonic|ATTSyntax, {}
+fdivrp, 0xdef0, FP, NoSuf, { FloatAcc, FloatReg }
+fdivrp, 0xdef0, FP, NoSuf, { FloatReg }
+fdivrp, 0xdef1, FP, NoSuf, {}
 
-f2xm1, 0xd9f0, CpuFP, NoSuf, {}
-fyl2x, 0xd9f1, CpuFP, NoSuf, {}
-fptan, 0xd9f2, CpuFP, NoSuf, {}
-fpatan, 0xd9f3, CpuFP, NoSuf, {}
-fxtract, 0xd9f4, CpuFP, NoSuf, {}
-fprem1, 0xd9f5, Cpu387, NoSuf, {}
-fdecstp, 0xd9f6, CpuFP, NoSuf, {}
-fincstp, 0xd9f7, CpuFP, NoSuf, {}
-fprem, 0xd9f8, CpuFP, NoSuf, {}
-fyl2xp1, 0xd9f9, CpuFP, NoSuf, {}
-fsqrt, 0xd9fa, CpuFP, NoSuf, {}
-fsincos, 0xd9fb, Cpu387, NoSuf, {}
-frndint, 0xd9fc, CpuFP, NoSuf, {}
-fscale, 0xd9fd, CpuFP, NoSuf, {}
-fsin, 0xd9fe, Cpu387, NoSuf, {}
-fcos, 0xd9ff, Cpu387, NoSuf, {}
-fchs, 0xd9e0, CpuFP, NoSuf, {}
-fabs, 0xd9e1, CpuFP, NoSuf, {}
+f2xm1, 0xd9f0, FP, NoSuf, {}
+fyl2x, 0xd9f1, FP, NoSuf, {}
+fptan, 0xd9f2, FP, NoSuf, {}
+fpatan, 0xd9f3, FP, NoSuf, {}
+fxtract, 0xd9f4, FP, NoSuf, {}
+fprem1, 0xd9f5, i387, NoSuf, {}
+fdecstp, 0xd9f6, FP, NoSuf, {}
+fincstp, 0xd9f7, FP, NoSuf, {}
+fprem, 0xd9f8, FP, NoSuf, {}
+fyl2xp1, 0xd9f9, FP, NoSuf, {}
+fsqrt, 0xd9fa, FP, NoSuf, {}
+fsincos, 0xd9fb, i387, NoSuf, {}
+frndint, 0xd9fc, FP, NoSuf, {}
+fscale, 0xd9fd, FP, NoSuf, {}
+fsin, 0xd9fe, i387, NoSuf, {}
+fcos, 0xd9ff, i387, NoSuf, {}
+fchs, 0xd9e0, FP, NoSuf, {}
+fabs, 0xd9e1, FP, NoSuf, {}
 
 // processor control
-fninit, 0xdbe3, CpuFP, NoSuf, {}
-finit, 0xdbe3, CpuFP, NoSuf|FWait, {}
-fldcw, 0xd9/5, CpuFP, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Word|Unspecified|BaseIndex }
-fnstcw, 0xd9/7, CpuFP, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Word|Unspecified|BaseIndex }
-fstcw, 0xd9/7, CpuFP, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf|FWait, { Word|Unspecified|BaseIndex }
-fnstsw, 0xdfe0, Cpu287|Cpu387, IgnoreSize|NoSuf, { Acc|Word }
-fnstsw, 0xdd/7, CpuFP, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Word|Unspecified|BaseIndex }
-fnstsw, 0xdfe0, Cpu287|Cpu387, NoSuf, {}
-fstsw, 0xdfe0, Cpu287|Cpu387, IgnoreSize|NoSuf|FWait, { Acc|Word }
-fstsw, 0xdd/7, CpuFP, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf|FWait, { Word|Unspecified|BaseIndex }
-fstsw, 0xdfe0, Cpu287|Cpu387, NoSuf|FWait, {}
-fnclex, 0xdbe2, CpuFP, NoSuf, {}
-fclex, 0xdbe2, CpuFP, NoSuf|FWait, {}
+fninit, 0xdbe3, FP, NoSuf, {}
+finit, 0xdbe3, FP, NoSuf|FWait, {}
+fldcw, 0xd9/5, FP, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Word|Unspecified|BaseIndex }
+fnstcw, 0xd9/7, FP, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Word|Unspecified|BaseIndex }
+fstcw, 0xd9/7, FP, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf|FWait, { Word|Unspecified|BaseIndex }
+fnstsw, 0xdfe0, i287|i387, IgnoreSize|NoSuf, { Acc|Word }
+fnstsw, 0xdd/7, FP, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Word|Unspecified|BaseIndex }
+fnstsw, 0xdfe0, i287|i387, NoSuf, {}
+fstsw, 0xdfe0, i287|i387, IgnoreSize|NoSuf|FWait, { Acc|Word }
+fstsw, 0xdd/7, FP, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf|FWait, { Word|Unspecified|BaseIndex }
+fstsw, 0xdfe0, i287|i387, NoSuf|FWait, {}
+fnclex, 0xdbe2, FP, NoSuf, {}
+fclex, 0xdbe2, FP, NoSuf|FWait, {}
 // Short forms of fldenv, fstenv, fsave, and frstor use data size prefix.
-fnstenv, 0xd9/6, CpuFP, Modrm|No_bSuf|No_wSuf|No_qSuf, { Unspecified|BaseIndex }
-fstenv, 0xd9/6, CpuFP, Modrm|No_bSuf|No_wSuf|No_qSuf|FWait, { Unspecified|BaseIndex }
-fldenv, 0xd9/4, CpuFP, Modrm|No_bSuf|No_wSuf|No_qSuf, { Unspecified|BaseIndex }
-fnsave, 0xdd/6, CpuFP, Modrm|No_bSuf|No_wSuf|No_qSuf, { Unspecified|BaseIndex }
-fsave, 0xdd/6, CpuFP, Modrm|No_bSuf|No_wSuf|No_qSuf|FWait, { Unspecified|BaseIndex }
-frstor, 0xdd/4, CpuFP, Modrm|No_bSuf|No_wSuf|No_qSuf, { Unspecified|BaseIndex }
+fnstenv, 0xd9/6, FP, Modrm|No_bSuf|No_wSuf|No_qSuf, { Unspecified|BaseIndex }
+fstenv, 0xd9/6, FP, Modrm|No_bSuf|No_wSuf|No_qSuf|FWait, { Unspecified|BaseIndex }
+fldenv, 0xd9/4, FP, Modrm|No_bSuf|No_wSuf|No_qSuf, { Unspecified|BaseIndex }
+fnsave, 0xdd/6, FP, Modrm|No_bSuf|No_wSuf|No_qSuf, { Unspecified|BaseIndex }
+fsave, 0xdd/6, FP, Modrm|No_bSuf|No_wSuf|No_qSuf|FWait, { Unspecified|BaseIndex }
+frstor, 0xdd/4, FP, Modrm|No_bSuf|No_wSuf|No_qSuf, { Unspecified|BaseIndex }
 // 8087 only
-fneni, 0xdbe0, Cpu8087, NoSuf, {}
-feni, 0xdbe0, Cpu8087, NoSuf|FWait, {}
-fndisi, 0xdbe1, Cpu8087, NoSuf, {}
-fdisi, 0xdbe1, Cpu8087, NoSuf|FWait, {}
+fneni, 0xdbe0, i8087, NoSuf, {}
+feni, 0xdbe0, i8087, NoSuf|FWait, {}
+fndisi, 0xdbe1, i8087, NoSuf, {}
+fdisi, 0xdbe1, i8087, NoSuf|FWait, {}
 // 287 only
-fnsetpm, 0xdbe4, Cpu287, NoSuf, {}
-fsetpm, 0xdbe4, Cpu287, NoSuf|FWait, {}
-frstpm, 0xdbe5, Cpu287, NoSuf, {}
+fnsetpm, 0xdbe4, i287, NoSuf, {}
+fsetpm, 0xdbe4, i287, NoSuf|FWait, {}
+frstpm, 0xdbe5, i287, NoSuf, {}
 
-ffree, 0xddc0, CpuFP, NoSuf, { FloatReg }
+ffree, 0xddc0, FP, NoSuf, { FloatReg }
 // P6:free st(i), pop st
-ffreep, 0xdfc0, Cpu687, NoSuf, { FloatReg }
-fnop, 0xd9d0, CpuFP, NoSuf, {}
-fwait, 0x9b, CpuFP, NoSuf, {}
+ffreep, 0xdfc0, i687, NoSuf, { FloatReg }
+fnop, 0xd9d0, FP, NoSuf, {}
+fwait, 0x9b, FP, NoSuf, {}
 
 // Opcode prefixes; we allow them as separate insns too.
 
-addr16, 0x67, Cpu386|CpuNo64, Size16|IgnoreSize|NoSuf|IsPrefix, {}
-addr32, 0x67, Cpu386, Size32|IgnoreSize|NoSuf|IsPrefix, {}
-aword, 0x67, Cpu386|CpuNo64, Size16|IgnoreSize|NoSuf|IsPrefix, {}
-adword, 0x67, Cpu386, Size32|IgnoreSize|NoSuf|IsPrefix, {}
-data16, 0x66, Cpu386, Size16|IgnoreSize|NoSuf|IsPrefix, {}
-data32, 0x66, Cpu386|CpuNo64, Size32|IgnoreSize|NoSuf|IsPrefix, {}
-word, 0x66, Cpu386, Size16|IgnoreSize|NoSuf|IsPrefix, {}
-dword, 0x66, Cpu386|CpuNo64, Size32|IgnoreSize|NoSuf|IsPrefix, {}
+addr16, 0x67, i386|No64, Size16|IgnoreSize|NoSuf|IsPrefix, {}
+addr32, 0x67, i386, Size32|IgnoreSize|NoSuf|IsPrefix, {}
+aword, 0x67, i386|No64, Size16|IgnoreSize|NoSuf|IsPrefix, {}
+adword, 0x67, i386, Size32|IgnoreSize|NoSuf|IsPrefix, {}
+data16, 0x66, i386, Size16|IgnoreSize|NoSuf|IsPrefix, {}
+data32, 0x66, i386|No64, Size32|IgnoreSize|NoSuf|IsPrefix, {}
+word, 0x66, i386, Size16|IgnoreSize|NoSuf|IsPrefix, {}
+dword, 0x66, i386|No64, Size32|IgnoreSize|NoSuf|IsPrefix, {}
 lock, 0xf0, 0, NoSuf|IsPrefix, {}
 wait, 0x9b, 0, NoSuf|IsPrefix, {}
 cs, 0x2e, 0, NoSuf|IsPrefix, {}
 ds, 0x3e, 0, NoSuf|IsPrefix, {}
-es, 0x26, CpuNo64, NoSuf|IsPrefix, {}
-fs, 0x64, Cpu386, NoSuf|IsPrefix, {}
-gs, 0x65, Cpu386, NoSuf|IsPrefix, {}
-ss, 0x36, CpuNo64, NoSuf|IsPrefix, {}
+es, 0x26, No64, NoSuf|IsPrefix, {}
+fs, 0x64, i386, NoSuf|IsPrefix, {}
+gs, 0x65, i386, NoSuf|IsPrefix, {}
+ss, 0x36, No64, NoSuf|IsPrefix, {}
 rep, 0xf3, 0, NoSuf|IsPrefix, {}
 repe, 0xf3, 0, NoSuf|IsPrefix, {}
 repz, 0xf3, 0, NoSuf|IsPrefix, {}
@@ -827,176 +842,176 @@ repne, 0xf2, 0, NoSuf|IsPrefix, {}
 repnz, 0xf2, 0, NoSuf|IsPrefix, {}
 ht, 0x3e, 0, NoSuf|IsPrefix, {}
 hnt, 0x2e, 0, NoSuf|IsPrefix, {}
-rex, 0x40, Cpu64, NoSuf|IsPrefix, {}
-rexz, 0x41, Cpu64, NoSuf|IsPrefix, {}
-rexy, 0x42, Cpu64, NoSuf|IsPrefix, {}
-rexyz, 0x43, Cpu64, NoSuf|IsPrefix, {}
-rexx, 0x44, Cpu64, NoSuf|IsPrefix, {}
-rexxz, 0x45, Cpu64, NoSuf|IsPrefix, {}
-rexxy, 0x46, Cpu64, NoSuf|IsPrefix, {}
-rexxyz, 0x47, Cpu64, NoSuf|IsPrefix, {}
-rex64, 0x48, Cpu64, NoSuf|IsPrefix, {}
-rex64z, 0x49, Cpu64, NoSuf|IsPrefix, {}
-rex64y, 0x4a, Cpu64, NoSuf|IsPrefix, {}
-rex64yz, 0x4b, Cpu64, NoSuf|IsPrefix, {}
-rex64x, 0x4c, Cpu64, NoSuf|IsPrefix, {}
-rex64xz, 0x4d, Cpu64, NoSuf|IsPrefix, {}
-rex64xy, 0x4e, Cpu64, NoSuf|IsPrefix, {}
-rex64xyz, 0x4f, Cpu64, NoSuf|IsPrefix, {}
-rex.b, 0x41, Cpu64, NoSuf|IsPrefix, {}
-rex.x, 0x42, Cpu64, NoSuf|IsPrefix, {}
-rex.xb, 0x43, Cpu64, NoSuf|IsPrefix, {}
-rex.r, 0x44, Cpu64, NoSuf|IsPrefix, {}
-rex.rb, 0x45, Cpu64, NoSuf|IsPrefix, {}
-rex.rx, 0x46, Cpu64, NoSuf|IsPrefix, {}
-rex.rxb, 0x47, Cpu64, NoSuf|IsPrefix, {}
-rex.w, 0x48, Cpu64, NoSuf|IsPrefix, {}
-rex.wb, 0x49, Cpu64, NoSuf|IsPrefix, {}
-rex.wx, 0x4a, Cpu64, NoSuf|IsPrefix, {}
-rex.wxb, 0x4b, Cpu64, NoSuf|IsPrefix, {}
-rex.wr, 0x4c, Cpu64, NoSuf|IsPrefix, {}
-rex.wrb, 0x4d, Cpu64, NoSuf|IsPrefix, {}
-rex.wrx, 0x4e, Cpu64, NoSuf|IsPrefix, {}
-rex.wrxb, 0x4f, Cpu64, NoSuf|IsPrefix, {}
+rex, 0x40, x64, NoSuf|IsPrefix, {}
+rexz, 0x41, x64, NoSuf|IsPrefix, {}
+rexy, 0x42, x64, NoSuf|IsPrefix, {}
+rexyz, 0x43, x64, NoSuf|IsPrefix, {}
+rexx, 0x44, x64, NoSuf|IsPrefix, {}
+rexxz, 0x45, x64, NoSuf|IsPrefix, {}
+rexxy, 0x46, x64, NoSuf|IsPrefix, {}
+rexxyz, 0x47, x64, NoSuf|IsPrefix, {}
+rex64, 0x48, x64, NoSuf|IsPrefix, {}
+rex64z, 0x49, x64, NoSuf|IsPrefix, {}
+rex64y, 0x4a, x64, NoSuf|IsPrefix, {}
+rex64yz, 0x4b, x64, NoSuf|IsPrefix, {}
+rex64x, 0x4c, x64, NoSuf|IsPrefix, {}
+rex64xz, 0x4d, x64, NoSuf|IsPrefix, {}
+rex64xy, 0x4e, x64, NoSuf|IsPrefix, {}
+rex64xyz, 0x4f, x64, NoSuf|IsPrefix, {}
+rex.b, 0x41, x64, NoSuf|IsPrefix, {}
+rex.x, 0x42, x64, NoSuf|IsPrefix, {}
+rex.xb, 0x43, x64, NoSuf|IsPrefix, {}
+rex.r, 0x44, x64, NoSuf|IsPrefix, {}
+rex.rb, 0x45, x64, NoSuf|IsPrefix, {}
+rex.rx, 0x46, x64, NoSuf|IsPrefix, {}
+rex.rxb, 0x47, x64, NoSuf|IsPrefix, {}
+rex.w, 0x48, x64, NoSuf|IsPrefix, {}
+rex.wb, 0x49, x64, NoSuf|IsPrefix, {}
+rex.wx, 0x4a, x64, NoSuf|IsPrefix, {}
+rex.wxb, 0x4b, x64, NoSuf|IsPrefix, {}
+rex.wr, 0x4c, x64, NoSuf|IsPrefix, {}
+rex.wrb, 0x4d, x64, NoSuf|IsPrefix, {}
+rex.wrx, 0x4e, x64, NoSuf|IsPrefix, {}
+rex.wrxb, 0x4f, x64, NoSuf|IsPrefix, {}
 
 // Pseudo prefixes (base_opcode == PSEUDO_PREFIX)
 
 <pseudopfx:ident:cpu, disp8:Disp8:0, disp16:Disp16:0, disp32:Disp32:0, +
                       load:Load:0, store:Store:0, +
                       vex:VEX:0, vex2:VEX:0, vex3:VEX3:0, evex:EVEX:0, +
-                      rex:REX:Cpu64, nooptimize:NoOptimize:0>
+                      rex:REX:x64, nooptimize:NoOptimize:0>
 
 {<pseudopfx>}, PSEUDO_PREFIX/Prefix_<pseudopfx:ident>, <pseudopfx:cpu>, NoSuf|IsPrefix, {}
 
 // 486 extensions.
 
-bswap, 0xfc8, Cpu486, No_bSuf|No_wSuf|No_sSuf, { Reg32|Reg64 }
-xadd, 0xfc0, Cpu486, W|CheckRegSize|Modrm|No_sSuf|HLEPrefixLock, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
-cmpxchg, 0xfb0, Cpu486, W|CheckRegSize|Modrm|No_sSuf|HLEPrefixLock, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
-invd, 0xf08, Cpu486, NoSuf, {}
-wbinvd, 0xf09, Cpu486, NoSuf, {}
-invlpg, 0xf01/7, Cpu486, Modrm|Anysize|IgnoreSize|NoSuf, { BaseIndex }
+bswap, 0xfc8, i486, No_bSuf|No_wSuf|No_sSuf, { Reg32|Reg64 }
+xadd, 0xfc0, i486, W|CheckRegSize|Modrm|No_sSuf|HLEPrefixLock, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
+cmpxchg, 0xfb0, i486, W|CheckRegSize|Modrm|No_sSuf|HLEPrefixLock, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
+invd, 0xf08, i486, NoSuf, {}
+wbinvd, 0xf09, i486, NoSuf, {}
+invlpg, 0xf01/7, i486, Modrm|Anysize|IgnoreSize|NoSuf, { BaseIndex }
 
 // 586 and late 486 extensions.
-cpuid, 0xfa2, Cpu486, NoSuf, {}
+cpuid, 0xfa2, i486, NoSuf, {}
 
 // Pentium extensions.
-wrmsr, 0xf30, Cpu586, NoSuf, {}
-rdtsc, 0xf31, Cpu586, NoSuf, {}
-rdmsr, 0xf32, Cpu586, NoSuf, {}
-cmpxchg8b, 0xfc7/1, Cpu586, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64|HLEPrefixLock, { Qword|Unspecified|BaseIndex }
+wrmsr, 0xf30, i586, NoSuf, {}
+rdtsc, 0xf31, i586, NoSuf, {}
+rdmsr, 0xf32, i586, NoSuf, {}
+cmpxchg8b, 0xfc7/1, i586, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64|HLEPrefixLock, { Qword|Unspecified|BaseIndex }
 
 // Pentium II/Pentium Pro extensions.
-sysenter, 0xf34, Cpu64, Intel64Only|NoSuf, {}
-sysenter, 0xf34, Cpu686|CpuNo64, NoSuf, {}
-sysexit, 0xf35, Cpu64, Intel64Only|No_bSuf|No_wSuf|No_sSuf, {}
-sysexit, 0xf35, Cpu686|CpuNo64, NoSuf, {}
-fxsave, 0xfae/0, CpuFXSR, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf, { Unspecified|BaseIndex }
-fxsave64, 0xfae/0, CpuFXSR|Cpu64, Modrm|NoSuf|Size64, { Unspecified|BaseIndex }
-fxrstor, 0xfae/1, CpuFXSR, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf, { Unspecified|BaseIndex }
-fxrstor64, 0xfae/1, CpuFXSR|Cpu64, Modrm|NoSuf|Size64, { Unspecified|BaseIndex }
-rdpmc, 0xf33, Cpu686, NoSuf, {}
+sysenter, 0xf34, x64, Intel64Only|NoSuf, {}
+sysenter, 0xf34, i686|No64, NoSuf, {}
+sysexit, 0xf35, x64, Intel64Only|No_bSuf|No_wSuf|No_sSuf, {}
+sysexit, 0xf35, i686|No64, NoSuf, {}
+fxsave, 0xfae/0, FXSR, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf, { Unspecified|BaseIndex }
+fxsave64, 0xfae/0, FXSR|x64, Modrm|NoSuf|Size64, { Unspecified|BaseIndex }
+fxrstor, 0xfae/1, FXSR, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf, { Unspecified|BaseIndex }
+fxrstor64, 0xfae/1, FXSR|x64, Modrm|NoSuf|Size64, { Unspecified|BaseIndex }
+rdpmc, 0xf33, i686, NoSuf, {}
 // official undefined instr.
-ud2, 0xf0b, Cpu186, NoSuf, {}
+ud2, 0xf0b, i186, NoSuf, {}
 // alias for ud2
-ud2a, 0xf0b, Cpu186, NoSuf, {}
+ud2a, 0xf0b, i186, NoSuf, {}
 // 2nd. official undefined instr.
-ud1, 0xfb9, Cpu186, Modrm|CheckRegSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+ud1, 0xfb9, i186, Modrm|CheckRegSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 // alias for ud1
-ud2b, 0xfb9, Cpu186, Modrm|CheckRegSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+ud2b, 0xfb9, i186, Modrm|CheckRegSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 // 3rd official undefined instr (older CPUs don't take a ModR/M byte)
-ud0, 0xfff, Cpu186, Modrm|CheckRegSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+ud0, 0xfff, i186, Modrm|CheckRegSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 
-cmov<cc>, 0xf4<cc:opc>, CpuCMOV, Modrm|CheckRegSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+cmov<cc>, 0xf4<cc:opc>, CMOV, Modrm|CheckRegSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 
-fcmovb, 0xdac0, Cpu687, NoSuf, { FloatReg, FloatAcc }
-fcmovnae, 0xdac0, Cpu687, NoSuf, { FloatReg, FloatAcc }
-fcmove, 0xdac8, Cpu687, NoSuf, { FloatReg, FloatAcc }
-fcmovbe, 0xdad0, Cpu687, NoSuf, { FloatReg, FloatAcc }
-fcmovna, 0xdad0, Cpu687, NoSuf, { FloatReg, FloatAcc }
-fcmovu, 0xdad8, Cpu687, NoSuf, { FloatReg, FloatAcc }
-fcmovae, 0xdbc0, Cpu687, NoSuf, { FloatReg, FloatAcc }
-fcmovnb, 0xdbc0, Cpu687, NoSuf, { FloatReg, FloatAcc }
-fcmovne, 0xdbc8, Cpu687, NoSuf, { FloatReg, FloatAcc }
-fcmova, 0xdbd0, Cpu687, NoSuf, { FloatReg, FloatAcc }
-fcmovnbe, 0xdbd0, Cpu687, NoSuf, { FloatReg, FloatAcc }
-fcmovnu, 0xdbd8, Cpu687, NoSuf, { FloatReg, FloatAcc }
+fcmovb, 0xdac0, i687, NoSuf, { FloatReg, FloatAcc }
+fcmovnae, 0xdac0, i687, NoSuf, { FloatReg, FloatAcc }
+fcmove, 0xdac8, i687, NoSuf, { FloatReg, FloatAcc }
+fcmovbe, 0xdad0, i687, NoSuf, { FloatReg, FloatAcc }
+fcmovna, 0xdad0, i687, NoSuf, { FloatReg, FloatAcc }
+fcmovu, 0xdad8, i687, NoSuf, { FloatReg, FloatAcc }
+fcmovae, 0xdbc0, i687, NoSuf, { FloatReg, FloatAcc }
+fcmovnb, 0xdbc0, i687, NoSuf, { FloatReg, FloatAcc }
+fcmovne, 0xdbc8, i687, NoSuf, { FloatReg, FloatAcc }
+fcmova, 0xdbd0, i687, NoSuf, { FloatReg, FloatAcc }
+fcmovnbe, 0xdbd0, i687, NoSuf, { FloatReg, FloatAcc }
+fcmovnu, 0xdbd8, i687, NoSuf, { FloatReg, FloatAcc }
 
-fcomi, 0xdbf0, Cpu687, NoSuf, { FloatReg, FloatAcc }
-fcomi, 0xdbf1, Cpu687, NoSuf, {}
-fcomi, 0xdbf0, Cpu687, NoSuf, { FloatReg }
-fucomi, 0xdbe8, Cpu687, NoSuf, { FloatReg, FloatAcc }
-fucomi, 0xdbe9, Cpu687, NoSuf, {}
-fucomi, 0xdbe8, Cpu687, NoSuf, { FloatReg }
-fcomip, 0xdff0, Cpu687, NoSuf, { FloatReg, FloatAcc }
-fcomip, 0xdff1, Cpu687, NoSuf, {}
-fcomip, 0xdff0, Cpu687, NoSuf, { FloatReg }
-fcompi, 0xdff0, Cpu687, NoSuf, { FloatReg, FloatAcc }
-fcompi, 0xdff1, Cpu687, NoSuf, {}
-fcompi, 0xdff0, Cpu687, NoSuf, { FloatReg }
-fucomip, 0xdfe8, Cpu687, NoSuf, { FloatReg, FloatAcc }
-fucomip, 0xdfe9, Cpu687, NoSuf, {}
-fucomip, 0xdfe8, Cpu687, NoSuf, { FloatReg }
-fucompi, 0xdfe8, Cpu687, NoSuf, { FloatReg, FloatAcc }
-fucompi, 0xdfe9, Cpu687, NoSuf, {}
-fucompi, 0xdfe8, Cpu687, NoSuf, { FloatReg }
+fcomi, 0xdbf0, i687, NoSuf, { FloatReg, FloatAcc }
+fcomi, 0xdbf1, i687, NoSuf, {}
+fcomi, 0xdbf0, i687, NoSuf, { FloatReg }
+fucomi, 0xdbe8, i687, NoSuf, { FloatReg, FloatAcc }
+fucomi, 0xdbe9, i687, NoSuf, {}
+fucomi, 0xdbe8, i687, NoSuf, { FloatReg }
+fcomip, 0xdff0, i687, NoSuf, { FloatReg, FloatAcc }
+fcomip, 0xdff1, i687, NoSuf, {}
+fcomip, 0xdff0, i687, NoSuf, { FloatReg }
+fcompi, 0xdff0, i687, NoSuf, { FloatReg, FloatAcc }
+fcompi, 0xdff1, i687, NoSuf, {}
+fcompi, 0xdff0, i687, NoSuf, { FloatReg }
+fucomip, 0xdfe8, i687, NoSuf, { FloatReg, FloatAcc }
+fucomip, 0xdfe9, i687, NoSuf, {}
+fucomip, 0xdfe8, i687, NoSuf, { FloatReg }
+fucompi, 0xdfe8, i687, NoSuf, { FloatReg, FloatAcc }
+fucompi, 0xdfe9, i687, NoSuf, {}
+fucompi, 0xdfe8, i687, NoSuf, { FloatReg }
 
 // Pentium4 extensions.
 
-movnti, 0xfc3, CpuSSE2, Modrm|CheckRegSize|IgnoreSize|No_bSuf|No_wSuf|No_sSuf, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
-clflush, 0xfae/7, CpuClflush, Modrm|Anysize|IgnoreSize|NoSuf, { BaseIndex }
-lfence, 0xfaee8, CpuSSE2, NoSuf, {}
-mfence, 0xfaef0, CpuSSE2, NoSuf, {}
+movnti, 0xfc3, SSE2, Modrm|CheckRegSize|IgnoreSize|No_bSuf|No_wSuf|No_sSuf, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
+clflush, 0xfae/7, Clflush, Modrm|Anysize|IgnoreSize|NoSuf, { BaseIndex }
+lfence, 0xfaee8, SSE2, NoSuf, {}
+mfence, 0xfaef0, SSE2, NoSuf, {}
 // Processors that do not support PAUSE treat this opcode as a NOP instruction.
-pause, 0xf390, Cpu186, NoSuf, {}
+pause, 0xf390, i186, NoSuf, {}
 
 // MMX/SSE2 instructions.
 
 <mmx:cpu:pfx:attr:shimm:reg:mem, +
-    $avx:CpuAVX:66:Vex128|VexVVVV|VexW0|SSE2AVX:Vex128|VexVVVV=2|VexW0|SSE2AVX:RegXMM:Xmmword, +
-    $sse:CpuSSE2:66:::RegXMM:Xmmword, +
-    $mmx:CpuMMX::::RegMMX:Qword>
+    $avx:AVX:66:Vex128|VexVVVV|VexW0|SSE2AVX:Vex128|VexVVVV=2|VexW0|SSE2AVX:RegXMM:Xmmword, +
+    $sse:SSE2:66:::RegXMM:Xmmword, +
+    $mmx:MMX::::RegMMX:Qword>
 
 <sse2:cpu:attr:scal:vvvv:shimm, +
-    $avx:CpuAVX:Vex128|VexW0|SSE2AVX:VexLIG|VexW0|SSE2AVX:VexVVVV:Vex128|VexVVVV=2|VexW0|SSE2AVX, +
-    $sse:CpuSSE2::::>
+    $avx:AVX:Vex128|VexW0|SSE2AVX:VexLIG|VexW0|SSE2AVX:VexVVVV:Vex128|VexVVVV=2|VexW0|SSE2AVX, +
+    $sse:SSE2::::>
 
 <bw:opc:vexw:elem:kcpu:kpfx:cpubmi, +
-    b:0:VexW0:Byte:CpuAVX512DQ:66:CpuAVX512VBMI, +
-    w:1:VexW1:Word:CpuAVX512F::CpuAVX512BW>
+    b:0:VexW0:Byte:AVX512DQ:66:AVX512VBMI, +
+    w:1:VexW1:Word:AVX512F::AVX512BW>
 
 <dq:opc:vexw:vexw64:elem:cpu64:gpr:kpfx, +
     d:0:VexW0::Dword::Reg32:66, +
-    q:1:VexW1:VexW1:Qword:Cpu64:Reg64:>
+    q:1:VexW1:VexW1:Qword:x64:Reg64:>
 
-emms, 0xf77, CpuMMX, NoSuf, {}
+emms, 0xf77, MMX, NoSuf, {}
 // These really shouldn't allow for Reg64 (movq is the right mnemonic for
 // copying between Reg64/Mem64 and RegXMM/RegMMX, as is mandated by Intel's
 // spec). AMD's spec, having been in existence for much longer, failed to
 // recognize that and specified movd for 32- and 64-bit operations.
-movd, 0x666e, CpuAVX, D|Modrm|Vex128|Space0F|VexW0|NoSuf|SSE2AVX, { Reg32|Unspecified|BaseIndex, RegXMM }
-movd, 0x666e, CpuAVX|Cpu64, D|Modrm|Vex=1|Space0F|VexW1|NoSuf|Size64|SSE2AVX, { Reg64|BaseIndex, RegXMM }
-movd, 0x660f6e, CpuSSE2, D|Modrm|IgnoreSize|NoSuf, { Reg32|Unspecified|BaseIndex, RegXMM }
-movd, 0x660f6e, CpuSSE2|Cpu64, D|Modrm|NoSuf|Size64, { Reg64|BaseIndex, RegXMM }
+movd, 0x666e, AVX, D|Modrm|Vex128|Space0F|VexW0|NoSuf|SSE2AVX, { Reg32|Unspecified|BaseIndex, RegXMM }
+movd, 0x666e, AVX|x64, D|Modrm|Vex=1|Space0F|VexW1|NoSuf|Size64|SSE2AVX, { Reg64|BaseIndex, RegXMM }
+movd, 0x660f6e, SSE2, D|Modrm|IgnoreSize|NoSuf, { Reg32|Unspecified|BaseIndex, RegXMM }
+movd, 0x660f6e, SSE2|x64, D|Modrm|NoSuf|Size64, { Reg64|BaseIndex, RegXMM }
 // The MMX templates have to remain after at least the SSE2AVX ones.
-movd, 0xf6e, CpuMMX, D|Modrm|IgnoreSize|NoSuf, { Reg32|Unspecified|BaseIndex, RegMMX }
-movd, 0xf6e, CpuMMX|Cpu64, D|Modrm|NoSuf|Size64, { Reg64|BaseIndex, RegMMX }
-movq, 0xf37e, CpuAVX, Load|Modrm|Vex=1|Space0F|VexWIG|NoSuf|SSE2AVX, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
-movq, 0x66d6, CpuAVX, Modrm|Vex=1|Space0F|VexWIG|NoSuf|SSE2AVX, { RegXMM, Qword|Unspecified|BaseIndex|RegXMM }
-movq, 0x666e, CpuAVX|Cpu64, D|Modrm|Vex=1|Space0F|VexW1|NoSuf|Size64|SSE2AVX, { Reg64|Unspecified|BaseIndex, RegXMM }
-movq, 0xf30f7e, CpuSSE2, Load|Modrm|NoSuf, { Unspecified|Qword|BaseIndex|RegXMM, RegXMM }
-movq, 0x660fd6, CpuSSE2, Modrm|NoSuf, { RegXMM, Unspecified|Qword|BaseIndex|RegXMM }
-movq, 0x660f6e, CpuSSE2|Cpu64, D|Modrm|NoSuf|Size64, { Reg64|Unspecified|BaseIndex, RegXMM }
+movd, 0xf6e, MMX, D|Modrm|IgnoreSize|NoSuf, { Reg32|Unspecified|BaseIndex, RegMMX }
+movd, 0xf6e, MMX|x64, D|Modrm|NoSuf|Size64, { Reg64|BaseIndex, RegMMX }
+movq, 0xf37e, AVX, Load|Modrm|Vex=1|Space0F|VexWIG|NoSuf|SSE2AVX, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
+movq, 0x66d6, AVX, Modrm|Vex=1|Space0F|VexWIG|NoSuf|SSE2AVX, { RegXMM, Qword|Unspecified|BaseIndex|RegXMM }
+movq, 0x666e, AVX|x64, D|Modrm|Vex=1|Space0F|VexW1|NoSuf|Size64|SSE2AVX, { Reg64|Unspecified|BaseIndex, RegXMM }
+movq, 0xf30f7e, SSE2, Load|Modrm|NoSuf, { Unspecified|Qword|BaseIndex|RegXMM, RegXMM }
+movq, 0x660fd6, SSE2, Modrm|NoSuf, { RegXMM, Unspecified|Qword|BaseIndex|RegXMM }
+movq, 0x660f6e, SSE2|x64, D|Modrm|NoSuf|Size64, { Reg64|Unspecified|BaseIndex, RegXMM }
 // The MMX templates have to remain after at least the SSE2AVX ones.
-movq, 0xf6f, CpuMMX, D|Modrm|NoSuf, { Unspecified|Qword|BaseIndex|RegMMX, RegMMX }
-movq, 0xf6e, CpuMMX|Cpu64, D|Modrm|NoSuf|Size64, { Reg64|Unspecified|BaseIndex, RegMMX }
+movq, 0xf6f, MMX, D|Modrm|NoSuf, { Unspecified|Qword|BaseIndex|RegMMX, RegMMX }
+movq, 0xf6e, MMX|x64, D|Modrm|NoSuf|Size64, { Reg64|Unspecified|BaseIndex, RegMMX }
 packssdw<mmx>, 0x<mmx:pfx>0f6b, <mmx:cpu>, Modrm|<mmx:attr>|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
 packsswb<mmx>, 0x<mmx:pfx>0f63, <mmx:cpu>, Modrm|<mmx:attr>|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
 packuswb<mmx>, 0x<mmx:pfx>0f67, <mmx:cpu>, Modrm|<mmx:attr>|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
 padd<bw><mmx>, 0x<mmx:pfx>0ffc | <bw:opc>, <mmx:cpu>, Modrm|<mmx:attr>|C|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
 paddd<mmx>, 0x<mmx:pfx>0ffe, <mmx:cpu>, Modrm|<mmx:attr>|C|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
 paddq<sse2>, 0x660fd4, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|C|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-paddq, 0xfd4, CpuSSE2, Modrm|NoSuf, { Qword|Unspecified|BaseIndex|RegMMX, RegMMX }
+paddq, 0xfd4, SSE2, Modrm|NoSuf, { Qword|Unspecified|BaseIndex|RegMMX, RegMMX }
 padds<bw><mmx>, 0x<mmx:pfx>0fec | <bw:opc>, <mmx:cpu>, Modrm|<mmx:attr>|C|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
 paddus<bw><mmx>, 0x<mmx:pfx>0fdc | <bw:opc>, <mmx:cpu>, Modrm|<mmx:attr>|C|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
 pand<mmx>, 0x<mmx:pfx>0fdb, <mmx:cpu>, Modrm|<mmx:attr>|C|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
@@ -1024,25 +1039,25 @@ psrl<dq><mmx>, 0x<mmx:pfx>0f72 | <dq:opc>/2, <mmx:cpu>, Modrm|<mmx:shimm>|NoSuf,
 psub<bw><mmx>, 0x<mmx:pfx>0ff8 | <bw:opc>, <mmx:cpu>, Modrm|<mmx:attr>|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
 psubd<mmx>, 0x<mmx:pfx>0ffa, <mmx:cpu>, Modrm|<mmx:attr>|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
 psubq<sse2>, 0x660ffb, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-psubq, 0xffb, CpuSSE2, Modrm|NoSuf, { Qword|Unspecified|BaseIndex|RegMMX, RegMMX }
+psubq, 0xffb, SSE2, Modrm|NoSuf, { Qword|Unspecified|BaseIndex|RegMMX, RegMMX }
 psubs<bw><mmx>, 0x<mmx:pfx>0fe8 | <bw:opc>, <mmx:cpu>, Modrm|<mmx:attr>|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
 psubus<bw><mmx>, 0x<mmx:pfx>0fd8 | <bw:opc>, <mmx:cpu>, Modrm|<mmx:attr>|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
 punpckhbw<mmx>, 0x<mmx:pfx>0f68, <mmx:cpu>, Modrm|<mmx:attr>|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
 punpckhwd<mmx>, 0x<mmx:pfx>0f69, <mmx:cpu>, Modrm|<mmx:attr>|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
 punpckhdq<mmx>, 0x<mmx:pfx>0f6a, <mmx:cpu>, Modrm|<mmx:attr>|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
 punpcklbw<sse2>, 0x660f60, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-punpcklbw, 0xf60, CpuMMX, Modrm|NoSuf, { Dword|Unspecified|BaseIndex|RegMMX, RegMMX }
+punpcklbw, 0xf60, MMX, Modrm|NoSuf, { Dword|Unspecified|BaseIndex|RegMMX, RegMMX }
 punpcklwd<sse2>, 0x660f61, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-punpcklwd, 0xf61, CpuMMX, Modrm|NoSuf, { Dword|Unspecified|BaseIndex|RegMMX, RegMMX }
+punpcklwd, 0xf61, MMX, Modrm|NoSuf, { Dword|Unspecified|BaseIndex|RegMMX, RegMMX }
 punpckldq<sse2>, 0x660f62, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-punpckldq, 0xf62, CpuMMX, Modrm|NoSuf, { Dword|Unspecified|BaseIndex|RegMMX, RegMMX }
+punpckldq, 0xf62, MMX, Modrm|NoSuf, { Dword|Unspecified|BaseIndex|RegMMX, RegMMX }
 pxor<mmx>, 0x<mmx:pfx>0fef, <mmx:cpu>, Modrm|<mmx:attr>|C|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
 
 // SSE instructions.
 
 <sse:cpu:attr:scal:vvvv, +
-    $avx:CpuAVX:Vex128|VexW0|SSE2AVX:VexLIG|VexW0|SSE2AVX:VexVVVV, +
-    $sse:CpuSSE:::>
+    $avx:AVX:Vex128|VexW0|SSE2AVX:VexLIG|VexW0|SSE2AVX:VexVVVV, +
+    $sse:SSE:::>
 <frel:imm:comm, eq:0:C, lt:1:, le:2:, unord:3:C, neq:4:C, nlt:5:, nle:6:, ord:7:C>
 
 addps<sse>, 0x0f58, <sse:cpu>, Modrm|<sse:attr>|<sse:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
