@@ -45,7 +45,7 @@ static bool with_functions;	/* -f, show function names.  */
 static bool do_demangle;	/* -C, demangle names.  */
 static bool pretty_print;	/* -p, print on one line.  */
 static bool base_names;		/* -s, strip directory names.  */
-
+static bool add_newline;        /* -n, add a newline at the end. */
 /* Flags passed to the name demangler.  */
 static int demangle_flags = DMGL_PARAMS | DMGL_ANSI;
 
@@ -70,6 +70,7 @@ static struct option long_options[] =
   {"no-recursion-limit", no_argument, NULL, 'r'},  
   {"section", required_argument, NULL, 'j'},
   {"target", required_argument, NULL, 'b'},
+  {"add-newline", no_argument, NULL, 'n'},
   {"help", no_argument, NULL, 'H'},
   {"version", no_argument, NULL, 'V'},
   {0, no_argument, 0, 0}
@@ -102,6 +103,7 @@ usage (FILE *stream, int status)
   -C --demangle[=style]  Demangle function names\n\
   -R --recurse-limit     Enable a limit on recursion whilst demangling.  [Default]\n\
   -r --no-recurse-limit  Disable a limit on recursion whilst demangling\n\
+  -n --add-newline       Add a newline at the end of the output\n\
   -h --help              Display this information\n\
   -v --version           Display the program's version\n\
 \n"));
@@ -417,6 +419,8 @@ translate_addresses (bfd *abfd, asection *section)
             }
 	}
 
+      if(add_newline)
+        printf("\n");
       /* fflush() is essential for using this command as a server
          child process that reads addresses from a pipe and responds
          with line number information, processing one address at a
@@ -505,7 +509,7 @@ main (int argc, char **argv)
   file_name = NULL;
   section_name = NULL;
   target = NULL;
-  while ((c = getopt_long (argc, argv, "ab:Ce:rRsfHhij:pVv", long_options, (int *) 0))
+  while ((c = getopt_long (argc, argv, "ab:Ce:rRsfnHhij:pVv", long_options, (int *) 0))
 	 != EOF)
     {
       switch (c)
@@ -564,6 +568,9 @@ main (int argc, char **argv)
 	case 'j':
 	  section_name = optarg;
 	  break;
+  case 'n':
+    add_newline = true;
+    break;
 	default:
 	  usage (stderr, 1);
 	  break;
