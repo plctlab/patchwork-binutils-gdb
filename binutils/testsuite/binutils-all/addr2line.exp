@@ -61,6 +61,16 @@ if ![regexp -line "^(\[0-9a-fA-F\]+)? +\[Tt\] ${dot}fn" $output contents] then {
 	pass "$testname -f option"
     }
 
+#testcase for -n option: check the extra newline
+#Using the same fn function address used in -f option.
+    set got [binutils_run $ADDR2LINE "-n -f -e tmpdir/testprog$exe [lindex $list 0]"]
+    set want "fn\n$srcdir/$subdir/testprog.c:\[0-9\]+\n\n"
+    if ![regexp $want $got] then {
+	fail "$testname -fn option $got\n"
+    } else {
+	pass "$testname -fn option"
+    }
+
 #testcase for -s option.
 #Using the same fn function address used in -f option.
     set got [binutils_run $ADDR2LINE "-s -e tmpdir/testprog$exe [lindex $list 0]"]
