@@ -1207,6 +1207,8 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
   {"zve64d",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zvkb",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zvkg",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zvkha",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zvkhb",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zvl32b",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zvl64b",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zvl128b",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
@@ -2421,6 +2423,13 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return riscv_subset_supports (rps, "zvkb");
     case INSN_CLASS_ZVKG:
       return riscv_subset_supports (rps, "zvkg");
+    case INSN_CLASS_ZVKHA:
+      return riscv_subset_supports (rps, "zvkha");
+    case INSN_CLASS_ZVKHB:
+      return riscv_subset_supports (rps, "zvkhb");
+    case INSN_CLASS_ZVKHA_OR_ZVKHB:
+      return (riscv_subset_supports (rps, "zvkha")
+	      || riscv_subset_supports (rps, "zvkhb"));
     case INSN_CLASS_SVINVAL:
       return riscv_subset_supports (rps, "svinval");
     case INSN_CLASS_H:
@@ -2583,6 +2592,10 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return _("zvkb");
     case INSN_CLASS_ZVKG:
       return _("zvkg");
+    case INSN_CLASS_ZVKHA:
+      return _("zvkha");
+    case INSN_CLASS_ZVKHB:
+      return _("zvkhb");
     case INSN_CLASS_SVINVAL:
       return "svinval";
     case INSN_CLASS_H:
