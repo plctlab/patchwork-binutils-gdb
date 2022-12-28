@@ -377,8 +377,6 @@ riscv_set_abi_by_arch (void)
       gas_assert (abi_xlen != 0 && xlen != 0 && float_abi != FLOAT_ABI_DEFAULT);
       if (abi_xlen > xlen)
 	as_bad ("can't have %d-bit ABI on %d-bit ISA", abi_xlen, xlen);
-      else if (abi_xlen < xlen)
-	as_bad ("%d-bit ABI not yet supported on %d-bit ISA", abi_xlen, xlen);
 
       if (riscv_subset_supports (&riscv_rps_as, "e") && !rve_abi)
 	as_bad ("only the ilp32e ABI is supported for e extension");
@@ -704,9 +702,9 @@ const char *
 riscv_target_format (void)
 {
   if (target_big_endian)
-    return xlen == 64 ? "elf64-bigriscv" : "elf32-bigriscv";
+    return abi_xlen == 64 ? "elf64-bigriscv" : "elf32-bigriscv";
   else
-    return xlen == 64 ? "elf64-littleriscv" : "elf32-littleriscv";
+    return abi_xlen == 64 ? "elf64-littleriscv" : "elf32-littleriscv";
 }
 
 /* Return the length of instruction INSN.  */
@@ -1487,7 +1485,7 @@ init_opcode_hash (const struct riscv_opcode *opcodes,
 void
 md_begin (void)
 {
-  unsigned long mach = xlen == 64 ? bfd_mach_riscv64 : bfd_mach_riscv32;
+  unsigned long mach = abi_xlen == 64 ? bfd_mach_riscv64 : bfd_mach_riscv32;
 
   if (! bfd_set_arch_mach (stdoutput, bfd_arch_riscv, mach))
     as_warn (_("could not set architecture and machine"));
@@ -1735,7 +1733,7 @@ md_assemblef (const char *format, ...)
 static void
 normalize_constant_expr (expressionS *ex)
 {
-  if (xlen > 32)
+  if (abi_xlen > 32)
     return;
   if ((ex->X_op == O_constant || ex->X_op == O_symbol)
       && IS_ZEXT_32BIT_NUM (ex->X_add_number))
@@ -1833,7 +1831,7 @@ load_const (int reg, expressionS *ep)
       return;
     }
 
-  if (xlen > 32 && !IS_SEXT_32BIT_NUM (ep->X_add_number))
+  if (abi_xlen > 32 && !IS_SEXT_32BIT_NUM (ep->X_add_number))
     {
       /* Reduce to a signed 32-bit constant using SLLI and ADDI.  */
       while (((upper.X_add_number >> shift) & 1) == 0)
@@ -2096,19 +2094,19 @@ macro (struct riscv_cl_insn *ip, expressionS *imm_expr,
       break;
 
     case M_ZEXTH:
-      riscv_ext (rd, rs1, xlen - 16, false);
+      riscv_ext (rd, rs1, abi_xlen - 16, false);
       break;
 
     case M_ZEXTW:
-      riscv_ext (rd, rs1, xlen - 32, false);
+      riscv_ext (rd, rs1, abi_xlen - 32, false);
       break;
 
     case M_SEXTB:
-      riscv_ext (rd, rs1, xlen - 8, true);
+      riscv_ext (rd, rs1, abi_xlen - 8, true);
       break;
 
     case M_SEXTH:
-      riscv_ext (rd, rs1, xlen - 16, true);
+      riscv_ext (rd, rs1, abi_xlen - 16, true);
       break;
 
     case M_VMSGE:
@@ -4787,7 +4785,7 @@ s_riscv_attribute (int ignored ATTRIBUTE_UNUSED)
       if (old_xlen != xlen)
 	{
 	  /* We must re-init bfd again if xlen is changed.  */
-	  unsigned long mach = xlen == 64 ? bfd_mach_riscv64 : bfd_mach_riscv32;
+	  unsigned long mach = abi_xlen == 64 ? bfd_mach_riscv64 : bfd_mach_riscv32;
 	  bfd_find_target (riscv_target_format (), stdoutput);
 
 	  if (! bfd_set_arch_mach (stdoutput, bfd_arch_riscv, mach))

@@ -3605,15 +3605,8 @@ riscv_merge_arch_attr_info (bfd *ibfd, char *in_arch, char *out_arch)
       return NULL;
     }
 
-  if (xlen_in != ARCH_SIZE)
-    {
-      _bfd_error_handler
-	(_("error: %pB: unsupported XLEN (%u), you might be "
-	   "using wrong emulation"), ibfd, xlen_in);
-      return NULL;
-    }
 
-  merged_arch_str = riscv_arch_str (ARCH_SIZE, &merged_subsets);
+  merged_arch_str = riscv_arch_str (xlen_in, &merged_subsets);
 
   /* Release the subset lists.  */
   riscv_release_subset_list (&in_subsets);
