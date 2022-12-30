@@ -55,7 +55,7 @@ fragment <<EOF
 
 #define COFF_IMAGE_WITH_PE
 #define COFF_WITH_PE
-#ifdef TARGET_IS_aarch64pe
+#ifdef TARGET_IS_arm64pe
 #define COFF_WITH_peAArch64
 #elif defined (TARGET_IS_i386pep)
 #define COFF_WITH_pex64
@@ -86,7 +86,7 @@ ${pdb_support+#include \"pdb.h\"}
    header in generic PE code.  */
 #ifdef TARGET_IS_i386pep
 # include "coff/x86_64.h"
-#elif defined TARGET_IS_aarch64pe
+#elif defined TARGET_IS_arm64pe
 # include "coff/aarch64.h"
 #endif
 #include "coff/pe.h"
