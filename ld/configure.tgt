@@ -119,7 +119,7 @@ aarch64-*-haiku*)	targ_emul=aarch64haiku
 			targ_extra_emuls="aarch64elf aarch64elf32 aarch64elf32b aarch64elfb armelf armelfb armelf_haiku $targ_extra_libpath"
 			;;
 aarch64-*-pe*)
-			targ_emul=aarch64pe
+			targ_emul=arm64pe
 			targ_extra_ofiles="deffilep.o pep-dll-aarch64.o"
 			;;
 alpha*-*-freebsd* | alpha*-*-kfreebsd*-gnu)
