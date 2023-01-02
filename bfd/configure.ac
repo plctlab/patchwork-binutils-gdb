@@ -115,6 +115,16 @@ AC_ARG_WITH(mmap,
   *)    AC_MSG_ERROR(bad value ${withval} for BFD with-mmap option) ;;
 esac],[want_mmap=false])dnl
 
+ac_default_elf_maxpagesize=unset
+AC_ARG_WITH(elf_maxpagesize,
+  AS_HELP_STRING([--with-elf-maxpagesize=N],
+    [Set ELF_MAXPAGESIZE to N instead of using the target value]),
+[ac_default_elf_maxpagesize=$withval]) dnl
+if test ${ac_default_elf_maxpagesize} != unset; then
+  AC_DEFINE_UNQUOTED(FORCED_ELF_MAXPAGESIZE, ${ac_default_elf_maxpagesize},
+    [Define to a value with which to override the target ELF_MAXPAGESIZE.])
+fi
+
 AC_ARG_ENABLE(secureplt,
 [  --enable-secureplt      Default to creating read-only plt entries],
 [case "${enableval}" in
