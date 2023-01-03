@@ -1814,11 +1814,13 @@ you obtained GMP, MPFR and/or MPC from a vendor distribution package,
 make sure that you have installed both the libraries and the header
 files.  They may be located in separate packages.])
     else
-      AC_MSG_ERROR([Building GDB requires GMP 4.2+, and MPFR 3.1.0+.
+      if test "x$enable_gdb" != xno; then
+        AC_MSG_ERROR([Building GDB requires GMP 4.2+, and MPFR 3.1.0+.
 Try the --with-gmp and/or --with-mpfr options to specify
 their locations.  If you obtained GMP and/or MPFR from a vendor
 distribution package, make sure that you have installed both the libraries
 and the header files.  They may be located in separate packages.])
+      fi
     fi
   fi
 fi
