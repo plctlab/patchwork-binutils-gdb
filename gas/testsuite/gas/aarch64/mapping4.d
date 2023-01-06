@@ -2,7 +2,7 @@
 #as: --generate-missing-build-notes=no
 #name: AArch64 Mapping Symbols Test 4
 # This test is only valid on ELF based ports.
-#notarget: *-*-*coff *-*-pe *-*-wince *-*-*aout* *-*-netbsd
+#notarget: *-*-*coff *-*-pe* *-*-wince *-*-*aout* *-*-netbsd *-*-mingw*
 
 .*: +file format.*aarch64.*
 
