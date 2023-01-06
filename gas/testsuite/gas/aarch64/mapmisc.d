@@ -3,7 +3,7 @@
 #name: AArch64 Mapping Symbols for miscellaneous directives
 #source: mapmisc.s
 # This test is only valid on ELF based ports.
-#notarget: *-*-*coff *-*-pe *-*-wince *-*-*aout* *-*-netbsd
+#notarget: *-*-*coff *-*-pe* *-*-wince *-*-*aout* *-*-netbsd *-*-mingw*
 
 
 .*: +file format .*aarch64.*
