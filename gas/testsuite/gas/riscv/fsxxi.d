@@ -7,7 +7,7 @@
 Disassembly of section .text:
 
 0+000 <.text>:
-[ 	]+0:[ 	]+002fd573[ 	]+fsrmi[ 	]+a0,31
-[ 	]+4:[ 	]+002f5073[ 	]+fsrmi[ 	]+zero,30
-[ 	]+8:[ 	]+001ed773[ 	]+fsflagsi[ 	]+a4,29
-[ 	]+c:[ 	]+001e5073[ 	]+fsflagsi[ 	]+zero,28
+[ 	]+0:[ 	]+002fd573[ 	]+fsrm[ 	]+a0,31
+[ 	]+4:[ 	]+002f5073[ 	]+fsrm[ 	]+zero,30
+[ 	]+8:[ 	]+001ed773[ 	]+fsflags[ 	]+a4,29
+[ 	]+c:[ 	]+001e5073[ 	]+fsflags[ 	]+zero,28
