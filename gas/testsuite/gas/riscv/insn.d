@@ -45,6 +45,9 @@ Disassembly of section .text:
 [^:]+: R_RISCV_JAL[	]+target
 [^:]+:[ 	]+fa5ff56f[ 	]+jal[ 	]+a0,0 \<target\>
 [^:]+: R_RISCV_JAL[	]+target
+[^:]+:[ 	]+0015a513[ 	]+slt[ 	]+a0,a1,1
+[^:]+:[ 	]+0015b513[ 	]+seqz[ 	]+a0,a1
+[^:]+:[ 	]+0025b513[ 	]+sltu[ 	]+a0,a1,2
 [^:]+:[ 	]+852e[ 	]+mv[ 	]+a0,a1
 [^:]+:[ 	]+0511[ 	]+add[ 	]+a0,a0,4 # .*
 [^:]+:[ 	]+002c[ 	]+add[ 	]+a1,sp,8
@@ -52,9 +55,9 @@ Disassembly of section .text:
 [^:]+:[ 	]+41a8[ 	]+lw[ 	]+a0,64\(a1\)
 [^:]+:[ 	]+c1a8[ 	]+sw[ 	]+a0,64\(a1\)
 [^:]+:[ 	]+8d6d[ 	]+and[ 	]+a0,a0,a1
-[^:]+:[ 	]+d9c9[ 	]+beqz[ 	]+a1,0 \<target\>
+[^:]+:[ 	]+d1d9[ 	]+beqz[ 	]+a1,0 \<target\>
 [^:]+: R_RISCV_RVC_BRANCH[	]+target
-[^:]+:[ 	]+bf41[ 	]+j[ 	]+0 \<target\>
+[^:]+:[ 	]+b751[ 	]+j[ 	]+0 \<target\>
 [^:]+: R_RISCV_RVC_JUMP[	]+target
 [^:]+:[ 	]+68c58543[ 	]+fmadd.s[ 	]+fa0,fa1,fa2,fa3,rne
 [^:]+:[ 	]+68c58543[ 	]+fmadd.s[ 	]+fa0,fa1,fa2,fa3,rne

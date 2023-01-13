@@ -36,6 +36,9 @@ Disassembly of section .text:
 [^:]+:[ 	]+00fff537[ 	]+lui[ 	]+a0,0xfff
 [^:]+:[ 	]+fa9ff56f[ 	]+jal[ 	]+a0,0 \<target\>
 [^:]+:[ 	]+fa5ff56f[ 	]+jal[ 	]+a0,0 \<target\>
+[^:]+:[ 	]+0015a513[ 	]+slti[ 	]+a0,a1,1
+[^:]+:[ 	]+0015b513[ 	]+sltiu[ 	]+a0,a1,1
+[^:]+:[ 	]+0025b513[ 	]+sltiu[ 	]+a0,a1,2
 [^:]+:[ 	]+852e[ 	]+c\.mv[ 	]+a0,a1
 [^:]+:[ 	]+0511[ 	]+c\.addi[ 	]+a0,4 # .*
 [^:]+:[ 	]+002c[ 	]+c\.addi4spn[ 	]+a1,sp,8
@@ -43,8 +46,8 @@ Disassembly of section .text:
 [^:]+:[ 	]+41a8[ 	]+c\.lw[ 	]+a0,64\(a1\)
 [^:]+:[ 	]+c1a8[ 	]+c\.sw[ 	]+a0,64\(a1\)
 [^:]+:[ 	]+8d6d[ 	]+c\.and[ 	]+a0,a1
-[^:]+:[ 	]+d9c9[ 	]+c\.beqz[ 	]+a1,0 \<target\>
-[^:]+:[ 	]+bf41[ 	]+c\.j[ 	]+0 \<target\>
+[^:]+:[ 	]+d1d9[ 	]+c\.beqz[ 	]+a1,0 \<target\>
+[^:]+:[ 	]+b751[ 	]+c\.j[ 	]+0 \<target\>
 [^:]+:[ 	]+68c58543[ 	]+fmadd\.s[ 	]+fa0,fa1,fa2,fa3,rne
 [^:]+:[ 	]+68c58543[ 	]+fmadd\.s[ 	]+fa0,fa1,fa2,fa3,rne
 [^:]+:[ 	]+68c58543[ 	]+fmadd\.s[ 	]+fa0,fa1,fa2,fa3,rne
