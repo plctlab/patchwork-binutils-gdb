@@ -526,10 +526,7 @@ coff_pe_aarch64_relocate_section (bfd *output_bfd,
       asection *sec = NULL;
       uint64_t dest_vma;
 
-      /* skip trivial relocations */
-      if (rel->r_type == IMAGE_REL_ARM64_ADDR32
-	  || rel->r_type == IMAGE_REL_ARM64_ADDR64
-	  || rel->r_type == IMAGE_REL_ARM64_ABSOLUTE)
+      if (rel->r_type == IMAGE_REL_ARM64_ABSOLUTE)
 	continue;
 
       symndx = rel->r_symndx;
@@ -564,6 +561,46 @@ coff_pe_aarch64_relocate_section (bfd *output_bfd,
 
       switch (rel->r_type)
 	{
+	case IMAGE_REL_ARM64_ADDR32:
+	  {
+	    uint64_t val;
+	    int32_t addend;
+
+	    addend = bfd_getl32 (contents + rel->r_vaddr);
+
+	    dest_vma += addend;
+
+	    val = dest_vma;
+
+	    if (val > 0xffffffff)
+	      (*info->callbacks->reloc_overflow)
+		(info, h ? &h->root : NULL, syms[symndx]._n._n_name,
+		"IMAGE_REL_ARM64_ADDR32", addend, input_bfd,
+		input_section, rel->r_vaddr - input_section->vma);
+
+	    bfd_putl32 (val, contents + rel->r_vaddr);
+	    rel->r_type = IMAGE_REL_ARM64_ABSOLUTE;
+
+	    break;
+	  }
+
+	case IMAGE_REL_ARM64_ADDR64:
+	  {
+	    uint64_t val;
+	    int64_t addend;
+
+	    addend = bfd_getl64 (contents + rel->r_vaddr);
+
+	    dest_vma += addend;
+
+	    val = dest_vma;
+
+	    bfd_putl64 (val, contents + rel->r_vaddr);
+	    rel->r_type = IMAGE_REL_ARM64_ABSOLUTE;
+
+	    break;
+	  }
+
 	case IMAGE_REL_ARM64_ADDR32NB:
 	  {
 	    uint64_t val;
