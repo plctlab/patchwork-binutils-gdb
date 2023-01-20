@@ -1815,6 +1815,22 @@ const struct riscv_opcode riscv_opcodes[] =
 {"vmv4r.v",    0, INSN_CLASS_V, "Vd,Vt", MATCH_VMV4RV, MASK_VMV4RV, match_opcode, 0},
 {"vmv8r.v",    0, INSN_CLASS_V, "Vd,Vt", MATCH_VMV8RV, MASK_VMV8RV, match_opcode, 0},
 
+/* Zvkb instructions.  */
+{"vclmul.vv",  0, INSN_CLASS_ZVKB, "Vd,Vt,VsVm", MATCH_VCLMULVV, MASK_VCLMULVV, match_opcode, 0},
+{"vclmul.vx",  0, INSN_CLASS_ZVKB, "Vd,Vt,sVm", MATCH_VCLMULVX, MASK_VCLMULVX, match_opcode, 0},
+{"vclmulh.vv", 0, INSN_CLASS_ZVKB, "Vd,Vt,VsVm", MATCH_VCLMULHVV, MASK_VCLMULHVV, match_opcode, 0},
+{"vclmulh.vx", 0, INSN_CLASS_ZVKB, "Vd,Vt,sVm", MATCH_VCLMULHVX, MASK_VCLMULHVX, match_opcode, 0},
+{"vrol.vv",    0, INSN_CLASS_ZVKB, "Vd,Vt,VsVm", MATCH_VROLVV, MASK_VROLVV, match_opcode, 0},
+{"vrol.vx",    0, INSN_CLASS_ZVKB, "Vd,Vt,sVm", MATCH_VROLVX, MASK_VROLVX, match_opcode, 0},
+{"vror.vv",    0, INSN_CLASS_ZVKB, "Vd,Vt,VsVm", MATCH_VRORVV, MASK_VRORVV, match_opcode, 0},
+{"vror.vx",    0, INSN_CLASS_ZVKB, "Vd,Vt,sVm", MATCH_VRORVX, MASK_VRORVX, match_opcode, 0},
+{"vror.vi",    0, INSN_CLASS_ZVKB, "Vd,Vt,VlVm", MATCH_VRORVI, MASK_VRORVI, match_opcode, 0},
+{"vbrev8.v",   0, INSN_CLASS_ZVKB, "Vd,VtVm", MATCH_VBREV8V, MASK_VBREV8V, match_opcode, 0},
+{"vrev8.v",    0, INSN_CLASS_ZVKB, "Vd,VtVm", MATCH_VREV8V, MASK_VREV8V, match_opcode, 0},
+{"vandn.vv",   0, INSN_CLASS_ZVKB, "Vd,Vt,VsVm", MATCH_VANDNVV, MASK_VANDNVV, match_opcode, 0},
+{"vandn.vx",   0, INSN_CLASS_ZVKB, "Vd,Vt,sVm", MATCH_VANDNVX, MASK_VANDNVX, match_opcode, 0},
+{"vandn.vi",   0, INSN_CLASS_ZVKB, "Vd,Vt,ViVm", MATCH_VANDNVI, MASK_VANDNVI, match_opcode, 0},
+
 /* Supervisor instructions.  */
 {"csrr",       0, INSN_CLASS_ZICSR, "d,E",   MATCH_CSRRS, MASK_CSRRS|MASK_RS1, match_opcode, INSN_ALIAS },
 {"csrw",       0, INSN_CLASS_ZICSR, "E,s",   MATCH_CSRRW, MASK_CSRRW|MASK_RD, match_opcode, INSN_ALIAS },
