@@ -1210,6 +1210,7 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
   {"zvknha",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zvknhb",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zvkns",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zvksed",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zvl32b",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zvl64b",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zvl128b",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
@@ -2373,6 +2374,8 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
 	      || riscv_subset_supports (rps, "zvknhb"));
     case INSN_CLASS_ZVKNS:
       return riscv_subset_supports (rps, "zvkns");
+    case INSN_CLASS_ZVKSED:
+      return riscv_subset_supports (rps, "zvksed");
     case INSN_CLASS_SVINVAL:
       return riscv_subset_supports (rps, "svinval");
     case INSN_CLASS_H:
@@ -2541,6 +2544,8 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return _("zvknhb");
     case INSN_CLASS_ZVKNS:
       return _("zvkns");
+    case INSN_CLASS_ZVKSED:
+      return _("zvksed");
     case INSN_CLASS_SVINVAL:
       return "svinval";
     case INSN_CLASS_H:
