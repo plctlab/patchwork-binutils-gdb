@@ -2087,6 +2087,13 @@
 /* Zvkg instructions.  */
 #define MATCH_VGHMACVV 0xb2002077
 #define MASK_VGHMACVV 0xfe00707f
+/* Zvknh[a,b] instructions.  */
+#define MATCH_VSHA2CHVV 0xba002077
+#define MASK_VSHA2CHVV 0xfe00707f
+#define MATCH_VSHA2CLVV 0xbe002077
+#define MASK_VSHA2CLVV 0xfe00707f
+#define MATCH_VSHA2MSVV 0xb6002077
+#define MASK_VSHA2MSVV 0xfe00707f
 /* Svinval instruction.  */
 #define MATCH_SINVAL_VMA 0x16000073
 #define MASK_SINVAL_VMA 0xfe007fff
@@ -3167,6 +3174,10 @@ DECLARE_INSN(vandnvx, MATCH_VANDNVX, MASK_VANDNVX)
 DECLARE_INSN(vandnvi, MATCH_VANDNVI, MASK_VANDNVI)
 /* Zvkg instructions.  */
 DECLARE_INSN(vghmacvv, MATCH_VGHMACVV, MASK_VGHMACVV)
+/* Zvknh[a,b] instructions.  */
+DECLARE_INSN(vsha2chvv, MATCH_VSHA2CHVV, MASK_VSHA2CHVV)
+DECLARE_INSN(vsha2clvv, MATCH_VSHA2CLVV, MASK_VSHA2CLVV)
+DECLARE_INSN(vsha2msvv, MATCH_VSHA2MSVV, MASK_VSHA2MSVV)
 /* Vendor-specific (T-Head) XTheadBa instructions.  */
 DECLARE_INSN(th_addsl, MATCH_TH_ADDSL, MASK_TH_ADDSL)
 /* Vendor-specific (T-Head) XTheadBb instructions.  */
