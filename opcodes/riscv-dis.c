@@ -800,16 +800,16 @@ riscv_disassemble_insn (bfd_vma memaddr,
       {
         int i;
 	(*info->fprintf_styled_func)
-	  (info->stream, dis_style_assembler_directive, ".byte");
+	  (info->stream, dis_style_assembler_directive, ".2byte");
 	(*info->fprintf_styled_func) (info->stream, dis_style_text, "\t");
-        for (i = 0; i < insnlen; ++i)
+        for (i = 0; i < insnlen; i += 2)
           {
             if (i > 0)
 	      (*info->fprintf_styled_func) (info->stream, dis_style_text,
 					    ", ");
+	    word = bfd_get_bits (packet + i, 16, false);
 	    (*info->fprintf_styled_func) (info->stream, dis_style_immediate,
-					  "0x%02x",
-					  (unsigned int) (*packet++));
+					  "0x%04x", (unsigned int) word);
           }
       }
       break;
