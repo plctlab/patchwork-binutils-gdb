@@ -599,6 +599,7 @@ struct mips_elf_obj_tdata
   asection *elf_text_section;
 
   struct mips_hi16 *mips_hi16_list;
+  bool freeze_mips_hi16_list;
 };
 
 /* Get MIPS ELF private object data from BFD's tdata.  */
@@ -2534,11 +2535,14 @@ _bfd_mips_elf_hi16_reloc (bfd *abfd, arelent *reloc_entry,
   if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
     return bfd_reloc_outofrange;
 
+  tdata = mips_elf_tdata (abfd);
+  if (tdata->freeze_mips_hi16_list)
+    return bfd_reloc_outofrange;
+
   n = bfd_malloc (sizeof *n);
   if (n == NULL)
     return bfd_reloc_outofrange;
 
-  tdata = mips_elf_tdata (abfd);
   n->next = tdata->mips_hi16_list;
   n->data = data;
   n->input_section = input_section;
@@ -2596,38 +2600,41 @@ _bfd_mips_elf_lo16_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
 			       location);
 
   tdata = mips_elf_tdata (abfd);
-  while (tdata->mips_hi16_list != NULL)
-    {
-      bfd_reloc_status_type ret;
-      struct mips_hi16 *hi;
+  if (!tdata->freeze_mips_hi16_list)
+    while (tdata->mips_hi16_list != NULL)
+      {
+	bfd_reloc_status_type ret;
+	struct mips_hi16 *hi;
 
-      hi = tdata->mips_hi16_list;
+	hi = tdata->mips_hi16_list;
 
-      /* R_MIPS*_GOT16 relocations are something of a special case.  We
-	 want to install the addend in the same way as for a R_MIPS*_HI16
-	 relocation (with a rightshift of 16).  However, since GOT16
-	 relocations can also be used with global symbols, their howto
-	 has a rightshift of 0.  */
-      if (hi->rel.howto->type == R_MIPS_GOT16)
-	hi->rel.howto = MIPS_ELF_RTYPE_TO_HOWTO (abfd, R_MIPS_HI16, false);
-      else if (hi->rel.howto->type == R_MIPS16_GOT16)
-	hi->rel.howto = MIPS_ELF_RTYPE_TO_HOWTO (abfd, R_MIPS16_HI16, false);
-      else if (hi->rel.howto->type == R_MICROMIPS_GOT16)
-	hi->rel.howto = MIPS_ELF_RTYPE_TO_HOWTO (abfd, R_MICROMIPS_HI16, false);
+	/* R_MIPS*_GOT16 relocations are something of a special case.
+	   We want to install the addend in the same way as for a
+	   R_MIPS*_HI16 relocation (with a rightshift of 16).
+	   However, since GOT16 relocations can also be used with
+	   global symbols, their howto has a rightshift of 0.  */
+	if (hi->rel.howto->type == R_MIPS_GOT16)
+	  hi->rel.howto = MIPS_ELF_RTYPE_TO_HOWTO (abfd, R_MIPS_HI16, false);
+	else if (hi->rel.howto->type == R_MIPS16_GOT16)
+	  hi->rel.howto = MIPS_ELF_RTYPE_TO_HOWTO (abfd, R_MIPS16_HI16, false);
+	else if (hi->rel.howto->type == R_MICROMIPS_GOT16)
+	  hi->rel.howto = MIPS_ELF_RTYPE_TO_HOWTO (abfd, R_MICROMIPS_HI16,
+						   false);
 
-      /* VALLO is a signed 16-bit number.  Bias it by 0x8000 so that any
-	 carry or borrow will induce a change of +1 or -1 in the high part.  */
-      hi->rel.addend += (vallo + 0x8000) & 0xffff;
+	/* VALLO is a signed 16-bit number.  Bias it by 0x8000 so that
+	   any carry or borrow will induce a change of +1 or -1 in the
+	   high part.  */
+	hi->rel.addend += (vallo + 0x8000) & 0xffff;
 
-      ret = _bfd_mips_elf_generic_reloc (abfd, &hi->rel, symbol, hi->data,
-					 hi->input_section, output_bfd,
-					 error_message);
-      if (ret != bfd_reloc_ok)
-	return ret;
+	ret = _bfd_mips_elf_generic_reloc (abfd, &hi->rel, symbol, hi->data,
+					   hi->input_section, output_bfd,
+					   error_message);
+	if (ret != bfd_reloc_ok)
+	  return ret;
 
-      tdata->mips_hi16_list = hi->next;
-      free (hi);
-    }
+	tdata->mips_hi16_list = hi->next;
+	free (hi);
+      }
 
   return _bfd_mips_elf_generic_reloc (abfd, reloc_entry, symbol, data,
 				      input_section, output_bfd,
@@ -13118,13 +13125,11 @@ struct mips_elf_find_line
   struct ecoff_find_line i;
 };
 
-bool
-_bfd_mips_elf_find_nearest_line (bfd *abfd, asymbol **symbols,
-				 asection *section, bfd_vma offset,
-				 const char **filename_ptr,
-				 const char **functionname_ptr,
-				 unsigned int *line_ptr,
-				 unsigned int *discriminator_ptr)
+static bool
+find_nearest_line (bfd *abfd, asymbol **symbols,
+		   asection *section, bfd_vma offset,
+		   const char **filename_ptr, const char **functionname_ptr,
+		   unsigned int *line_ptr, unsigned int *discriminator_ptr)
 {
   asection *msec;
 
@@ -13229,6 +13234,25 @@ _bfd_mips_elf_find_nearest_line (bfd *abfd, asymbol **symbols,
 }
 
 bool
+_bfd_mips_elf_find_nearest_line (bfd *abfd, asymbol **symbols,
+				 asection *section, bfd_vma offset,
+				 const char **filename_ptr,
+				 const char **functionname_ptr,
+				 unsigned int *line_ptr,
+				 unsigned int *discriminator_ptr)
+{
+  /* Debug info should not contain hi16 or lo16 relocs.  If it does
+     then someone is playing fuzzing games.  Altering the hi16 list
+     during linking when printing an error message is bad.  */
+  mips_elf_tdata (abfd)->freeze_mips_hi16_list = true;
+  bool ret = find_nearest_line (abfd, symbols, section, offset,
+				filename_ptr, functionname_ptr,
+				line_ptr, discriminator_ptr);
+  mips_elf_tdata (abfd)->freeze_mips_hi16_list = false;
+  return ret;
+}
+
+bool
 _bfd_mips_elf_find_inliner_info (bfd *abfd,
 				 const char **filename_ptr,
 				 const char **functionname_ptr,
@@ -13321,16 +13345,19 @@ _bfd_elf_mips_get_relocated_section_contents
 	 mips_hi16_list that point into this section's data.  Data
 	 will typically be freed on return from this function.  */
       tdata = mips_elf_tdata (abfd);
-      hip = &tdata->mips_hi16_list;
-      while ((hi = *hip) != NULL)
+      if (!tdata->freeze_mips_hi16_list)
 	{
-	  if (hi->input_section == input_section)
+	  hip = &tdata->mips_hi16_list;
+	  while ((hi = *hip) != NULL)
 	    {
-	      *hip = hi->next;
-	      free (hi);
+	      if (hi->input_section == input_section)
+		{
+		  *hip = hi->next;
+		  free (hi);
+		}
+	      else
+		hip = &hi->next;
 	    }
-	  else
-	    hip = &hi->next;
 	}
       if (orig_data == NULL)
 	free (data);
