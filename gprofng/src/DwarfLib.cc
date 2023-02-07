@@ -31,6 +31,7 @@
 #include "DbeArray.h"
 #include "DbeSession.h"
 
+#define NO_STMT_LIST 0xffffffffffffffffULL
 #define CASE_S(x)   case x: s = (char *) #x; break
 
 static char *
@@ -1557,8 +1558,11 @@ DwrLineRegs::getPath (int fn)
   if (*dir != '/')
     { // not absolute
       char *s = include_directories->fetch (0);
-      sb.append (s);
-      sb.append ('/');
+      if (s != NULL && *s != 0)
+	{
+	  sb.append (s);
+	  sb.append ('/');
+	}
     }
   sb.append (dir);
   sb.append ('/');
@@ -1590,7 +1594,7 @@ DwrCU::DwrCU (Dwarf *_dwarf)
   abbrevTable = NULL;
   dwrInlinedSubrs = NULL;
   srcFiles = NULL;
-  stmt_list_offset = 0;
+  stmt_list_offset = NO_STMT_LIST;
   dwrLineReg = NULL;
   isMemop = false;
   isGNU = false;
@@ -1857,7 +1861,7 @@ DwrCU::parse_cu_header (LoadObject *lo)
   char *name = Dwarf_string (DW_AT_name);
   if (name == NULL)
     name = NTXT ("UnnamedUnit");
-  stmt_list_offset = Dwarf_data (DW_AT_stmt_list);
+  stmt_list_offset = Dwarf_ref (DW_AT_stmt_list);
   comp_dir = dbe_strdup (Dwarf_string (DW_AT_comp_dir));
   char *dir_name = comp_dir ? StrChr (comp_dir, ':') : NULL;
   char *orig_name = Dwarf_string (DW_AT_SUN_original_name);
@@ -2073,6 +2077,8 @@ DwrCU::map_dwarf_lines (Module *mod)
 					Stabs::is_fortran (mod->lang_code));
 	}
     }
+  if (lineReg == NULL)
+    return;
   Vector<DwrLine *> *lines = lineReg->get_lines ();
 
   Include *includes = new Include;
@@ -2083,7 +2089,7 @@ DwrCU::map_dwarf_lines (Module *mod)
   for (long i = 0, sz = VecSize (lines); i < sz; i++)
     {
       DwrLine *dwrLine = lines->get (i);
-      char *filename = dwrLineReg->getPath (dwrLine->file);
+      char *filename = lineReg->getPath (dwrLine->file);
       if (filename == NULL)
 	continue;
       uint64_t pc = dwrLine->address;
@@ -2123,7 +2129,7 @@ DwrCU::map_dwarf_lines (Module *mod)
 DwrLineRegs *
 DwrCU::get_dwrLineReg ()
 {
-  if (dwrLineReg == NULL)
+  if (dwrLineReg == NULL && stmt_list_offset != NO_STMT_LIST)
     dwrLineReg = new DwrLineRegs (new DwrSec (dwarf->debug_lineSec,
 					      stmt_list_offset), comp_dir);
   return dwrLineReg;
