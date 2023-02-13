@@ -8364,7 +8364,6 @@ lang_add_data (int type, union etree_union *exp)
 void
 lang_add_string (bfd_vma size, char *s)
 {
-  lang_data_statement_type *new_stmt;
   bfd_vma stringlen = strlen(s) + 1;    /* Add one for terminating '\0' */
   bfd_vma fill_len = 0;
   int     escape = 0;
@@ -8406,25 +8405,19 @@ lang_add_string (bfd_vma size, char *s)
       } else {
         /* whatever we have */
       }
-      new_stmt = new_stat (lang_data_statement, stat_ptr);
-      new_stmt->exp = exp_intop(s[i]);
-      new_stmt->type = BYTE;
+      lang_add_data (BYTE, exp_intop(s[i]));
       escape = 0;
     } else {
       if (s[i] == '\\') {
         escape = 1;
       } else {
-        new_stmt = new_stat (lang_data_statement, stat_ptr);
-        new_stmt->exp = exp_intop(s[i]);
-        new_stmt->type = BYTE;
+        lang_add_data (BYTE, exp_intop(s[i]));
       }
     }
   }
   /* Add byte expressions for filling to the end of the string */
   for (bfd_vma i = 0 ; i < fill_len ; i++) {
-    new_stmt = new_stat (lang_data_statement, stat_ptr);
-    new_stmt->exp = exp_intop(0);
-    new_stmt->type = BYTE;
+    lang_add_data (BYTE, exp_intop(s[i]));
   }
 }
 
