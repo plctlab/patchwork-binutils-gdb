@@ -5308,6 +5308,7 @@ C identifiers because they contain a @samp{.} character.
 @cindex data
 @cindex section data
 @cindex output section data
+@kindex ASCIZ @var{string}
 @kindex BYTE(@var{expression})
 @kindex SHORT(@var{expression})
 @kindex LONG(@var{expression})
@@ -5337,6 +5338,16 @@ same; they both store an 8 byte, or 64 bit, value.  When both host and
 target are 32 bits, an expression is computed as 32 bits.  In this case
 @code{QUAD} stores a 32 bit value zero extended to 64 bits, and
 @code{SQUAD} stores a 32 bit value sign extended to 64 bits.
+
+You can include a zero-terminated string in an output section by using
+@code{ASCIZ} as an output section command. The keyword is followed by a string
+which is stored at the current value of the location counter adding a zero byte
+at the end.
+
+For example, this string of 16 characters will create a 17 byte area
+@smallexample
+ASCIZ     "This is 16 bytes"
+@end smallexample
 
 If the object file format of the output file has an explicit endianness,
 which is the normal case, the value will be stored in that endianness.
