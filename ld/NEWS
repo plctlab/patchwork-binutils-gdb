@@ -1,5 +1,11 @@
 -*- text -*-
 
+* The linker has a new command for output sections.
+  ASCIZ "string"
+  This will insert the string at the current location adding a zero at the end.
+  The string may contain '\n', '\r', '\t' and octal numbers.
+  Hex numbers are not supported
+
 Changes in 2.40:
 
 * The linker has a new command line option to suppress the generation of any
