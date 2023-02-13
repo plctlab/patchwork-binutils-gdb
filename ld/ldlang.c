@@ -8361,6 +8361,78 @@ lang_add_data (int type, union etree_union *exp)
   new_stmt->type = type;
 }
 
+void
+lang_add_string (bfd_vma size, char *s)
+{
+  bfd_vma stringlen = strlen(s) + 1;    /* Add one for terminating '\0' */
+  bfd_vma fill_len = 0;
+  int     escape = 0;
+
+  if (size == 0) {  /* Zero terminated string */
+    size = stringlen;
+  } else if (size > stringlen) {    /* Fix Size string */
+    fill_len = size - stringlen;
+  } else if (size > stringlen) {
+    /* We have an error */
+    einfo (_("%P:%pS: warning: string does not fit \"%s\"\n"), NULL, s);
+  }
+  /* Add byte expressions until end of string */
+  for (bfd_vma i = 0 ; i < size ; i++) {
+    if (escape) {
+      char *p = &s[i];
+      char c = *p;
+      if (c == 't') {
+        *p = '\t';
+      } else if (c == 'n') {
+        *p = '\n';
+      } else if (c == 'r') {
+        *p = '\r';
+      } else if ((c >= '0') && (c <= '7')) {
+        int value = c;
+        c = p[1];
+        if ((c >= '0') && (c <= '7')) {
+          value <<= 3;
+          value += (c - '0');
+          i++;
+          c = p[2];
+          if ((c >= '0') && (c <= '7')) {
+            value <<= 3;
+            value += (c - '0');
+            i++;
+          }
+        }
+        if (value <= 0xff) {
+          s[i] = value;
+        } else {  /* octal: \777 is treated as '\077' + '7' */
+          value >>= 3;
+          i--;
+          s[i] = value;
+        }
+      } else {
+        /* whatever we have */
+      }
+      lang_add_data (BYTE, exp_intop(s[i]));
+      escape = 0;
+    } else {
+      if (s[i] == '\\') {
+        escape = 1;
+      } else {
+        lang_add_data (BYTE, exp_intop(s[i]));
+      }
+    }
+  }
+  /* Add byte expressions for filling to the end of the string */
+  for (bfd_vma i = 0 ; i < fill_len ; i++) {
+    lang_add_data (BYTE, exp_intop(s[i]));
+  }
+}
+
+void
+lang_add_stringz (char *s)
+{
+    lang_add_string (0, s);
+}
+
 /* Create a new reloc statement.  RELOC is the BFD relocation type to
    generate.  HOWTO is the corresponding howto structure (we could
    look this up, but the caller has already done so).  SECTION is the
