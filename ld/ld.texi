@@ -5308,6 +5308,7 @@ C identifiers because they contain a @samp{.} character.
 @cindex data
 @cindex section data
 @cindex output section data
+@kindex ASCII (@var{expression}) ``@var{string}''
 @kindex ASCIZ ``@var{string}''
 @kindex BYTE(@var{expression})
 @kindex SHORT(@var{expression})
@@ -5345,14 +5346,27 @@ When the object file format does not have an explicit endianness, as is
 true of, for example, S-records, the value will be stored in the
 endianness of the first input object file.
 
+You can include a fixed size string in an output section by using @code{ASCII}.
+The keyword is followed by a size and a string which is stored at
+the current value of the location counter adding zero bytes at the end.
+
 You can include a zero-terminated string in an output section by using
 @code{ASCIZ}.  The keyword is followed by a string which is stored at
-the current value of the location counter adding a zero byte at the
-end.  If the string includes spaces it must be enclosed in double
-quotes.  The string may contain '\n', '\r', '\t' and octal numbers.
-Hex numbers are not supported.
+the current value of the location counter adding a zero byte at the end.  
 
-For example, this string of 16 characters will create a 17 byte area
+If the string in an @code{ASCIZ} or @code{ASCIZ} command includes spaces
+it must be enclosed in double quotes.
+If the string is too long, a warning is issued and the string is truncated.
+The string can have C escape characters like '\n', '\r', '\t' and octal numbers.
+The '\"' escape is not supported.
+
+Example 1: This is string of 16 characters and will create a 32 byte area
+@smallexample
+  ASCII 32, "This is 16 bytes"
+  ASCII (32) "This is 16 bytes"
+@end smallexample
+
+Example 2: This is a string of 16 characters and will create a 17 byte area
 @smallexample
   ASCIZ "This is 16 bytes"
 @end smallexample
