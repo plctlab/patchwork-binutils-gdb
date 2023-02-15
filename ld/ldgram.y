@@ -91,7 +91,7 @@ static int error_index;
 }
 
 %type <etree> exp opt_exp_with_type mustbe_exp opt_at phdr_type phdr_val
-%type <etree> opt_exp_without_type opt_subalign opt_align
+%type <etree> mustbe_int opt_exp_without_type opt_subalign opt_align
 %type <fill> fill_opt fill_exp
 %type <name_list> exclude_name_list
 %type <wildcard_list> section_name_list
@@ -125,7 +125,7 @@ static int error_index;
 %right UNARY
 %token END
 %left <token> '('
-%token <token> ALIGN_K BLOCK BIND QUAD SQUAD LONG SHORT BYTE ASCIZ
+%token <token> ALIGN_K BLOCK BIND QUAD SQUAD LONG SHORT BYTE ASCII ASCIII ASCIZ
 %token SECTIONS PHDRS INSERT_K AFTER BEFORE
 %token DATA_SEGMENT_ALIGN DATA_SEGMENT_RELRO_END DATA_SEGMENT_END
 %token SORT_BY_NAME SORT_BY_ALIGNMENT SORT_NONE
@@ -668,9 +668,21 @@ statement:
 		{
 		  lang_add_data ((int) $1, $3);
 		}
+	| ASCII '(' mustbe_int ')' NAME
+		{
+		  /* 'value' is a memory leak, do we care? */
+		  etree_type *value = $3;
+		  lang_add_string (value->value.value, $5);
+		}
+	| ASCII mustbe_int ',' NAME
+		{
+		  /* 'value' is a memory leak, do we care? */
+		  etree_type *value = $2;
+		  lang_add_string (value->value.value, $4);
+		}
 	| ASCIZ NAME
 		{
-		  lang_add_string ($2);
+		  lang_add_string (0, $2);
 		}
 	| FILL '(' fill_exp ')'
 		{
@@ -908,6 +920,15 @@ paren_script_name:	{ ldlex_script (); }
 mustbe_exp:		{ ldlex_expression (); }
 		exp
 			{ ldlex_popstate (); $$ = $2; }
+	;
+
+mustbe_int:		{ ldlex_expression (); }
+		INT
+			{ 
+			  etree_type *value = exp_bigintop ($2.integer, $2.str);
+			  ldlex_popstate ();
+			  $$ = value;
+			}
 	;
 
 exp	:
