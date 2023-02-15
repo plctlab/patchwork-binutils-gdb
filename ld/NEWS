@@ -1,5 +1,11 @@
 -*- text -*-
 
+* The linker script syntax has a new command for output sections: 
+  ASCII (<size>) "string" (Alt 1 = Working)
+  ASCII <size>, "string"  (Alt 2 = Not Working)
+  This will reserve a zero filled block of <size> bytes at the current
+  location and insert a zero-terminated string at the beginning of the block.
+
 * The linker script syntax has a new command for output sections: ASCIZ "string"
   This will insert a zero-terminated string at the current location.
 
