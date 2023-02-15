@@ -46,6 +46,9 @@
 #include "plugin.h"
 #endif /* BFD_SUPPORTS_PLUGINS */
 
+/* for ASCII command */
+#define	MAX_STRING	256
+
 #ifndef offsetof
 #define offsetof(TYPE, MEMBER) ((size_t) & (((TYPE*) 0)->MEMBER))
 #endif
@@ -8361,88 +8364,71 @@ lang_add_data (int type, union etree_union *exp)
   new_stmt->type = type;
 }
 
-void
-lang_add_string (const char *s)
+/* Count characters in string, ignoring escape characters */
+bfd_vma charcount(const char *s)
 {
-  bfd_vma  len = strlen (s);
-  bfd_vma  i;
-  bool     escape = false;
+  bfd_vma count = 0;
+  while (1) {
+    char c = *s++;
+    if (c =='\0')
+      {
+	return count;
+      }
+      count++;
+  }
+}
 
-  /* Add byte expressions until end of string.  */
-  for (i = 0 ; i < len; i++)
+void lang_add_string(bfd_vma size, const char *s, ...)
+{
+  bfd_vma len;
+  char string[MAX_STRING];
+
+  /* We allocate enough space for a reasonable buffer */
+  /* If the user specifies a string that does not fit */
+  /* then the user has to split up into several ASCII commands */
+  /* We are a little bit too harsh, since escape chars */
+  /* will reduce the size, but the string should be shortened */
+  bfd_vma alloc_size = charcount(s);
+  if (alloc_size > MAX_STRING-1)
     {
-      char c = *s++;
-
-      if (escape)
-	{
-	  switch (c)
-	    {
-	    default:
-	      /* Ignore the escape.  */
-	      break;
-
-	    case 'n': c = '\n'; break;
-	    case 'r': c = '\r'; break;
-	    case 't': c = '\t'; break;
-	  
-	    case '0':
-	    case '1':
-	    case '2':
-	    case '3':
-	    case '4':
-	    case '5':
-	    case '6':
-	    case '7':
-	      /* We have an octal number.  */
-	      {
-		unsigned int value = c - '0';
-
-		c = *s;
-		if ((c >= '0') && (c <= '7'))
-		  {
-		    value <<= 3;
-		    value += (c - '0');
-		    i++;
-		    s++;
-
-		    c = *s;
-		    if ((c >= '0') && (c <= '7'))
-		      {
-			value <<= 3;
-			value += (c - '0');
-			i++;
-			s++;
-		      }
-		  }
-
-		if (value > 0xff)
-		  {
-		    /* octal: \777 is treated as '\077' + '7' */
-		    value >>= 3;
-		    i--;
-		    s--;
-		  }
-
-		c = value;
-	      }
-	      break;
-	    }
-
-	  lang_add_data (BYTE, exp_intop (c));
-	  escape = false;
-	}
-      else
-	{
-	  if (c == '\\')
-	    escape = true;
-	  else
-	    lang_add_data (BYTE, exp_intop (c));
-	}
+      einfo (_("%X%P: ASCII string maximum size exceeded\n"));
+      return;
     }
 
-  /* Remeber to terminate the string.  */
-  lang_add_data (BYTE, exp_intop (0));
+  memset(string, '\0', MAX_STRING);
+  { /* Evade the -Werror=format-error, if sprintf is called directly */
+    int (*alias)(char *, const char *, ...) = sprintf;
+    alias(string,s);
+  }
+  
+  /* Now we have the actual thing to emit to the object file */
+  len = strlen(string);
+
+  /* Check if it is ASCIZ command (len == 0) */
+  if (size == 0) /* Emit actual length of string + room for '\0' */
+    {
+      size = len + 1;
+    }
+  else if (len > (size - 1))
+    {
+      /* We cannot fit the '\0' at the end */
+      string[size-1] = '\0'; /* truncate string */
+      einfo (_("%P:%pS: warning: ASCII string does not fit in allocated space,"
+               " truncated\n"), NULL);
+    }
+
+  for (bfd_vma i = 0 ; i < size ; i++)
+    {  if (i < len)
+         {
+           lang_add_data (BYTE, exp_intop (string[i]));
+         }
+       else
+         {
+           lang_add_data (BYTE, exp_intop ('\0'));
+         }
+    }
 }
+
 
 /* Create a new reloc statement.  RELOC is the BFD relocation type to
    generate.  HOWTO is the corresponding howto structure (we could
