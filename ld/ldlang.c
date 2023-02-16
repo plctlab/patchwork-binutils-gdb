@@ -42,6 +42,8 @@
 #include "demangle.h"
 #include "hashtab.h"
 #include "elf-bfd.h"
+#include "checksum.h"
+
 #if BFD_SUPPORTS_PLUGINS
 #include "plugin.h"
 #endif /* BFD_SUPPORTS_PLUGINS */
@@ -144,6 +146,11 @@ int lang_statement_iteration = 0;
 
 /* Count times through one_lang_size_sections_pass after mark phase.  */
 static int lang_sizing_iteration = 0;
+
+/* CRC calculation on output section */
+bfd_vma  crc64_poly  = CRC_POLY_64;	/* Default Polynome is CRC64 ECMA */
+bfd_vma *crc64_tab   = NULL;
+bool      crc64_invert= false;
 
 /* Return TRUE if the PATTERN argument is a wildcard pattern.
    Although backslashes are treated specially if a pattern contains
@@ -8522,6 +8529,131 @@ void
 lang_add_attribute (enum statement_enum attribute)
 {
   new_statement (attribute, sizeof (lang_statement_header_type), stat_ptr);
+}
+
+/*
+ * bfd_vma *init_crc64_tab( bfd_vma poly ) ;
+ *
+ * For optimal speed, the CRC64 calculation uses a table with pre-calculated
+ * bit patterns which are used in the XOR operations in the program. This table
+ * is generated on request and is available as a table with constant values.
+ * init_crc64_tab is copyright (c) 2016 Lammert Bies
+ */
+static
+bfd_vma *init_crc64_tab( bfd_vma poly ) {
+
+	bfd_vma i;
+	bfd_vma j;
+	bfd_vma c;
+	bfd_vma crc;
+	bfd_vma *crc_tab;
+
+	crc_tab = malloc(256 * sizeof(bfd_vma));
+	if (crc_tab == NULL)
+		return NULL;
+
+	for (i=0; i<256; i++) {
+
+		crc = 0;
+		c   = i << 56;
+
+		for (j=0; j<8; j++) {
+
+			if ( ( crc ^ c ) & 0x8000000000000000ull ) crc = ( crc << 1 ) ^ poly;
+			else                                       crc =   crc << 1;
+
+			c = c << 1;
+		}
+
+		crc_tab[i] = crc;
+	}
+	return crc_tab;
+
+}  /* init_crc64_tab */
+
+/*
+ * bfd_vma crc_64_ecma( const unsigned char *input_str, size_t num_bytes );
+ *
+ * The function crc_64() calculates in one pass the 64 bit CRC value
+ * for a byte string that is passed to the function together with a parameter
+ * indicating the length.
+ * This is used for CRC64-ECMA and CRC64-ISO
+ * crc_64 is copyright (c) 2016 Lammert Bies
+ */
+
+bfd_vma crc_64(const unsigned char *input_str, size_t num_bytes)
+{
+	bfd_vma crc;
+	const unsigned char *ptr;
+	size_t a;
+	crc = CRC_START_64;
+	ptr = input_str;
+	if ( ptr != NULL ) {
+		for (a=0; a<num_bytes; a++) {
+			crc = (crc << 8) ^ crc64_tab[ ((crc >> 56) ^ (bfd_vma) *ptr++) & 0x00000000000000FFull ];
+		}
+	}
+	return crc;
+}  /* crc_64 */
+
+/*
+ * The function crc_64_inv() calculates in one pass the CRC64 64 bit CRC
+ * value for a byte string that is passed to the function together with a
+ * parameter indicating the length.
+ * This is used for CRC64-WE
+ * crc_64_inv is copyright (c) 2016 Lammert Bies
+ */
+
+bfd_vma crc_64_inv( const unsigned char *input_str, size_t num_bytes ) {
+
+	bfd_vma crc;
+	const unsigned char *ptr;
+	size_t a;
+
+	crc = CRC_START_64_INV;
+	ptr = input_str;
+
+	if ( ptr != NULL ) {
+		for (a=0; a<num_bytes; a++) {
+			crc = (crc << 8) ^ crc64_tab[ ((crc >> 56) ^ (bfd_vma) *ptr++) & 0x00000000000000FFull ];
+		}
+	}
+
+	return crc ^ 0xFFFFFFFFFFFFFFFFull;
+
+}  /* crc_64_inv */
+
+extern void lang_add_crc_syndrome(bool invert, bfd_vma poly)
+{
+  crc64_poly = poly;			/* Set the polynom */
+  crc64_invert = invert;
+  printf("Adding Syndrome: 0x%08lx\n", poly);
+  lang_add_data (QUAD, exp_intop (0));	/* Reserve room for the ECC value */
+  if (crc64_tab == NULL)
+    {
+      crc64_tab = init_crc64_tab(crc64_poly);
+    }
+  else
+    {
+      einfo (_("%P:%pS: warning: CRC polynome declared twice (ignored)\n"), NULL);
+    }
+}
+
+extern void lang_add_crc_table(void)
+{
+  if (crc64_tab == NULL)
+    {
+      crc64_tab = init_crc64_tab(crc64_poly);
+      if (crc64_tab == NULL)
+	{
+	  einfo (_("%F%P: can not allocate memory for CRC table: %E\n"));
+	  return;
+	}
+    }
+  for (bfd_vma i = 0 ; i < 256 ; i++)
+    {
+       lang_add_data (QUAD, exp_intop (crc64_tab[i]));
+    }
 }
 
 void
