@@ -6847,6 +6847,26 @@ lang_symbol_tweaks (void)
     }
 }
 
+static bool symbol_lookup(char *name, bfd_vma *val)
+{
+  struct bfd_link_hash_entry *h;
+  h = bfd_link_hash_lookup (link_info.hash, name,
+			    false, false, true);
+  if (h != NULL)
+    {
+      if ((h->type == bfd_link_hash_defined
+	  || h->type == bfd_link_hash_defweak)
+	 && h->u.def.section->output_section != NULL)
+	{
+	  *val = (h->u.def.value
+	     + bfd_section_vma (h->u.def.section->output_section)
+	     + h->u.def.section->output_offset);
+	  return true;
+	}
+    }
+    return false;
+}
+
 static void
 lang_end (void)
 {
@@ -6953,6 +6973,94 @@ lang_end (void)
 		   entry_symbol.name);
 	}
     }
+
+
+  /* Check if we can calculate CRC64 */
+  /* All of CRC_ADDRESS CRC_START CRC_END must be defined */
+  {
+    bfd_vma crc64, start, end;
+    bool can_do_crc;
+
+    can_do_crc = symbol_lookup(CRC_ADDRESS, &crc64) &&
+		 symbol_lookup(CRC_START, &start)   &&
+		 symbol_lookup(CRC_END, &end);
+    if (can_do_crc)
+      {
+	asection *ts;
+
+	ts = bfd_get_section_by_name (link_info.output_bfd, entry_section);
+	if (ts != NULL) {
+	  bfd_vma text_start = ts->lma;
+	  bfd_vma text_end   = ts->lma + ts->size;
+	  printf("%s: [0x%08lx .. 0x%08lx]\n",
+		ts->name,
+		text_start,
+		text_end);
+	  bool OK =
+	    ((text_start <= crc64) && (crc64 <= text_end)) &&
+	    ((text_start <= start) && (start <= text_end)) &&
+	    ((text_start <= end)   && (end   <= text_end));
+	  if (OK)
+	    {
+	      printf("All the memory to be CRC checked is in the text section\n");
+	       /* allocate twice the size, since we do not know what we are doing */
+	      bfd_vma *text_section = malloc(ts->size * 2);
+	      if (text_section != NULL)
+		{
+		  if ( bfd_get_section_contents (link_info.output_bfd,
+			  ts,
+			  text_section,
+			  0,
+			  ts->size))
+		    {
+		      for (bfd_vma i = 0 ; i < ts->size ; i+=4)
+			{
+			  printf("0x%08lx: 0x%08lx 0x%08lx 0x%08lx 0x%08lx\n",
+				ts->lma + i,
+				text_section[i+0],
+				text_section[i+1],
+				text_section[i+2],
+				text_section[i+3]);
+			}
+		    }
+		  else
+		    {
+		      printf("Could not fetch contents of %s\n", ts->name);
+		    }
+		  free(text_section);
+		}
+	    }
+	}
+	printf("%-20s = 0x%08lx\n",CRC_ADDRESS , crc64);
+	ts = bfd_get_linker_section (link_info.output_bfd, CRC_ADDRESS);
+	if (ts != NULL) {
+	  printf("%s: [0x%08lx .. 0x%08lx]\n",
+		ts->name,
+		ts->lma,
+		ts->lma + ts->size);
+	}
+	printf("%-20s = 0x%08lx\n",CRC_START , start);
+	ts = bfd_get_linker_section (link_info.output_bfd, CRC_START);
+	if (ts != NULL) {
+	  printf("%s: [0x%08lx .. 0x%08lx]\n",
+		ts->name,
+		ts->lma,
+		ts->lma + ts->size);
+	}
+	printf("%-20s = 0x%08lx\n",CRC_END , end);
+	ts = bfd_get_linker_section (link_info.output_bfd, CRC_END);
+	if (ts != NULL) {
+	  printf("%s: [0x%08lx .. 0x%08lx]\n",
+		ts->name,
+		ts->lma,
+		ts->lma + ts->size);
+	}
+      }
+    else
+      {
+	printf("%-20s not found\n", CRC_ADDRESS);
+      }
+  }
 }
 
 /* This is a small function used when we want to ignore errors from
