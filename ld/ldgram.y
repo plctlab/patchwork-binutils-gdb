@@ -41,6 +41,7 @@
 #include "mri.h"
 #include "ldctor.h"
 #include "ldlex.h"
+#include "checksum.h"
 
 #ifndef YYDEBUG
 #define YYDEBUG 1
@@ -130,6 +131,8 @@ static int error_index;
 %token DATA_SEGMENT_ALIGN DATA_SEGMENT_RELRO_END DATA_SEGMENT_END
 %token SORT_BY_NAME SORT_BY_ALIGNMENT SORT_NONE
 %token SORT_BY_INIT_PRIORITY
+%token CRC64 ECMA ISO POLY POLYI TABLE
+%token DEBUG ON OFF
 %token '{' '}'
 %token SIZEOF_HEADERS OUTPUT_FORMAT FORCE_COMMON_ALLOCATION OUTPUT_ARCH
 %token INHIBIT_COMMON_ALLOCATION FORCE_GROUP_ALLOCATION
@@ -675,6 +678,53 @@ statement:
 	| FILL '(' fill_exp ')'
 		{
 		  lang_add_fill ($3);
+		}
+	| DEBUG ON
+		{
+			yydebug = 1;
+		}
+	| DEBUG OFF
+		{
+			yydebug = 0;
+		}
+
+	| CRC64 ECMA '(' mustbe_exp ',' mustbe_exp ')'
+		{
+		  etree_type *DOT = exp_nameop (NAME,".");
+		  lang_add_assignment (exp_assign (CRC_ADDRESS, DOT, false));
+		  lang_add_crc_syndrome(false, CRC_POLY_64);
+		  lang_add_assignment (exp_assign (CRC_START, $4, false));
+		  lang_add_assignment (exp_assign (CRC_END,   $6, false));
+		}
+	| CRC64 ISO '(' mustbe_exp ',' mustbe_exp ')'
+		{
+		  etree_type *DOT = exp_nameop (NAME,".");
+		  lang_add_assignment (exp_assign (CRC_ADDRESS, DOT, false));
+		  lang_add_crc_syndrome(false, CRC_POLY_64_ISO);
+		  lang_add_assignment (exp_assign (CRC_START, $4, false));
+		  lang_add_assignment (exp_assign (CRC_END,   $6, false));
+		}
+	| CRC64 POLY '[' mustbe_exp ']'  '(' mustbe_exp ',' mustbe_exp ')'
+		{
+		  etree_type *DOT = exp_nameop (NAME,".");
+		  lang_add_assignment (exp_assign (CRC_ADDRESS, DOT, false));
+		  etree_type *value = $4;
+		  lang_add_crc_syndrome(false, value->value.value);
+		  lang_add_assignment (exp_assign (CRC_START, $7, false));
+		  lang_add_assignment (exp_assign (CRC_END,   $9, false));
+		}
+	| CRC64 POLYI '[' mustbe_exp ']'  '(' mustbe_exp ',' mustbe_exp ')'
+		{
+		  etree_type *DOT = exp_nameop (NAME,".");
+		  lang_add_assignment (exp_assign (CRC_ADDRESS, DOT, false));
+		  etree_type *value = $4;
+		  lang_add_crc_syndrome(true, value->value.value);
+		  lang_add_assignment (exp_assign (CRC_START, $7, false));
+		  lang_add_assignment (exp_assign (CRC_END,   $9, false));
+		}
+	| CRC64 TABLE
+		{
+			lang_add_crc_table();
 		}
 	| ASSERT_K
 		{ ldlex_expression (); }
