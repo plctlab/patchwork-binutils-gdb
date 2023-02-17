@@ -871,6 +871,143 @@ add_keepsyms_file (const char *filename)
   link_info.strip = strip_some;
   fclose (file);
 }
+
+/* Turn a string into an argvec.  */
+
+static char **
+str2vec (char *in)
+{
+  char **res;
+  char *s, *first, *end;
+  char *sq, *dq;
+  int i;
+
+  end = in + strlen (in);
+  s = in;
+  while (ISSPACE (*s)) s++;
+  first = s;
+
+  i = 1;
+  while ((s = strchr (s, ' ')))
+    {
+      s++;
+      i++;
+    }
+  res = (char **)xmalloc ((i+1) * sizeof (char *));
+  if (!res)
+    return res;
+
+  i = 0;
+  sq = NULL;
+  dq = NULL;
+  res[0] = first;
+  for (s = first; *s; s++)
+    {
+      if (*s == '\\')
+	{
+	  memmove (s, s+1, end-s-1);
+	  end--;
+	}
+      if (ISSPACE (*s))
+	{
+	  if (sq || dq)
+	    continue;
+	  *s++ = '\0';
+	  while (ISSPACE (*s)) s++;
+	  if (*s)
+	    res[++i] = s;
+	}
+      if (*s == '\'' && !dq)
+	{
+	  if (sq)
+	    {
+	      memmove (sq, sq+1, s-sq-1);
+	      memmove (s-2, s+1, end-s-1);
+	      end -= 2;
+	      s--;
+	      sq = NULL;
+	    }
+	  else
+	    {
+	      sq = s;
+	    }
+	}
+      if (*s == '"' && !sq)
+	{
+	  if (dq)
+	    {
+	      memmove (dq, dq+1, s-dq-1);
+	      memmove (s-2, s+1, end-s-1);
+	      end -= 2;
+	      s--;
+	      dq = NULL;
+	    }
+	  else
+	    {
+	      dq = s;
+	    }
+	}
+    }
+  res[++i] = NULL;
+  return res;
+}
+
+#define LIBDEPS "__.LIBDEP"
+
+/* Check if ARCHIVE has a '__.LIBDEP' member and if so interpret its
+   content as linker command line arguments (only -L and -l are accepted).
+   The special member is expected amongst the first few.  */
+
+static void
+check_archive_deps (bfd *archive)
+{
+  int count = 3;
+  bfd *member;
+
+  if (bfd_is_thin_archive (archive))
+    return;
+
+  /* We look for the magic member only in the first few archive
+     members.  */
+  member = bfd_openr_next_archived_file (archive, NULL);
+  while (member != NULL && count--)
+    {
+      ufile_ptr memsize = bfd_get_file_size (member);
+      if (memsize
+	  && !strcmp (bfd_get_filename (member), LIBDEPS))
+	{
+	  char *buf = (char *) xmalloc (memsize);
+	  if (buf
+	      && bfd_seek (member, (file_ptr) 0, SEEK_SET) == 0
+	      && bfd_bread (buf, memsize, member) == memsize)
+	    {
+	      char **vec;
+	      vec = str2vec (buf);
+	      if (vec)
+		{
+		  int i;
+		  for (i = 0; vec[i]; i++)
+		    {
+		      if (vec[i][0] != '-')
+			einfo ("ignoring libdep argument %s", vec[i]);
+		      else if (vec[i][1] == 'l')
+			lang_add_input_file (xstrdup (vec[i]+2),
+					     lang_input_file_is_l_enum,
+					     NULL);
+		      else if (vec[i][1] == 'L')
+			ldfile_add_library_path (vec[i]+2, false);
+		      else
+			einfo ("ignoring libdep argument %s", vec[i]);
+		    }
+		  free (vec);
+		}
+	    }
+	  free (buf);
+	  break;
+	}
+      member = bfd_openr_next_archived_file (archive, member);
+    }
+}
 
 /* Callbacks from the BFD linker routines.  */
 
@@ -936,7 +1073,12 @@ add_archive_element (struct bfd_link_info *info,
      from the archive.  See ldlang.c:find_rescan_insertion.  */
   parent = bfd_usrdata (abfd->my_archive);
   if (parent != NULL && !parent->flags.reload)
-    parent->next = input;
+    {
+      if (!parent->next)
+	/* The first time we see an archive use we check for dependencies.  */
+	check_archive_deps (abfd->my_archive);
+      parent->next = input;
+    }
 
   ldlang_add_file (input);
 
