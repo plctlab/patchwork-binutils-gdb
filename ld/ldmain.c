@@ -527,6 +527,7 @@ main (int argc, char **argv)
 
   ldwrite ();
 
+  lang_generate_crc();		/* Calculate and store CRC on request */
   if (config.map_file != NULL)
     lang_map ();
   if (command_line.cref)
