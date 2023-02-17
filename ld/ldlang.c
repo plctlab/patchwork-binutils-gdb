@@ -18,6 +18,8 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
+#define	DEBUG_CRC	1
+
 #include "sysdep.h"
 #include <limits.h>
 #include "bfd.h"
@@ -42,6 +44,8 @@
 #include "demangle.h"
 #include "hashtab.h"
 #include "elf-bfd.h"
+#include "checksum.h"
+
 #if BFD_SUPPORTS_PLUGINS
 #include "plugin.h"
 #endif /* BFD_SUPPORTS_PLUGINS */
@@ -144,6 +148,11 @@ int lang_statement_iteration = 0;
 
 /* Count times through one_lang_size_sections_pass after mark phase.  */
 static int lang_sizing_iteration = 0;
+
+/* CRC calculation on output section */
+bfd_vma  crc64_poly   = CRC_POLY_64;	/* Default Polynome is CRC64 ECMA */
+bfd_vma *crc64_tab    = NULL;
+bool     crc64_invert = false;
 
 /* Return TRUE if the PATTERN argument is a wildcard pattern.
    Although backslashes are treated specially if a pattern contains
@@ -8389,7 +8398,7 @@ convert_string (const char * s)
 	    case 'n': c = '\n'; break;
 	    case 'r': c = '\r'; break;
 	    case 't': c = '\t'; break;
-	  
+
 	    case '0':
 	    case '1':
 	    case '2':
@@ -8409,7 +8418,7 @@ convert_string (const char * s)
 		    value += (c - '0');
 		    i++;
 		    s++;
- 
+
 		    c = *s;
 		    if ((c >= '0') && (c <= '7'))
 		      {
@@ -8427,7 +8436,7 @@ convert_string (const char * s)
 		    i--;
 		    s--;
 		  }
-		
+
 		c = value;
 	      }
 	      break;
@@ -8522,6 +8531,307 @@ void
 lang_add_attribute (enum statement_enum attribute)
 {
   new_statement (attribute, sizeof (lang_statement_header_type), stat_ptr);
+}
+
+/*
+ * bfd_vma *init_crc64_tab( bfd_vma poly ) ;
+ *
+ * For optimal speed, the CRC64 calculation uses a table with pre-calculated
+ * bit patterns which are used in the XOR operations in the program.
+ * init_crc64_tab is copyright (c) 2016 Lammert Bies
+ */
+static
+bfd_vma *init_crc64_tab( bfd_vma poly )
+{
+  bfd_vma i;
+  bfd_vma j;
+  bfd_vma c;
+  bfd_vma crc;
+  bfd_vma *crc_tab;
+
+  crc_tab = malloc(256 * sizeof(bfd_vma));
+  if (crc_tab == NULL)
+    return NULL;
+
+  for (i=0; i<256; i++)
+    {
+      crc = 0;
+      c   = i << 56;
+      for (j=0; j<8; j++)
+	{
+	  if ( ( crc ^ c ) & 0x8000000000000000ull )
+	    crc = ( crc << 1 ) ^ poly;
+	  else
+	    crc =   crc << 1;
+	  c = c << 1;
+	}
+	crc_tab[i] = crc;
+    }
+  return crc_tab;
+
+}  /* init_crc64_tab */
+
+/*
+ * The function crc_64_inv() calculates in one pass the CRC64 64 bit CRC
+ * value for a byte string that is passed to the function together with a
+ * parameter indicating the length.
+ * This is used for CRC64-WE
+ * crc_64_inv is copyright (c) 2016 Lammert Bies
+ */
+
+bfd_vma crc_64_inv( const unsigned char *input_str, size_t num_bytes )
+{
+  bfd_vma crc;
+  const unsigned char *ptr;
+  size_t a;
+
+  crc = CRC_START_64_INV;
+  ptr = input_str;
+
+  if ( ptr != NULL )
+    {
+      for (a=0; a<num_bytes; a++)
+	{
+	  crc = (crc << 8) ^
+		crc64_tab[
+		  ((crc >> 56) ^ (bfd_vma) *ptr++) &
+		  0x00000000000000FFull
+		  ];
+	}
+    }
+  return crc ^ 0xFFFFFFFFFFFFFFFFull;
+}  /* crc_64_inv */
+
+/*
+ * bfd_vma crc_64( const unsigned char *input_str, size_t num_bytes );
+ *
+ * The function crc_64() calculates in one pass the 64 bit CRC value
+ * for a byte string that is passed to the function together with a
+ * parameter indicating the length.
+ * This is used for CRC64-ECMA and CRC64-ISO
+ * crc_64 is copyright (c) 2016 Lammert Bies
+ */
+
+bfd_vma crc_64(const unsigned char *input_str, size_t num_bytes)
+{
+  bfd_vma crc;
+  const unsigned char *ptr;
+  size_t a;
+  if (crc64_invert)
+    return crc_64_inv(input_str, num_bytes);
+  crc = CRC_START_64;
+  ptr = input_str;
+  if ( ptr != NULL )
+    {
+      for (a=0; a<num_bytes; a++)
+	{
+	  crc = (crc << 8) ^
+	  crc64_tab[
+	    ((crc >> 56) ^ (bfd_vma) *ptr++) &
+	    0x00000000000000FFull
+	    ];
+	}
+    }
+  return crc;
+}  /* crc_64 */
+
+extern void lang_add_crc_syndrome(bool invert, bfd_vma poly)
+{
+  crc64_poly = poly;      /* Set the polynom */
+  crc64_invert = invert;
+#if (DEBUG_CRC == 1)
+  printf("Adding Syndrome: 0x%08lx\n", poly);
+#endif
+  lang_add_data (QUAD, exp_intop (0));  /* Reserve room for the ECC value */
+  if (crc64_tab == NULL)
+    {
+      crc64_tab = init_crc64_tab(crc64_poly);
+    }
+  else
+    {
+      einfo (_("%P:%pS: warning: CRC polynome declared twice (ignored)\n"),
+		NULL);
+    }
+}
+
+extern void lang_add_crc_table(void)
+{
+  if (crc64_tab == NULL)
+    {
+      crc64_tab = init_crc64_tab(crc64_poly);
+      if (crc64_tab == NULL)
+	{
+	   einfo (_("%F%P: can not allocate memory for CRC table: %E\n"));
+	   return;
+	}
+    }
+  for (bfd_vma i = 0 ; i < 256 ; i++)
+    {
+       lang_add_data (QUAD, exp_intop (crc64_tab[i]));
+    }
+}
+
+static bool symbol_lookup(char *name, bfd_vma *val)
+{
+  struct bfd_link_hash_entry *h;
+  h = bfd_link_hash_lookup (link_info.hash, name, false, false, true);
+  if (h != NULL)
+    {
+      if (
+	  (
+	    (h->type == bfd_link_hash_defined) ||
+	    (h->type == bfd_link_hash_defweak)
+	  ) &&
+	  (h->u.def.section->output_section != NULL)
+	 )
+	{
+	  *val = (h->u.def.value
+		 + bfd_section_vma (h->u.def.section->output_section)
+		 + h->u.def.section->output_offset);
+	  return true;
+	}
+    }
+    return false;
+}
+
+#if (DEBUG_CRC == 1)
+static void output_hex(char *prompt, unsigned char *section,
+  bfd_vma address, bfd_vma sz)
+{
+  bfd_vma *vma_section  = (bfd_vma *) section;
+  bfd_vma size = (sz)/sizeof(bfd_vma);
+  printf("%s:\n", prompt);
+  for (bfd_vma i = 0 ; i < size ; i+=8)
+    {
+      printf("0x%08lx: 0x%016lx 0x%016lx 0x%016lx 0x%016lx\n",
+	address + (i*sizeof(bfd_vma)),
+	vma_section[i+0],
+	vma_section[i+1],
+	vma_section[i+2],
+	vma_section[i+3]);
+    }
+}
+#endif
+
+void lang_generate_crc(void)
+{
+  bfd_vma crc64, start, end;
+  bfd_vma crc;
+  bool can_do_crc;
+  bool crc_in_section;
+  asection *ts;
+  unsigned char *text_section = NULL;
+
+  /* These symbols must be present, for CRC to be generated */
+  /* They are all defined in the CRC <syndrome> statement
+   * If the user defines them without the CRC <syndrome>
+   * the ECMA algorithm will be used.
+   * Should we consider using symbols which cannot be parsed by the linker?
+   * I.E. CRC-64 is never an identifier
+   */
+  can_do_crc =  symbol_lookup(CRC_ADDRESS,  &crc64) &&
+    symbol_lookup(CRC_START,  &start) &&
+    symbol_lookup(CRC_END,    &end);
+
+  if (!can_do_crc)
+    return;
+
+  /*
+   * Get the '.text' section
+   * Is there a risk that CRC needs to be calculated on more than .text?
+   * We do not support that...
+   */
+  ts = bfd_get_section_by_name (link_info.output_bfd, entry_section);
+  if (ts == NULL)
+    einfo (_("%P:%pS: Cannot retrieve '.text' section\n"), NULL);
+
+  bfd_vma text_start = ts->lma;
+  bfd_vma text_end   = ts->lma + ts->size;
+
+#if (DEBUG_CRC == 1)
+  printf("%s: [0x%08lx .. 0x%08lx]\n",
+	      ts->name,
+	      text_start,
+	      text_end);
+#endif
+
+  crc_in_section =
+    ((text_start <= crc64) && (crc64 <= text_end)) &&
+    ((text_start <= start) && (start <= text_end)) &&
+    ((text_start <= end)   && (end   <= text_end));
+
+  if (!crc_in_section)
+    {
+      einfo (_("%P:%pS: warning: CRC area outside the '.text' section\n"
+	       "CRC generation aborted\n"), NULL);
+      /*
+       * Maybe we should printout the text section start and end
+       * as well as the boundaries of the CRC check area.
+       */
+      return;
+    }
+
+  /* Get the contents of the '.text' area so we can calculate the CRC */
+  if (!bfd_malloc_and_get_section(link_info.output_bfd,
+	ts->output_section,
+	(bfd_byte **) &text_section))
+    {
+      einfo (_("%P:%pS: warning: '.text' section contents unavailable\n"
+	       "CRC generation aborted\n"), NULL);
+      return;
+    }
+
+#if (DEBUG_CRC == 1)
+  output_hex("Before CRC", text_section, ts->vma, 64);
+#endif
+
+  /* Calculate and set the CRC */
+  {
+    /*
+     * The '.text' area does not neccessarily start at 0x0000,
+     * so we have to shift the indices.
+     */
+    bfd_vma _crc64 = crc64 - ts->vma;
+    bfd_vma _start = start - ts->vma;
+    bfd_vma _end   = end   - ts->vma;
+
+    /* This is the CRC calculation which we worked so hard for */
+    crc = crc_64(&text_section[_start] , _end - _start);
+
+    /*
+     * The '.text' contents are no longer needed.
+     * It is but a copy of the contents, and will therefore be stale
+     * after we updated the CRC.
+     * Remove it, before we try to set the CRC, to simplify the code logic.
+     */
+    free(text_section);
+
+    /* Set the 64-bit CRC64 at CRC_ADDRESS */
+    if (!bfd_set_section_contents(link_info.output_bfd,
+	ts->output_section,
+	&crc,
+	_crc64,
+	sizeof(bfd_vma)))
+      {
+	einfo (_("%P:%pS: warning: updating CRC failed\n"
+		 "CRC generation aborted\n"), NULL);
+	return;
+      }
+  }
+
+#if (DEBUG_CRC == 1)
+  printf("CRC [0x%016lx] update at 0x%08lx succeeded\n", crc, crc64);
+
+  /* In order to see the updated contents, we have to it them again */
+  if (bfd_malloc_and_get_section(link_info.output_bfd,
+	  ts->output_section,
+	  (bfd_byte **) &text_section))
+    {
+      output_hex("After CRC", text_section, ts->vma, 64);
+      output_hex("Full Section After CRC", text_section, ts->vma, ts->size);
+      free(text_section);
+    }
+#endif
 }
 
 void
