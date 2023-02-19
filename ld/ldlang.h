@@ -632,6 +632,18 @@ extern lang_output_section_statement_type *lang_output_section_statement_lookup
   (const char *, int, int);
 extern lang_output_section_statement_type *next_matching_output_section_statement
   (lang_output_section_statement_type *, int);
+extern void lang_add_crc32_syndrome
+  (bool, bfd_vma);
+extern void lang_add_crc32_table
+  (void);
+extern void lang_add_crc64_syndrome
+  (bool, bfd_vma);
+extern void lang_add_crc64_table
+  (void);
+extern void lang_add_timestamp
+  (void);
+extern void lang_generate_crc
+  (void);
 extern void ldlang_add_undef
   (const char *const, bool);
 extern void ldlang_add_require_defined

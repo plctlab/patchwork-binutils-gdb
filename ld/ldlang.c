@@ -18,8 +18,11 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
+#define	DEBUG_CRC	0
+
 #include "sysdep.h"
 #include <limits.h>
+#include <time.h>
 #include "bfd.h"
 #include "libiberty.h"
 #include "filenames.h"
@@ -42,6 +45,8 @@
 #include "demangle.h"
 #include "hashtab.h"
 #include "elf-bfd.h"
+#include "checksum.h"
+
 #if BFD_SUPPORTS_PLUGINS
 #include "plugin.h"
 #endif /* BFD_SUPPORTS_PLUGINS */
@@ -144,6 +149,25 @@ int lang_statement_iteration = 0;
 
 /* Count times through one_lang_size_sections_pass after mark phase.  */
 static int lang_sizing_iteration = 0;
+
+/* CRC calculation on output section */
+asection *text_section;
+unsigned char *text_contents = NULL;
+
+enum crc_alg crc_algo = crc_algo_none;
+bfd_vma  crc_size     = 0;		/* Size of syndrome */
+bool     crc_invert   = false;
+
+bfd_vma  crc64_poly   = CRC_POLY_64;	/* Default Polynome is CRC64 ECMA */
+bfd_vma *crc64_tab    = NULL;
+
+uint32_t crc32_poly   = CRC_POLY_32;	/* Default Polynome is CRC-32 */
+bool     crc32_invert = true;
+uint32_t *crc32_tab   = NULL;
+
+char *CRC_ADDRESS     = NULL;
+char *CRC_START       = NULL;
+char *CRC_END         = NULL;
 
 /* Return TRUE if the PATTERN argument is a wildcard pattern.
    Although backslashes are treated specially if a pattern contains
@@ -8389,7 +8413,7 @@ convert_string (const char * s)
 	    case 'n': c = '\n'; break;
 	    case 'r': c = '\r'; break;
 	    case 't': c = '\t'; break;
-	  
+
 	    case '0':
 	    case '1':
 	    case '2':
@@ -8409,7 +8433,7 @@ convert_string (const char * s)
 		    value += (c - '0');
 		    i++;
 		    s++;
- 
+
 		    c = *s;
 		    if ((c >= '0') && (c <= '7'))
 		      {
@@ -8427,7 +8451,7 @@ convert_string (const char * s)
 		    i--;
 		    s--;
 		  }
-		
+
 		c = value;
 	      }
 	      break;
@@ -8523,6 +8547,624 @@ lang_add_attribute (enum statement_enum attribute)
 {
   new_statement (attribute, sizeof (lang_statement_header_type), stat_ptr);
 }
+
+/* ============ CRC-32 LIBCRC functions ======================================*/
+
+/*
+ * void init_crc32_tab( void );
+ *
+ * For optimal speed, the CRC32 calculation uses a table with pre-calculated
+ * bit patterns which are used in the XOR operations in the program.
+ * init_crc32_tab is copyright (c) 2016 Lammert Bies
+ */
+static
+uint32_t *init_crc32_tab( uint32_t poly )
+{
+  uint32_t i;
+  uint32_t j;
+  uint32_t crc;
+  uint32_t *crc_tab;
+
+  crc_tab = malloc(256 * sizeof(uint32_t));
+  if (crc_tab == NULL)
+    return NULL;
+
+  for (i=0; i<256; i++)
+    {
+
+      crc = i;
+
+      for (j=0; j<8; j++)
+	{
+
+	  if ( crc & 0x00000001L )
+	    {
+	      crc = ( crc >> 1 ) ^ poly;
+	    }
+	  else
+	    {
+	      crc =   crc >> 1;
+	    }
+	}
+
+      crc_tab[i] = crc;
+    }
+  return crc_tab;
+}  /* init_crc32_tab */
+
+/*
+ * uint32_t calc_crc32_inv( const unsigned char *input_str, size_t num_bytes );
+ *
+ * The function calc_crc32_inv() calculates in one pass the common 32 bit CRC value for
+ * a byte string that is passed to the function together with a parameter
+ * indicating the length.
+ */
+static
+uint32_t calc_crc32_inv( const unsigned char *input_str, size_t num_bytes )
+{
+  uint32_t crc;
+  const unsigned char *ptr;
+  size_t a;
+
+  crc = CRC_START_32_INV;
+  ptr = input_str;
+
+  if ( ptr != NULL )
+    {
+      for (a=0; a<num_bytes; a++)
+	{
+	  crc = (crc >> 8) ^
+		crc32_tab[(crc ^ (uint32_t) *ptr++) & 0x000000FFul ];
+	}
+    }
+
+  return (crc ^ 0xFFFFFFFFul);
+
+}  /* calc_crc32_inv */
+
+/*
+ * uint32_t calc_crc32( const unsigned char *input_str, size_t num_bytes );
+ *
+ * The function calc_crc32() calculates in one pass the common 32 bit CRC value for
+ * a byte string that is passed to the function together with a parameter
+ * indicating the length.
+ */
+static
+uint32_t calc_crc32( const unsigned char *input_str, size_t num_bytes )
+{
+  uint32_t crc;
+  const unsigned char *ptr;
+  size_t a;
+  if (crc_invert)
+    return calc_crc32_inv(input_str, num_bytes);
+
+  crc = 0;
+  ptr = input_str;
+
+  if ( ptr != NULL )
+    {
+      for (a=0; a<num_bytes; a++)
+	{
+	  crc = (crc >> 8) ^
+		crc32_tab[(crc ^ (uint32_t) *ptr++) & 0x000000FFul ];
+	}
+    }
+
+  return (crc);
+
+}  /* calc_crc32 */
+
+/* ============ CRC-32 public functions ======================================*/
+
+extern void lang_add_crc32_syndrome(bool invert, bfd_vma poly)
+{
+
+  if (crc_algo == crc_algo_none) /* We only allow one CRC64 <polynom> */
+    {
+      crc_algo     = crc_algo_32;
+      crc_size     = sizeof(uint32_t);
+      crc32_invert = invert;
+      crc32_poly   = (uint32_t) (poly & 0xFFFFFFFF); /* Set the polynom */
+      CRC_ADDRESS  = CRC32_ADDRESS;
+      CRC_START    = CRC32_START;
+      CRC_END      = CRC32_END;
+
+#if (DEBUG_CRC == 1)
+      printf("Adding Syndrome: 0x%08lx\n", poly);
+#endif
+      lang_add_data (LONG, exp_intop (0));  /* Reserve room for the ECC value */
+      crc32_tab = init_crc32_tab(crc32_poly);
+      if (crc32_tab == NULL)
+	{
+	   einfo (_("%F%P: can not allocate memory for CRC table: %E\n"));
+	   return;
+	}
+    }
+  else
+    {
+      einfo (_("%P:%pS: warning: Only the first CRC polynome is used\n"),
+		NULL);
+    }
+}
+
+extern void lang_add_crc32_table(void)
+{
+  uint32_t *crc32_table = crc32_tab; /* Use a precomputed, if it exists */
+  bool      local_table = false;
+  if (crc32_table == NULL)
+    { /* No luck, create a table */
+      crc32_table = init_crc32_tab(crc32_poly);
+      if (crc32_table == NULL)
+	{
+	   einfo (_("%F%P: can not allocate memory for CRC table: %E\n"));
+	   return;
+	}
+      local_table = true;
+    }
+  for (bfd_vma i = 0 ; i < 256 ; i++)
+    {
+       lang_add_data (LONG, exp_intop (crc32_table[i]));
+    }
+  if (local_table)
+    free(crc32_table);
+}
+
+/* ============ CRC-64 LIBCRC functions ======================================*/
+
+/*
+ * bfd_vma *init_crc64_tab( bfd_vma poly ) ;
+ *
+ * For optimal speed, the CRC64 calculation uses a table with pre-calculated
+ * bit patterns which are used in the XOR operations in the program.
+ * init_crc64_tab is copyright (c) 2016 Lammert Bies
+ */
+static
+bfd_vma *init_crc64_tab( bfd_vma poly )
+{
+  bfd_vma i;
+  bfd_vma j;
+  bfd_vma c;
+  bfd_vma crc;
+  bfd_vma *crc_tab;
+
+  crc_tab = malloc(256 * sizeof(bfd_vma));
+  if (crc_tab == NULL)
+    return NULL;
+
+  for (i=0; i<256; i++)
+    {
+      crc = 0;
+      c   = i << 56;
+      for (j=0; j<8; j++)
+	{
+	  if ( ( crc ^ c ) & 0x8000000000000000ull )
+	    crc = ( crc << 1 ) ^ poly;
+	  else
+	    crc =   crc << 1;
+	  c = c << 1;
+	}
+	crc_tab[i] = crc;
+    }
+  return crc_tab;
+
+}  /* init_crc64_tab */
+
+/*
+ * The function calc_crc64_inv() calculates in one pass the CRC64 64 bit CRC
+ * value for a byte string that is passed to the function together with a
+ * parameter indicating the length.
+ * This is used for CRC64-WE
+ * calc_crc64_inv is copyright (c) 2016 Lammert Bies
+ */
+static
+bfd_vma calc_crc64_inv( const unsigned char *input_str, size_t num_bytes )
+{
+  bfd_vma crc;
+  const unsigned char *ptr;
+  size_t a;
+
+  crc = CRC_START_64_INV;
+  ptr = input_str;
+
+  if ( ptr != NULL )
+    {
+      for (a=0; a<num_bytes; a++)
+	{
+	  crc = (crc << 8) ^
+		crc64_tab[
+		  ((crc >> 56) ^ (bfd_vma) *ptr++) &
+		  0x00000000000000FFull
+		  ];
+	}
+    }
+  return crc ^ 0xFFFFFFFFFFFFFFFFull;
+}  /* calc_crc64_inv */
+
+/*
+ * bfd_vma calc_crc64( const unsigned char *input_str, size_t num_bytes );
+ *
+ * The function calc_crc64() calculates in one pass the 64 bit CRC value
+ * for a byte string that is passed to the function together with a
+ * parameter indicating the length.
+ * This is used for CRC64-ECMA and CRC64-ISO
+ * calc_crc64 is copyright (c) 2016 Lammert Bies
+ */
+static
+bfd_vma calc_crc64(const unsigned char *input_str, size_t num_bytes)
+{
+  bfd_vma crc;
+  const unsigned char *ptr;
+  size_t a;
+  if (crc_invert)
+    return calc_crc64_inv(input_str, num_bytes);
+  crc = CRC_START_64;
+  ptr = input_str;
+  if ( ptr != NULL )
+    {
+      for (a=0; a<num_bytes; a++)
+	{
+	  crc = (crc << 8) ^
+	  crc64_tab[
+	    ((crc >> 56) ^ (bfd_vma) *ptr++) &
+	    0x00000000000000FFull
+	    ];
+	}
+    }
+  return crc;
+}  /* calc_crc64 */
+
+/* ============ CRC-64 public functions ======================================*/
+
+extern void lang_add_crc64_syndrome(bool invert, bfd_vma poly)
+{
+
+  if (crc_algo == crc_algo_none) /* We only allow one CRC64 <polynom> */
+    {
+      crc_algo    = crc_algo_64;
+      crc_size    = sizeof(bfd_vma);
+      crc_invert  = invert;
+      crc64_poly  = poly;      /* Set the polynom */
+      CRC_ADDRESS = CRC64_ADDRESS;
+      CRC_START   = CRC64_START;
+      CRC_END     = CRC64_END;
+
+#if (DEBUG_CRC == 1)
+      printf("Adding Syndrome: 0x%08lx\n", poly);
+#endif
+      lang_add_data (QUAD, exp_intop (0));  /* Reserve room for the ECC value */
+      crc64_tab = init_crc64_tab(crc64_poly);
+      if (crc64_tab == NULL)
+	{
+	   einfo (_("%F%P: can not allocate memory for CRC table: %E\n"));
+	   return;
+	}
+    }
+  else
+    {
+      einfo (_("%P:%pS: warning: Only the first CRC polynome is used\n"),
+		NULL);
+    }
+}
+
+extern void lang_add_crc64_table(void)
+{
+  bfd_vma *crc64_table = crc64_tab; /* Use a precomputed, if it exists */
+  bool     local_table = false;
+  if (crc64_table == NULL)
+    { /* No luck, create a table */
+      crc64_table = init_crc64_tab(crc64_poly);
+      if (crc64_table == NULL)
+	{
+	   einfo (_("%F%P: can not allocate memory for CRC table: %E\n"));
+	   return;
+	}
+      local_table = true;
+    }
+  for (bfd_vma i = 0 ; i < 256 ; i++)
+    {
+       lang_add_data (QUAD, exp_intop (crc64_table[i]));
+    }
+  if (local_table)
+    free(crc64_table);
+}
+
+/* ============ Access functions for inserting checksum in text section=======*/
+static
+bool get_text_section_contents(void)
+{
+  /*
+   * Get the '.text' section
+   * Is there a risk that CRC needs to be calculated on more than .text?
+   * We do not support that...
+   */
+  text_section = bfd_get_section_by_name (link_info.output_bfd, entry_section);
+  if (text_section == NULL)
+    {
+      einfo (_("%P:%pS: Cannot retrieve '.text' section for CRC calc\n"), NULL);
+      return false;
+    }
+
+  /* Get the contents of the '.text' area so we can calculate the CRC */
+  if (!bfd_malloc_and_get_section(link_info.output_bfd,
+	text_section->output_section,
+	(bfd_byte **) &text_contents))
+    {
+      einfo (_("%P:%pS: warning: '.text' section contents unavailable\n"
+	       "CRC generation aborted\n"), NULL);
+      return false;
+    }
+
+#if (DEBUG_CRC == 1)
+  printf("%s: [0x%08lx .. 0x%08lx]\n",
+	      text_section->name,
+	      text_section->lma,
+	      text_section->lma + text_section->size -1);
+#endif
+  return true;
+}
+
+/* Set variable in the '.text' area */
+static
+bool set_crc_checksum(bfd_vma crc, bfd_vma addr, bfd_vma size)
+{
+    if (!bfd_set_section_contents(link_info.output_bfd,
+	text_section->output_section,
+	&crc,
+	addr,
+	size))
+      {
+	einfo (_("%P:%pS: warning: updating CRC failed\n"
+		 "CRC generation aborted\n"), NULL);
+	return false;
+      }
+  return true;
+}
+
+static bool symbol_lookup(char *name, bfd_vma *val)
+{
+  struct bfd_link_hash_entry *h;
+  *val = 0ull;
+  h = bfd_link_hash_lookup (link_info.hash, name, false, false, true);
+  if (h != NULL)
+    {
+      if (
+	  (
+	    (h->type == bfd_link_hash_defined) ||
+	    (h->type == bfd_link_hash_defweak)
+	  ) &&
+	  (h->u.def.section->output_section != NULL)
+	 )
+	{
+	  *val = (h->u.def.value
+		 + bfd_section_vma (h->u.def.section->output_section)
+		 + h->u.def.section->output_offset);
+	  return true;
+	}
+    }
+    return false;
+}
+
+/* ============ CRC DEBUG functions ==========================================*/
+
+#if (DEBUG_CRC == 1)
+static void debug_hex(char *prompt, unsigned char *section,
+  bfd_vma address, bfd_vma sz)
+{
+  bfd_vma *vma_section  = (bfd_vma *) section;
+  bfd_vma size = (sz)/sizeof(bfd_vma);
+  printf("%s:\n", prompt);
+  for (bfd_vma i = 0 ; i < size ; i+=8)
+    {
+      printf("0x%08lx: 0x%016lx 0x%016lx 0x%016lx 0x%016lx\n",
+	address + (i*sizeof(bfd_vma)),
+	vma_section[i+0],
+	vma_section[i+1],
+	vma_section[i+2],
+	vma_section[i+3]);
+    }
+}
+
+static
+void debug_crc_header(char *prompt)
+{
+  debug_hex(prompt, text_contents, text_section->vma, 64);
+}
+static
+void debug_crc_update(bfd_vma crc, bfd_vma crc_addr)
+{
+  printf("CRC [0x%016lx] update at 0x%08lx succeeded\n", crc, crc_addr);
+}
+
+static
+void debug_full_textsection(void)
+{
+
+  /* In order to see the updated content, we have to fetch it again */
+
+  if (!get_text_section_contents())
+    {
+      debug_crc_header("After CRC");
+      debug_hex("Full Section After CRC",
+		  text_contents,
+		  text_section->vma,
+		  text_section->size);
+      free(text_contents);
+    }
+}
+#else
+#define	debug_hex(p,s,a,sz)
+#define debug_crc_header(p)
+#define debug_crc_update(c, a)
+#define debug_full_textsection()
+#endif
+
+/* ============ CRC common functions =========================================*/
+/*
+ * Multiplexing function for calculating CRC with different algorithms
+ * 'crc_algo'
+ */
+static
+bfd_vma calculate_crc(const unsigned char *input_str, size_t num_bytes)
+{
+  if (crc_algo == crc_algo_64)
+    {
+      if (crc64_tab != NULL)
+	{
+	  return calc_crc64(input_str, num_bytes);
+	}
+    }
+  else if (crc_algo == crc_algo_32)
+    {
+      if (crc32_tab != NULL)
+	{
+	  return calc_crc32(input_str, num_bytes);
+	}
+    }
+    /* This should never happen */
+    return 0;
+}
+
+static
+bool invalid_crc_parameters(
+		bfd_vma crc_addr,
+		bfd_vma crc_area_start,
+		bfd_vma crc_area_end
+		)
+{
+  bool crc_in_section;
+  /* Get limits of '.text' section */
+  bfd_vma text_start = text_section->lma;
+  bfd_vma text_end   = text_section->lma + text_section->size;
+
+  /* All three symbols must be inside the '.text' section */
+  crc_in_section =
+    ((text_start <= crc_addr)       && (crc_addr       <= text_end)) &&
+    ((text_start <= crc_area_start) && (crc_area_start <= text_end)) &&
+    ((text_start <= crc_area_end)   && (crc_area_end   <= text_end));
+
+  if (!crc_in_section)
+    {
+      einfo (_("%P:%pS: warning: CRC area outside the '.text' section\n"
+	       "CRC generation aborted\n"), NULL);
+      /*
+       * Maybe we should printout the text section start and end
+       * as well as the boundaries of the CRC check area.
+       */
+      return true;
+    }
+
+  /*
+   * CRC checksum must be outside the checked area
+   * We must check that they do not overlap in the beginning
+   */
+  {
+    bool crc_valid = false;
+    if (crc_addr < crc_area_start)
+      {
+	if ((crc_addr + crc_size) <= crc_area_start)
+	  {
+	    crc_valid = true;
+	  }
+      }
+    else if (crc_addr >= crc_area_end)
+      {
+	crc_valid = true;
+      }
+    if (!crc_valid)
+      {
+	einfo (_("%P:%pS: warning: CRC located inside checked area\n"
+	     "CRC generation aborted\n"), NULL);
+	return true;
+      }
+  }
+  return false;
+}
+
+
+void lang_generate_crc(void)
+{
+  bfd_vma crc_addr, crc_area_start, crc_area_end;
+  bfd_vma crc;
+  bool can_do_crc;
+
+  /* Return immediately, if CRC is not requested */
+  if (crc_algo == crc_algo_none)
+    return;
+
+  if (!get_text_section_contents())
+    {
+      /* Error messages inside check */
+      return;
+    }
+  /*
+   * These symbols must be present, for CRC to be generated
+   * They should all have been defined in a CRC## <syndrome> statement
+   * If they are not defined, then there is an internal error.
+   * Should we consider using symbols which cannot be parsed by the linker?
+   * I.E. CRC-64 is never an identifier
+   */
+  can_do_crc =  symbol_lookup(CRC_ADDRESS,  &crc_addr) &&
+		symbol_lookup(CRC_START,    &crc_area_start) &&
+		symbol_lookup(CRC_END,      &crc_area_end);
+
+  if (!can_do_crc)
+    {
+      einfo (_("%P:%pS: Internal Error - __CRC#___ symbols not defined\n"
+	       "CRC generation aborted\n"), NULL);
+      return;
+    }
+
+  /* Check that the addresses make sense */
+  if (invalid_crc_parameters(crc_addr, crc_area_start, crc_area_end))
+    {
+      /* Error messages inside check */
+      return;
+    }
+
+  /* Calculate and set the CRC */
+  {
+    /*
+     * The '.text' area does not neccessarily start at 0x00000000,
+     * so we have to shift the indices.
+     */
+    bfd_vma _crc_addr          = crc_addr       - text_section->vma;
+    bfd_vma _crc_area_start    = crc_area_start - text_section->vma;
+    bfd_vma _crc_area_end      = crc_area_end   - text_section->vma;
+
+
+    /* This is the CRC calculation which we worked so hard for */
+    debug_crc_header("Before CRC");
+    crc = calculate_crc(&text_contents[_crc_area_start] ,
+			_crc_area_end - _crc_area_start);
+
+
+    /*
+     * The contents of the '.text' section are no longer needed.
+     * It is a copy of the section contents, and will therefore be stale
+     * after we updated the section with the CRC checksum.
+     * Remove it before we set the CRC checksum, to simplify the code logic.
+     */
+    free(text_contents);
+    if (set_crc_checksum(crc, _crc_addr, crc_size))
+      {
+	debug_crc_update(crc, crc_addr);
+      }
+  }
+
+  debug_full_textsection();
+}
+
+/* ============ END CRC common functions =====================================*/
+
+/* ============ TIMESTAMP common functions ===================================*/
+
+/* Store the time of linking in the image */
+void lang_add_timestamp (void)
+{
+  lang_add_data (QUAD, exp_intop ((bfd_vma) time(0)));
+}
+
+/* ===========================================================================*/
 
 void
 lang_startup (const char *name)
