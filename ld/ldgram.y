@@ -41,6 +41,7 @@
 #include "mri.h"
 #include "ldctor.h"
 #include "ldlex.h"
+#include "checksum.h"
 
 #ifndef YYDEBUG
 #define YYDEBUG 1
@@ -130,6 +131,9 @@ static int error_index;
 %token DATA_SEGMENT_ALIGN DATA_SEGMENT_RELRO_END DATA_SEGMENT_END
 %token SORT_BY_NAME SORT_BY_ALIGNMENT SORT_NONE
 %token SORT_BY_INIT_PRIORITY
+%token CRC64 CRC32 ECMA ISO POLY POLYI TABLE
+%token TIMESTAMP
+%token DEBUG ON OFF
 %token '{' '}'
 %token SIZEOF_HEADERS OUTPUT_FORMAT FORCE_COMMON_ALLOCATION OUTPUT_ARCH
 %token INHIBIT_COMMON_ALLOCATION FORCE_GROUP_ALLOCATION
@@ -668,7 +672,7 @@ statement:
 		{
 		  lang_add_data ((int) $1, $3);
 		}
-        | ASCII '(' mustbe_exp ')' NAME
+	| ASCII '(' mustbe_exp ')' NAME
 		{
 		  /* 'value' is a memory leak, do we care?  */
 		  etree_type *value = $3;
@@ -682,6 +686,38 @@ statement:
 		{
 		  lang_add_fill ($3);
 		}
+	| CRC32
+		{
+		  lang_add_assignment (exp_assign (CRC32_ADDRESS, exp_nameop (NAME,"."), false));
+		}
+		polynome32 '(' mustbe_exp ',' mustbe_exp ')'
+		{
+		  lang_add_assignment (exp_assign (CRC32_START, $5, false));
+		  lang_add_assignment (exp_assign (CRC32_END,   $7, false));
+		}
+	| CRC32 TABLE
+		{
+		  lang_add_assignment (exp_assign (CRC32_TABLE, exp_nameop (NAME,"."), false));
+		  lang_add_crc32_table ();
+		}
+	| CRC64
+		{
+		  lang_add_assignment (exp_assign (CRC64_ADDRESS, exp_nameop (NAME,"."), false));
+		}
+		polynome64 '(' mustbe_exp ',' mustbe_exp ')'
+		{
+		  lang_add_assignment (exp_assign (CRC64_START, $5, false));
+		  lang_add_assignment (exp_assign (CRC64_END,   $7, false));
+		}
+	| CRC64 TABLE
+		{
+		  lang_add_assignment (exp_assign (CRC64_TABLE, exp_nameop (NAME,"."), false));
+		  lang_add_crc64_table ();
+		}
+	| TIMESTAMP
+		{
+		  lang_add_timestamp ();
+		}
 	| ASSERT_K
 		{ ldlex_expression (); }
 	  '(' exp ',' NAME ')' separator
@@ -693,8 +729,48 @@ statement:
 		{
 		  ldfile_open_command_file ($2);
 		}
+	| DEBUG ON
+		{
+		  yydebug = 1;
+		}
+	| DEBUG OFF
+		{
+		  yydebug = 0;
+		}
 	  statement_list_opt END
 	;
+
+polynome64:
+	ECMA
+		{
+		  lang_add_crc64_syndrome (false, CRC_POLY_64);
+		}
+	| ISO
+		{
+		  lang_add_crc64_syndrome (false, CRC_POLY_64_ISO);
+		}
+	| POLY mustbe_exp
+		{
+		  lang_add_crc64_syndrome (false, $2->value.value);
+		}
+	| POLYI mustbe_exp
+		{
+		  lang_add_crc64_syndrome (true,  $2->value.value);
+		}
+
+polynome32:
+	CRC32
+		{
+		  lang_add_crc32_syndrome (true,  CRC_POLY_32);
+		}
+	| POLY mustbe_exp
+		{
+		  lang_add_crc32_syndrome (false, $2->value.value);
+		}
+	| POLYI mustbe_exp
+		{
+		  lang_add_crc32_syndrome (true,  $2->value.value);
+		}
 
 statement_list:
 		statement_list statement
