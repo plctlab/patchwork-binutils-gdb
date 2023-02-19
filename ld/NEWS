@@ -1,5 +1,52 @@
 -*- text -*-
 
+* The linker script has a new command to insert a timestamp
+  TIMESTAMP
+  inserts the current time (seconds since Epoch) as a 64-bit value
+
+* The linker script syntax has new commands for debugging a linker script
+  DEBUG ON  turns on debugging
+  DEBUG OFF turns off debugging
+
+* The linker script syntax has new commands for handling CRC-32/64 calculations
+  on the '.text' section
+  It uses code from https://www.libcrc.org/
+
+  CRC32 CRC32          (start, end)
+  CRC32 POLY (polynome)(start, end)
+  CRC32 POLYI(polynome)(start, end) (inversion during CRC calculation)
+  CRC64 ECMA           (start, end)
+  CRC64 ISO            (start, end)
+  CRC64 POLY (polynome)(start, end)
+  CRC64 POLYI(polynome)(start, end) (inversion during CRC calculation)
+  CRC64 TABLE
+
+  The CRC32, ECMA, ISO, POLY and POLYI defines the polynome to use
+  and reserves space for the 32/64-bit CRC in the '.text' section.
+  The default polynome is the ECMA.
+
+  The CRC32 <polynome> command defines some global symbols.
+  ___CRC32___ is the address of the CRC64 checksum
+  ___CRC32_START___ is the address where CRC calculation starts
+  ___CRC32_END___ The CRC calculation ends before this address.
+
+  The CRC64 <polynome> command defines some global symbols.
+  ___CRC64___ is the address of the CRC64 checksum
+  ___CRC64_START___ is the address where CRC calculation starts
+  ___CRC64_END___ The CRC calculation ends before this address.
+
+  All three symbols must refer to addresses in the '.text' section.
+  If they are defined at the end of the linking process, then
+  the CRC## will be calculated between ___CRC##_START___ .. ___CRC##_END___ -1
+  and the result will be inserted at ___CRC##___.
+  ___CRC##___ must be outside the region where CRC is calculated
+
+  The CRC32/64 TABLE command generates a table for CRC generation.
+  This is not neccessary, but will speed up the calculation
+  and makes it compatible with the CRC check routines at https://www.libcrc.org/
+  It defines the ___CRC##_TABLE___ symbol at the start of the table.
+  The user may choose to add this table to his code instead of using the linker.
+
 * The linker script syntax has two new commands for inserting text into output
   sections:
     ASCII (<size>) "string"
