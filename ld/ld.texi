@@ -5394,6 +5394,146 @@ area:
   ASCIZ "This is 16 bytes"
 @end smallexample
 
+@cindex output section strings
+@kindex CRC32 CRC32                   (@var{expression}, @var{expression})
+@kindex CRC32 POLY  (@var{expression})(@var{expression}, @var{expression})
+@kindex CRC32 POLYI (@var{expression})(@var{expression}, @var{expression})
+@kindex CRC64 ECMA                    (@var{expression}, @var{expression})
+@kindex CRC64 ISO                     (@var{expression}, @var{expression})
+@kindex CRC64 POLY  (@var{expression})(@var{expression}, @var{expression})
+@kindex CRC64 POLYI (@var{expression})(@var{expression}, @var{expression})
+
+You can calculate the CRC of a part of the '.text' section through the
+@code{CRC32} and @code{CRC64} commands.  
+The commands take a parameter for the @code{polynome} and then two more,
+specifying range of the checked area.  The end address is the first address
+past the checked area.
+
+There is one predefined 43-bit polynomes
+
+* @code{CRC32} @code{0xEDB88320}
+
+There are two predefined 64-bit polynomes
+
+* @code{ECMA}  @code{0x42F0E1EBA9EA3693}
+
+* @code{ISO}   @code{0xD800000000000000}
+
+You can also select your own @code{polynome} using the @code{CRCxx POLY} or
+@code{CRCxx POLYI}. The @code{POLYI} will invert the polynome before and after
+the calculation which is neccessary for the @code{CRC64-WE} algorithm
+
+The default 64-bit polynome is the @code{ECMA}
+
+The CRC32 <polynome> command defines some global symbols.
+
+* @code{___CRC32___}       address of the CRC32 checksum
+
+* @code{___CRC32_START___} first address in the checked area.
+
+* @code{___CRC32_END___}   first address past the checked area.
+
+The CRC64 <polynome> command defines some global symbols.
+
+* @code{___CRC64___}       address of the CRC64 checksum
+
+* @code{___CRC64_START___} first address in the checked area.
+
+* @code{___CRC64_END___}   first address past the checked area.
+
+Note: The generated CRC value must be stored outside the checked area.
+
+Example 1: This request a CRC check using the @code{ECMA} algorithm
+
+@smallexample
+  CRC = '.';
+  CRC64 ECMA (START_CHECK,END_TEXT)
+  START_CHECK = '.';
+@end smallexample
+
+The user can retrieve the CRC value through the @code{CRC} label.
+
+Example 2: This request a CRC check using the @code{ISO} algorithm
+
+@smallexample
+  CRC = '.';
+  CRC64 ISO (START_CHECK,END_TEXT)
+  START_CHECK = '.';
+@end smallexample
+
+The user can retrieve the CRC value through the @code{CRC} label.
+
+Example 3: This request a CRC check using a user defined @code{polynome}
+
+@smallexample
+  CRC = '.';
+  CRC64 POLY (0xDEADBEEFDEADBEEF) (START_CHECK,END_TEXT)
+  START_CHECK = '.';
+@end smallexample
+
+The user can retrieve the CRC value through the @code{CRC} label.
+
+Example 4: This request a CRC check using a user defined @code{polynome}
+  The @code{polynome} is inverted before use, and teh result is inverted.
+
+@smallexample
+  CRC = '.';
+  CRC64 POLYI (0xDEADBEEFDEADBEEF) (START_CHECK,END_TEXT)
+  START_CHECK = '.';
+@end smallexample
+
+Example 5: This request a CRC check using a user defined @code{CRC32}
+
+@smallexample
+  CRC = '.';
+  CRC32 CRC32 (START_CHECK,END_TEXT)
+  START_CHECK = '.';
+@end smallexample
+
+The user can retrieve the CRC value through the @code{CRC} label.
+
+@cindex output section strings
+@kindex CRC32 TABLE
+
+The @code{CRC32 TABLE} command creates a 1 kByte table for a table-driven
+CRC calculation.  This speeds up the CRC calculation over a non-table-driver
+version since you can handle 8 bits at a time, instead of 1 bit.
+
+The table generated is for the @code{polynome} selected using a @code{CRC32}
+command.
+
+Example 1: Generate a 1 kB table
+@smallexample
+  mytable = '.';
+  CRC32 TABLE
+@end smallexample
+
+The user can declare @code{extern uint32_t *mytable;} in his code to use it.
+
+@cindex output section strings
+@kindex CRC64 TABLE
+
+The @code{CRC64 TABLE} command creates a 2 kByte table for a table-driven
+CRC calculation.  This speeds up the CRC calculation over a non-table-driver
+version since you can handle 8 bits at a time, instead of 1 bit.
+
+The table generated is for the @code{polynome} selected using a @code{CRC64}
+command. If no @code{CRC64} command has been emitted, the @code{ECMA} is used.
+
+Example 1: Generate a 2 kB table
+@smallexample
+  mytable = '.';
+  CRC64 TABLE
+@end smallexample
+
+The user can declare @code{extern uint64_t *mytable;} in his code to use it.
+
+@cindex output section strings
+@kindex TIMESTAMP
+
+The @code{TIMESTAMP} command creates 64-bit integer with the number of seconds
+since Epoch (1970-01-01 00:00)
+
 @kindex FILL(@var{expression})
 @cindex holes, filling
 @cindex unspecified memory
