@@ -5,7 +5,7 @@
 	.endm
 
 	.macro m2 args:vararg
-	.file "Line.s"
+	.file "new_line.s"
 	.line 9
 	.warning "m2/1: \args"
 	.nop
