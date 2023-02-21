@@ -14505,6 +14505,16 @@ struct mips_mach_extension
   unsigned long extension, base;
 };
 
+/* An array describing how BFD machines relate to one another. The entries
+   are ordered topologically. */
+static const struct mips_mach_extension mips_mach_32_64[] =
+{
+  { bfd_mach_mipsisa64r6, bfd_mach_mipsisa32r6 },
+  { bfd_mach_mipsisa64r5, bfd_mach_mipsisa32r5 },
+  { bfd_mach_mipsisa64r3, bfd_mach_mipsisa32r3 },
+  { bfd_mach_mipsisa64r2, bfd_mach_mipsisa32r2 },
+  { bfd_mach_mipsisa64,   bfd_mach_mipsisa32 }
+};
 
 /* An array describing how BFD machines relate to one another.  The entries
    are ordered topologically with MIPS I extensions listed last.  */
@@ -14585,26 +14595,34 @@ static const struct mips_mach_extension mips_mach_extensions[] =
 /* Return true if bfd machine EXTENSION is an extension of machine BASE.  */
 
 static bool
-mips_mach_extends_p (unsigned long base, unsigned long extension)
+mips_mach_extends_32_64 (unsigned long base, unsigned long extension)
 {
   size_t i;
 
   if (extension == base)
     return true;
 
-  if (base == bfd_mach_mipsisa32
-      && mips_mach_extends_p (bfd_mach_mipsisa64, extension))
-    return true;
+  for (i = 0; i < ARRAY_SIZE (mips_mach_64_32); i++)
+    if (extension == mips_mach_32_64[i].extension)
+      return base == mips_mach_32_64[i].base;
 
-  if (base == bfd_mach_mipsisa32r2
-      && mips_mach_extends_p (bfd_mach_mipsisa64r2, extension))
+  return false;
+}
+
+static bool
+mips_mach_extends_p (unsigned long base, unsigned long extension)
+{
+  size_t i;
+  unsigned long extension1 = extension;
+
+  if (mips_mach_extends_32_64 (base, extension))
     return true;
 
   for (i = 0; i < ARRAY_SIZE (mips_mach_extensions); i++)
     if (extension == mips_mach_extensions[i].extension)
       {
 	extension = mips_mach_extensions[i].base;
-	if (extension == base)
+	if (mips_mach_extends_32_64 (base, extension))
 	  return true;
       }
 
