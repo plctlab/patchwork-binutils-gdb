@@ -5394,6 +5394,152 @@ area:
   ASCIZ "This is 16 bytes"
 @end smallexample
 
+@cindex output section strings
+@kindex DIGEST "CRC64-ECMA"                              (@var{expression}, @var{expression})
+@kindex DIGEST "CRC64-WE"                                (@var{expression}, @var{expression})
+@kindex DIGEST "CRC64-ISO"                               (@var{expression}, @var{expression})
+@kindex DIGEST "CRC32"                                   (@var{expression}, @var{expression})
+@kindex DIGEST POLY  (@var{expression}, @var{expression})(@var{expression}, @var{expression})
+@kindex DIGEST POLYI (@var{expression}, @var{expression})(@var{expression}, @var{expression})
+
+You can calculate the CRC of a part of the '.text' section through the
+@code{DIGEST} command.
+The commands take a parameter for the @code{polynome} and then two more,
+specifying range of the checked area.  The end address is the first address
+past the checked area.
+
+There is one predefined 32-bit polynome
+
+@enumerate
+@item
+@code{CRC32} @code{0xEDB88320}
+@end enumerate
+
+There are three predefined 64-bit polynomes
+
+@enumerate
+@item
+@code{CRC64-ECMA}  @code{0x42F0E1EBA9EA3693}
+@item
+@code{CRC64-WE}    @code{0x42F0E1EBA9EA3693}
+@item
+@code{CRC64-ISO}   @code{0xD800000000000000}
+@end enumerate
+
+You can also select your own @code{polynome} using the @code{DIGEST POLY} or
+@code{DIGEST POLYI}. The @code{DIGEST POLYI} will invert the polynome before
+and after the calculation which is neccessary for the @code{CRC64-WE} algorithm
+
+The default 64-bit polynome is the @code{ECMA}
+
+The 32-bit <polynome> command defines some global symbols.
+
+@enumerate
+@item
+@code{___CRC32___}       address of the CRC32 checksum
+@item
+@code{___CRC32_START___} first address in the checked area.
+@item
+@code{___CRC32_END___}   first address past the checked area.
+@end enumerate
+
+The 64-bit <polynome> command defines some global symbols.
+
+@enumerate
+@item
+@code{___CRC64___}       address of the CRC64 checksum
+@item
+@code{___CRC64_START___} first address in the checked area.
+@item
+@code{___CRC64_END___}   first address past the checked area.
+@end enumerate
+
+Note: The generated CRC value must be stored outside the checked area.
+
+Example 1: This request a CRC check using the @code{ECMA} algorithm
+
+@smallexample
+  CRC = '.';
+  DIGEST "CRC64-ECMA" (START_CHECK,END_TEXT)
+  START_CHECK = '.';
+@end smallexample
+
+The user can retrieve the CRC value through the @code{CRC} label.
+
+Example 2: This request a CRC check using the @code{ISO} algorithm
+
+@smallexample
+  CRC = '.';
+  DIGEST "CRC64-ISO" (START_CHECK,END_TEXT)
+  START_CHECK = '.';
+@end smallexample
+
+The user can retrieve the CRC value through the @code{CRC} label.
+
+Example 3: This request a CRC check using a user defined @code{polynome}
+
+@smallexample
+  CRC = '.';
+  DIGEST POLY (64, 0xDEADBEEFDEADBEEF) (START_CHECK,END_TEXT)
+  START_CHECK = '.';
+@end smallexample
+
+The user can retrieve the CRC value through the @code{CRC} label.
+
+Example 4: This request a CRC check using a user defined @code{polynome}
+  The @code{polynome} is inverted before use, and teh result is inverted.
+
+@smallexample
+  CRC DIGEST POLYI (64, 0xDEADBEEFDEADBEEF) (START_CHECK,END_TEXT)
+  START_CHECK = '.';
+@end smallexample
+
+Example 5: This request a CRC check using the @code{CRC32} polynome
+
+@smallexample
+  CRC = '.';
+  DIGEST "CRC32" (START_CHECK,END_TEXT)
+  START_CHECK = '.';
+@end smallexample
+
+The user can retrieve the CRC value through the @code{CRC} label.
+
+@cindex output section strings
+@kindex DIGEST TABLE
+
+The @code{DIGEST TABLE} command creates a 1 or 2 kByte table for a table-driven
+CRC calculation.  This speeds up the CRC calculation over a non-table-driver
+version since you can handle 8 bits at a time, instead of 1 bit.
+
+The table generated is for the @code{polynome} selected using a 
+@code{DIGEST <polynome>} command.
+
+The command will define a symbol base on the size of the polynome
+
+@enumerate
+@item
+@code{___CRC32_TABLE___}       address of the CRC32 table, or
+@item
+@code{___CRC64_TABLE___}       address of the CRC64 table
+@end enumerate
+
+
+Example 1: Generate a 1 kB table
+           (assuming a previous @code{DIGEST "CRC32"} command
+
+@smallexample
+  mytable = '.';
+  DIGEST TABLE
+@end smallexample
+
+The user can declare @code{extern uint32_t *mytable;} in his code to use it.
+
+@cindex output section strings
+@kindex TIMESTAMP
+
+The @code{TIMESTAMP} command creates 64-bit integer with the number of seconds
+since Epoch (1970-01-01 00:00)
+
 @kindex FILL(@var{expression})
 @cindex holes, filling
 @cindex unspecified memory
