@@ -41,6 +41,7 @@
 #include "mri.h"
 #include "ldctor.h"
 #include "ldlex.h"
+#include "lddigest.h"
 
 #ifndef YYDEBUG
 #define YYDEBUG 1
@@ -130,6 +131,9 @@ static int error_index;
 %token DATA_SEGMENT_ALIGN DATA_SEGMENT_RELRO_END DATA_SEGMENT_END
 %token SORT_BY_NAME SORT_BY_ALIGNMENT SORT_NONE
 %token SORT_BY_INIT_PRIORITY
+%token DIGEST POLY POLYI TABLE SECTION
+%token TIMESTAMP
+%token DEBUG ON OFF
 %token '{' '}'
 %token SIZEOF_HEADERS OUTPUT_FORMAT FORCE_COMMON_ALLOCATION OUTPUT_ARCH
 %token INHIBIT_COMMON_ALLOCATION FORCE_GROUP_ALLOCATION
@@ -668,7 +672,7 @@ statement:
 		{
 		  lang_add_data ((int) $1, $3);
 		}
-        | ASCII '(' mustbe_exp ')' NAME
+	| ASCII '(' mustbe_exp ')' NAME
 		{
 		  /* 'value' is a memory leak, do we care?  */
 		  etree_type *value = $3;
@@ -685,6 +689,25 @@ statement:
 		{
 		  lang_add_fill ($3);
 		}
+	| DIGEST polynome '(' mustbe_exp ',' mustbe_exp ')'
+		{
+		  lang_add_assignment (exp_assign (CRC_ADDRESS, exp_nameop (NAME,"."), false));
+		  lang_add_assignment (exp_assign (CRC_START, $4, false));
+		  lang_add_assignment (exp_assign (CRC_END,   $6, false));
+		}
+	| DIGEST TABLE
+		{
+		  lang_add_assignment (exp_assign (CRC_TABLE, exp_nameop (NAME,"."), false));
+		  lang_add_digest_table ();
+		}
+	| DIGEST SECTION NAME
+		{
+		  lang_set_digest_section ($3);
+		}
+	| TIMESTAMP
+		{
+		  lang_add_timestamp ();
+		}
 	| ASSERT_K
 		{ ldlex_expression (); }
 	  '(' exp ',' NAME ')' separator
@@ -692,12 +715,35 @@ statement:
 		  ldlex_popstate ();
 		  lang_add_assignment (exp_assert ($4, $6));
 		}
+	| DEBUG ON
+		{
+		  yydebug = 1;
+		}
+	| DEBUG OFF
+		{
+		  yydebug = 0;
+		}
 	| INCLUDE filename
 		{
 		  ldfile_open_command_file ($2);
 		}
+
 	  statement_list_opt END
 	;
+
+polynome:
+	NAME
+		{
+		  lang_set_digest($1);
+		}
+	| POLY '(' mustbe_exp ',' mustbe_exp ')'
+		{
+		  lang_add_digest (false, $3->value.value, $5->value.value);
+		}
+	| POLYI '(' mustbe_exp ',' mustbe_exp ')'
+		{
+		  lang_add_digest (true,  $3->value.value, $5->value.value);
+		}
 
 statement_list:
 		statement_list statement
