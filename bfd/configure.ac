@@ -168,6 +168,13 @@ AC_ARG_WITH(separate-debug-dir,
 [DEBUGDIR="${withval}"])
 AC_SUBST(DEBUGDIR)
 
+DEFAULT_ARCH=
+AC_ARG_WITH(arch,
+  AS_HELP_STRING([--with-arch=ARCH],
+                 [Set the default arch for bfd [[default=]]]),
+[DEFAULT_ARCH="${withval}"])
+AC_SUBST(DEFAULT_ARCH)
+
 ACX_PKGVERSION([GNU Binutils])
 ACX_BUGURL([https://sourceware.org/bugzilla/])
 
@@ -341,6 +348,10 @@ do
 	TDEFINES="$TDEFINES $targ_cflags"
     fi
 done
+
+if test -n "$DEFAULT_ARCH"; then
+  TDEFINES="$TDEFINES -DDEFAULT_ARCH=\\\"${DEFAULT_ARCH}\\\""
+fi
 AC_SUBST(TDEFINES)
 
 # This processing still needs to be done if we're to decide properly whether

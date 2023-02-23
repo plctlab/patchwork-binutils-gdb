@@ -695,6 +695,7 @@ WARN_CFLAGS
 REPORT_BUGS_TEXI
 REPORT_BUGS_TO
 PKGVERSION
+DEFAULT_ARCH
 DEBUGDIR
 ENABLE_BFD_64_BIT_FALSE
 ENABLE_BFD_64_BIT_TRUE
@@ -12033,6 +12034,15 @@ fi
 
 
 
+DEFAULT_ARCH=
+
+# Check whether --with-arch was given.
+if test "${with_arch+set}" = set; then :
+  withval=$with_arch; DEFAULT_ARCH="${withval}"
+fi
+
+
+
 
 
 # Check whether --with-pkgversion was given.
@@ -13774,6 +13784,10 @@ do
 	TDEFINES="$TDEFINES $targ_cflags"
     fi
 done
+
+if test -n "$DEFAULT_ARCH"; then
+  TDEFINES="$TDEFINES -DDEFAULT_ARCH=\\\"${DEFAULT_ARCH}\\\""
+fi
 
 
 # This processing still needs to be done if we're to decide properly whether

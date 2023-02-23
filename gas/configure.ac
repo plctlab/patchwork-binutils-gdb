@@ -370,6 +370,19 @@ changequote([,])dnl
 	    AC_MSG_ERROR($target_cpu isn't a supported MIPS CPU name)
 	    ;;
 	esac
+	AC_MSG_CHECKING(for default configuration of --with-arch)
+	if test "x${with_arch}" != x; then
+	  case ${with_arch} in
+	    mips1 | mips2 | mips32 | mips32r2 | mips32r3 | mips32r5 | mips32r6 | \
+	    mips3 | mips4 | mips5 | mips64 | mips64r2 | mips64r3 | mips64r5 | mips64r6)
+	      mips_cpu=${with_arch}
+	      ;;
+	    *)
+	      AC_MSG_ERROR(This kind of arch name does *NOT* exist!)
+	      ;;
+	  esac
+	fi
+	AC_MSG_RESULT($with_arch)
 	# See whether it's appropriate to set E_MIPS_ABI_O32 for o32
 	# binaries.  It's a GNU extension that some OSes don't understand.
 	case ${target} in
@@ -392,7 +405,10 @@ changequote([,])dnl
 	esac
 	# Decide which ABI to target by default.
 	case ${target} in
-	  mips64*-linux* | mips-sgi-irix6* | mips64*-freebsd* \
+	  mips*64*-linux-gnuabi64)
+	    mips_default_abi=N64_ABI
+	    ;;
+	  mips*64*-linux* | mips-sgi-irix6* | mips64*-freebsd* \
 	  | mips64*-kfreebsd*-gnu | mips64*-ps2-elf*)
 	    mips_default_abi=N32_ABI
 	    ;;

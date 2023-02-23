@@ -47,6 +47,15 @@
 
 #include "hashtab.h"
 
+/* A table describing all ISA and its 32bit and 64bit version for best matching */
+struct mips_eflags_32_64
+{
+  const char *name;
+  flagword e_mips_arch;
+  flagword e_mips_arch32;
+  flagword e_mips_arch64;
+};
+
 /* Types of TLS GOT entry.  */
 enum mips_got_tls_type {
   GOT_TLS_NONE,
@@ -1305,6 +1314,28 @@ bfd_get_micromips_32 (const bfd *abfd, const bfd_byte *ptr)
 
 #define TP_OFFSET 0x7000
 #define DTP_OFFSET 0x8000
+
+/* A table describing all ISA and its 32bit and 64bit version for best matching */
+__attribute__ ((unused))
+static const struct mips_eflags_32_64 mips_eflags_32_64_table[] =
+{
+  { "mips1", E_MIPS_ARCH_1, E_MIPS_ARCH_1, E_MIPS_ARCH_3},
+  { "mips2", E_MIPS_ARCH_2, E_MIPS_ARCH_2, E_MIPS_ARCH_3},
+  { "mips3", E_MIPS_ARCH_3, E_MIPS_ARCH_2, E_MIPS_ARCH_3},
+  { "mips4", E_MIPS_ARCH_3, E_MIPS_ARCH_2, E_MIPS_ARCH_4},
+  { "mips5", E_MIPS_ARCH_5, E_MIPS_ARCH_2, E_MIPS_ARCH_5},
+  { "mips32", E_MIPS_ARCH_32, E_MIPS_ARCH_32, E_MIPS_ARCH_64},
+  { "mips32r2", E_MIPS_ARCH_32R2, E_MIPS_ARCH_32R2, E_MIPS_ARCH_64R2},
+  { "mips32r3", E_MIPS_ARCH_32R2, E_MIPS_ARCH_32R2, E_MIPS_ARCH_64R2},
+  { "mips32r5", E_MIPS_ARCH_32R2, E_MIPS_ARCH_32R2, E_MIPS_ARCH_64R2},
+  { "mips32r6", E_MIPS_ARCH_32R6, E_MIPS_ARCH_32R6, E_MIPS_ARCH_64R6},
+  { "mips64", E_MIPS_ARCH_64, E_MIPS_ARCH_32, E_MIPS_ARCH_64},
+  { "mips64r2", E_MIPS_ARCH_64R2, E_MIPS_ARCH_32R2, E_MIPS_ARCH_64R2},
+  { "mips64r3", E_MIPS_ARCH_64R2, E_MIPS_ARCH_32R2, E_MIPS_ARCH_64R2},
+  { "mips64r5", E_MIPS_ARCH_64R2, E_MIPS_ARCH_32R2, E_MIPS_ARCH_64R2},
+  { "mips64r6", E_MIPS_ARCH_64R6, E_MIPS_ARCH_32R6, E_MIPS_ARCH_64R6},
+  { NULL, 0, 0, 0 }
+};
 
 static bfd_vma
 dtprel_base (struct bfd_link_info *info)
@@ -12316,6 +12347,30 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
 }
 
 
+/* Get the E_MIPA_ARCH_?? value for the DEFAULT_ARCH 
+   The value of bits can be 32/64 or 0 (guess from DEFAULT_ARCH)
+   */
+static flagword mips_get_default_arch_eflags(int bits)
+{
+#ifdef DEFAULT_ARCH
+  int i;
+
+  for (i = 0; mips_eflags_32_64_table[i].name; i++)
+    if (strcasecmp (mips_eflags_32_64_table[i].name, DEFAULT_ARCH) != 0)
+      continue;
+    else if (bits == 32)
+      return mips_eflags_32_64_table[i].e_mips_arch32;
+    else if (bits == 64)
+      return mips_eflags_32_64_table[i].e_mips_arch64;
+    else if (bits == 0)
+      return mips_eflags_32_64_table[i].e_mips_arch;
+#endif
+
+  if (bits == 64)
+    return E_MIPS_ARCH_3;
+  return E_MIPS_ARCH_1;
+}
+
 /* Set ABFD's EF_MIPS_ARCH and EF_MIPS_MACH flags.  */
 
 static void
@@ -12327,9 +12382,11 @@ mips_set_isa_flags (bfd *abfd)
     {
     default:
       if (ABI_N32_P (abfd) || ABI_64_P (abfd))
-        val = E_MIPS_ARCH_3;
+	 val = mips_get_default_arch_eflags(64);
+      else if (ABI_O32_P (abfd))
+	 val = mips_get_default_arch_eflags(32);
       else
-        val = E_MIPS_ARCH_1;
+	 val = mips_get_default_arch_eflags(0);
       break;
 
     case bfd_mach_mips3000:

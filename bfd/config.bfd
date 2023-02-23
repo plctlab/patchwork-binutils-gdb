@@ -227,6 +227,62 @@ z8k*)		 targ_archs=bfd_z8k_arch ;;
 *)		 targ_archs=bfd_${targ_cpu}_arch ;;
 esac
 
+# Build option --with-arch. Only MIPS supports it now.
+case "${targ}" in
+  mips*)
+    case "${DEFAULT_ARCH}" in
+      "")
+	case "${targ}" in
+	  mipsisa64r6*)
+	    DEFAULT_ARCH=mips64r6
+	    ;;
+	  mipsisa64r5*)
+	    DEFAULT_ARCH=mips64r5
+	    ;;
+	  mipsisa64r3*)
+	    DEFAULT_ARCH=mips64r3
+	    ;;
+	  mipsisa64r2*)
+	    DEFAULT_ARCH=mips64r2
+	    ;;
+	  mipsisa64*)
+	    DEFAULT_ARCH=mips64
+	    ;;
+	  mipsisa32r6*)
+	    DEFAULT_ARCH=mips32r6
+	    ;;
+	  mipsisa32r5*)
+	    DEFAULT_ARCH=mips32r5
+	    ;;
+	  mipsisa32r3*)
+	    DEFAULT_ARCH=mips32r3
+	    ;;
+	  mipsisa32r2*)
+	    DEFAULT_ARCH=mips32r2
+	    ;;
+	  mipsisa32*)
+	    DEFAULT_ARCH=mips32
+	    ;;
+	  *)
+	    ;;
+	esac
+	;;
+      mips1 | mips2 | mips32 | mips32r2 | mips32r3 | mips32r5 | mips32r6 | \
+      mips3 | mips4 | mips5 | mips64 | mips64r2 | mips64r3 | mips64r5 | mips64r6)
+	;;
+      *)
+	echo "The arch name doesn't exits: ${DEFAULT_ARCH}" >&2
+	exit -1
+	;;
+     esac
+    ;;
+  *)
+    if test x"${DEFAULT_ARCH}" != x""; then
+      echo "The value of option --with-arch is ignored for this arch: ${DEFAULT_ARCH}" >&2
+    fi
+    DEFAULT_ARCH=
+    ;;
+esac
 
 # WHEN ADDING ENTRIES TO THIS MATRIX:
 #  Make sure that the left side always has two dashes.  Otherwise you
@@ -941,11 +997,21 @@ case "${targ}" in
     targ_defvec=mips_elf32_be_vec
     targ_selvecs="mips_elf32_le_vec mips_elf64_be_vec mips_elf64_le_vec mips_ecoff_be_vec mips_ecoff_le_vec"
     ;;
-  mips64*el-*-linux*)
+  mips*64*el-*-linux*-gnuabi64)
+    targ_defvec=mips_elf64_trad_le_vec
+    targ_selvecs="mips_elf32_ntrad_be_vec mips_elf32_ntrad_le_vec mips_elf32_trad_be_vec mips_elf32_trad_le_vec mips_elf64_trad_be_vec"
+    want64=true
+    ;;
+  mips*64*-*-linux*-gnuabi64)
+    targ_defvec=mips_elf64_trad_be_vec
+    targ_selvecs="mips_elf32_ntrad_be_vec mips_elf32_ntrad_le_vec mips_elf32_trad_be_vec mips_elf32_trad_le_vec mips_elf64_trad_le_vec"
+    want64=true
+    ;;
+  mips*64*el-*-linux*)
     targ_defvec=mips_elf32_ntrad_le_vec
     targ_selvecs="mips_elf32_ntrad_be_vec mips_elf32_trad_le_vec mips_elf32_trad_be_vec mips_elf64_trad_le_vec mips_elf64_trad_be_vec"
     ;;
-  mips64*-*-linux*)
+  mips*64*-*-linux*)
     targ_defvec=mips_elf32_ntrad_be_vec
     targ_selvecs="mips_elf32_ntrad_le_vec mips_elf32_trad_be_vec mips_elf32_trad_le_vec mips_elf64_trad_be_vec mips_elf64_trad_le_vec"
     ;;
