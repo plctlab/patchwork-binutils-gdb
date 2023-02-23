@@ -1465,7 +1465,7 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
   flagword flags = bfd_section_flags (sec);
 
   if (seginfo == NULL
-      || uncompressed_size < 32
+      || (!flag_force_compress_debug && uncompressed_size < 32)
       || (flags & SEC_HAS_CONTENTS) == 0)
     return;
 
@@ -1582,7 +1582,7 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
 
   /* PR binutils/18087: If compression didn't make the section smaller,
      just keep it uncompressed.  */
-  if (compressed_size >= uncompressed_size)
+  if (!flag_force_compress_debug && compressed_size >= uncompressed_size)
     return;
 
   /* Replace the uncompressed frag list with the compressed frag list.  */

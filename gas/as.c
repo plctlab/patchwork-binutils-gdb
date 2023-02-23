@@ -234,6 +234,8 @@ enum compressed_debug_section_type flag_compress_debug
 #define DEFAULT_COMPRESSED_DEBUG_ALGORITHM_HELP COMPRESS_DEBUG_NONE
 #endif
 
+bool flag_force_compress_debug = false;
+
 static void
 show_usage (FILE * stream)
 {
@@ -266,6 +268,9 @@ Options:\n\
   fprintf (stream, _("\
   --nocompress-debug-sections\n\
                           don't compress DWARF debug sections\n"));
+  fprintf (stream, _("\
+  --force-compress-debug-sections\n\
+                          force compression of DWARF debug sections\n")),
   fprintf (stream, _("\
   -D                      produce assembler debugging messages\n"));
   fprintf (stream, _("\
@@ -513,7 +518,8 @@ parse_args (int * pargc, char *** pargv)
       OPTION_NOCOMPRESS_DEBUG,
       OPTION_NO_PAD_SECTIONS,
       OPTION_MULTIBYTE_HANDLING,  /* = STD_BASE + 40 */
-      OPTION_SFRAME
+      OPTION_SFRAME,
+      OPTION_FORCE_COMPRESS_DEBUG
     /* When you add options here, check that they do
        not collide with OPTION_MD_BASE.  See as.h.  */
     };
@@ -533,6 +539,7 @@ parse_args (int * pargc, char *** pargv)
     ,{"al", optional_argument, NULL, OPTION_AL}
     ,{"compress-debug-sections", optional_argument, NULL, OPTION_COMPRESS_DEBUG}
     ,{"nocompress-debug-sections", no_argument, NULL, OPTION_NOCOMPRESS_DEBUG}
+    ,{"force-compress-debug-sections", no_argument, NULL, OPTION_FORCE_COMPRESS_DEBUG}
     ,{"debug-prefix-map", required_argument, NULL, OPTION_DEBUG_PREFIX_MAP}
     ,{"defsym", required_argument, NULL, OPTION_DEFSYM}
     ,{"dump-config", no_argument, NULL, OPTION_DUMPCONFIG}
@@ -774,6 +781,10 @@ This program has absolutely no warranty.\n"));
 
 	case OPTION_NOCOMPRESS_DEBUG:
 	  flag_compress_debug = COMPRESS_DEBUG_NONE;
+	  break;
+
+	case OPTION_FORCE_COMPRESS_DEBUG:
+	  flag_force_compress_debug = true;
 	  break;
 
 	case OPTION_DEBUG_PREFIX_MAP:

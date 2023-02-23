@@ -331,6 +331,10 @@ COMMON int flag_traditional_format;
 /* Type of compressed debug sections we should generate.   */
 COMMON enum compressed_debug_section_type flag_compress_debug;
 
+/* True if we want to generate compressed debug sections, even if it
+   doesn't make them smaller.  */
+COMMON bool flag_force_compress_debug;
+
 /* TRUE if .note.GNU-stack section with SEC_CODE should be created */
 COMMON int flag_execstack;
 

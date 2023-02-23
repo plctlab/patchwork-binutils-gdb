@@ -229,6 +229,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @value{AS} [@b{-a}[@b{cdghlns}][=@var{file}]]
  [@b{--alternate}]
  [@b{--compress-debug-sections}] [@b{--nocompress-debug-sections}]
+ [@b{--force-compress-debug-sections}]
  [@b{-D}]
  [@b{--dump-config}]
  [@b{--debug-prefix-map} @var{old}=@var{new}]
@@ -718,7 +719,8 @@ Begin in alternate macro mode.
 Compress DWARF debug sections using zlib with SHF_COMPRESSED from the
 ELF ABI.  The resulting object file may not be compatible with older
 linkers and object file utilities.  Note if compression would make a
-given section @emph{larger} then it is not compressed.
+given section @emph{larger} then it is not compressed, unless
+@option{--force-compress-debug-section} is used.
 
 @ifset ELF
 @cindex @samp{--compress-debug-sections=} option
@@ -738,7 +740,11 @@ using the obsoleted zlib-gnu format.  The debug sections are renamed to begin
 with @samp{.zdebug}.
 @option{--compress-debug-sections=zstd} compresses DWARF debug
 sections using zstd.  Note - if compression would actually make a section
-@emph{larger}, then it is not compressed nor renamed.
+@emph{larger}, then it is not compressed nor renamed, unless
+@option{--force-compress-debug-section} is used.
+
+@item --force-compress-debug-sections
+Compress DWARF debug sections, even if this does not reduce size.
 
 @end ifset
 
