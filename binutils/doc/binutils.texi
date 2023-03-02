@@ -5297,10 +5297,12 @@ elfedit [@option{--input-mach=}@var{machine}]
         [@option{--input-type=}@var{type}]
         [@option{--input-osabi=}@var{osabi}]
         [@option{--input-abiversion=}@var{version}]
+        [@option{--input-flags=}@var{flags}]
         @option{--output-mach=}@var{machine}
         @option{--output-type=}@var{type}
         @option{--output-osabi=}@var{osabi}
         @option{--output-abiversion=}@var{version}
+        @option{--output-flags=}@var{flags}
         @option{--enable-x86-feature=}@var{feature}
         @option{--disable-x86-feature=}@var{feature}
         [@option{-v}|@option{--version}]
@@ -5325,7 +5327,7 @@ should be updated.
 The long and short forms of options, shown here as alternatives, are
 equivalent. At least one of the @option{--output-mach},
 @option{--output-type}, @option{--output-osabi},
-@option{--output-abiversion},
+@option{--output-abiversion}, @option{--output-flags},
 @option{--enable-x86-feature} and @option{--disable-x86-feature}
 options must be given.
 
@@ -5375,6 +5377,15 @@ isn't specified, it will match any ELF ABIVERSIONs.
 @item --output-abiversion=@var{version}
 Change the ELF ABIVERSION in the ELF header to @var{version}.
 @var{version} must be between 0 and 255.
+
+@item --input-flags=@var{flags}
+Set the matching input ELF file @var{e_flags} value to @var{flags}.
+@var{flags} must be an unsigned 32-bit integer.  If @option{--input-flags}
+isn't specified, it will match any e_flags value.
+
+@item --output-flags=@var{flags}
+Change the @var{e_flags} field in the ELF header to @var{flags}.
+@var{version} must be an unsigned 32-bit integer.
 
 @item --enable-x86-feature=@var{feature}
 Set the @var{feature} bit in program property in @var{exec} or @var{dyn}

@@ -68,6 +68,10 @@ enum elfclass
   };
 static enum elfclass input_elf_class = ELF_CLASS_UNKNOWN;
 static enum elfclass output_elf_class = ELF_CLASS_BOTH;
+static int check_elf_flags = 0;
+static unsigned int input_elf_flags = 0;
+static int write_elf_flags = 0;
+static unsigned int output_elf_flags = 0;
 
 #ifdef HAVE_MMAP
 #include <sys/mman.h>
@@ -394,7 +398,16 @@ update_elf_header (const char *file_name, FILE *file)
       return 0;
     }
 
-  /* Update e_machine, e_type and EI_OSABI.  */
+  /* Skip if e_flags doesn't match. */
+  if (check_elf_flags && elf_header.e_flags != input_elf_flags)
+    {
+      error
+	(_("%s: Unmatched e_flags: 0x%lx is not 0x%x\n"),
+	 file_name, elf_header.e_flags, input_elf_flags);
+      return 0;
+    }
+
+  /* Update e_machine, e_type, OSABI, ABIVERSION and e_flags.  */
   switch (class)
     {
     default:
@@ -410,6 +423,8 @@ update_elf_header (const char *file_name, FILE *file)
 	ehdr32.e_ident[EI_OSABI] = output_elf_osabi;
       if (output_elf_abiversion != -1)
 	ehdr32.e_ident[EI_ABIVERSION] = output_elf_abiversion;
+      if (write_elf_flags)
+	BYTE_PUT (ehdr32.e_flags, output_elf_flags);
       status = fwrite (&ehdr32, sizeof (ehdr32), 1, file) == 1;
       break;
     case ELFCLASS64:
@@ -421,6 +436,8 @@ update_elf_header (const char *file_name, FILE *file)
 	ehdr64.e_ident[EI_OSABI] = output_elf_osabi;
       if (output_elf_abiversion != -1)
 	ehdr64.e_ident[EI_ABIVERSION] = output_elf_abiversion;
+      if (write_elf_flags)
+	BYTE_PUT (ehdr64.e_flags, output_elf_flags);
       status = fwrite (&ehdr64, sizeof (ehdr64), 1, file) == 1;
       break;
     }
@@ -904,6 +921,8 @@ enum command_line_switch
     OPTION_OUTPUT_OSABI,
     OPTION_INPUT_ABIVERSION,
     OPTION_OUTPUT_ABIVERSION,
+    OPTION_INPUT_FLAGS,
+    OPTION_OUTPUT_FLAGS,
 #ifdef HAVE_MMAP
     OPTION_ENABLE_X86_FEATURE,
     OPTION_DISABLE_X86_FEATURE,
@@ -920,6 +939,8 @@ static struct option options[] =
   {"output-osabi",	required_argument, 0, OPTION_OUTPUT_OSABI},
   {"input-abiversion",	required_argument, 0, OPTION_INPUT_ABIVERSION},
   {"output-abiversion",	required_argument, 0, OPTION_OUTPUT_ABIVERSION},
+  {"input-flags",	required_argument, 0, OPTION_INPUT_FLAGS},
+  {"output-flags",	required_argument, 0, OPTION_OUTPUT_FLAGS},
 #ifdef HAVE_MMAP
   {"enable-x86-feature",
 			required_argument, 0, OPTION_ENABLE_X86_FEATURE},
@@ -958,7 +979,11 @@ usage (FILE *stream, int exit_status)
   --output-osabi [%s]\n\
                               Set output OSABI\n\
   --input-abiversion [0-255]  Set input ABIVERSION\n\
-  --output-abiversion [0-255] Set output ABIVERSION\n"),
+  --output-abiversion [0-255] Set output ABIVERSION\n\
+  --input-flags [32-bit unsigned integer]\n\
+                              Set input e_flags\n\
+  --output-flags [32-bit unsigned integer]\n\
+                              Set output e_flags\n"),
 	   osabi, osabi);
 #ifdef HAVE_MMAP
   fprintf (stream, _("\
@@ -983,6 +1008,7 @@ main (int argc, char ** argv)
 {
   int c, status;
   char *end;
+  unsigned long tmp;
 
 #ifdef HAVE_LC_MESSAGES
   setlocale (LC_MESSAGES, "");
@@ -1062,6 +1088,28 @@ main (int argc, char ** argv)
 	    }
 	  break;
 
+	case OPTION_INPUT_FLAGS:
+	  check_elf_flags = 1;
+	  tmp = strtoul (optarg, &end, 0);
+	  if (*end != '\0' || tmp > 0xffffffff)
+	    {
+	      error (_("Invalid e_flags: %s\n"), optarg);
+	      return 1;
+	    }
+	  input_elf_flags = (unsigned int) tmp;
+	  break;
+
+	case OPTION_OUTPUT_FLAGS:
+	  write_elf_flags = 1;
+	  tmp = strtoul (optarg, &end, 0);
+	  if (*end != '\0' || tmp > 0xffffffff)
+	    {
+	      error (_("Invalid e_flags: %s\n"), optarg);
+	      return 1;
+	    }
+	  output_elf_flags = (unsigned int) tmp;
+	  break;
+
 #ifdef HAVE_MMAP
 	case OPTION_ENABLE_X86_FEATURE:
 	  if (elf_x86_feature (optarg, 1) < 0)
@@ -1094,7 +1142,8 @@ main (int argc, char ** argv)
 #endif
 	  && output_elf_type == -1
 	  && output_elf_osabi == -1
-	  && output_elf_abiversion == -1))
+	  && output_elf_abiversion == -1
+	  && ! write_elf_flags))
     usage (stderr, 1);
 
   status = 0;
