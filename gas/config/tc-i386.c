@@ -3756,8 +3756,7 @@ get_broadcast_bytes (const insn_template *t, bool diag)
   const i386_operand_type *types;
 
   if (i.broadcast.type)
-    return i.broadcast.bytes = ((1 << (t->opcode_modifier.broadcast - 1))
-				* i.broadcast.type);
+    return (1 << (t->opcode_modifier.broadcast - 1)) * i.broadcast.type;
 
   gas_assert (intel_syntax);
 
@@ -3943,7 +3942,8 @@ build_evex_prefix (void)
 		    i.tm.opcode_modifier.evex = EVEX128;
 		    break;
 		  }
-		else if (i.broadcast.bytes && op == i.broadcast.operand)
+		else if ((i.broadcast.type || i.broadcast.bytes)
+			 && op == i.broadcast.operand)
 		  {
 		    switch (get_broadcast_bytes (&i.tm, true))
 		      {
@@ -3994,7 +3994,7 @@ build_evex_prefix (void)
 	}
       i.vex.bytes[3] |= vec_length;
       /* Encode the broadcast bit.  */
-      if (i.broadcast.bytes)
+      if (i.broadcast.type || i.broadcast.bytes)
 	i.vex.bytes[3] |= 0x10;
     }
   else if (i.rounding.type != saeonly)
@@ -4495,6 +4495,7 @@ optimize_encoding (void)
 	   && !i.types[0].bitfield.zmmword
 	   && !i.types[1].bitfield.zmmword
 	   && !i.mask.reg
+	   && !i.broadcast.type
 	   && !i.broadcast.bytes
 	   && is_evex_encoding (&i.tm)
 	   && ((i.tm.base_opcode & ~Opcode_SIMD_IntD) == 0x6f
@@ -6594,7 +6595,7 @@ check_VecOperands (const insn_template *t)
   if (t->opcode_modifier.disp8memshift
       && i.disp_encoding <= disp_encoding_8bit)
     {
-      if (i.broadcast.bytes)
+      if (i.broadcast.type || i.broadcast.bytes)
 	i.memshift = t->opcode_modifier.broadcast - 1;
       else if (t->opcode_modifier.disp8memshift != DISP8_SHIFT_VL)
 	i.memshift = t->opcode_modifier.disp8memshift;
@@ -11099,7 +11100,8 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
 	  if (operand_type_check (i.types[j], disp))
 	    i.types[j].bitfield.baseindex = 1;
 
-	  if (i.broadcast.type && j == i.broadcast.operand)
+	  if ((i.broadcast.type || i.broadcast.bytes)
+	      && j == i.broadcast.operand)
 	    continue;
 
 	  combined = operand_type_or (combined, i.types[j]);
@@ -11168,10 +11170,10 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
 
   if (i.vec_encoding == vex_encoding_error
       || (i.vec_encoding != vex_encoding_evex
-	  ? i.broadcast.type
+	  ? i.broadcast.type || i.broadcast.bytes
 	    || i.rounding.type != rc_none
 	    || i.mask.reg
-	  : i.broadcast.type
+	  : (i.broadcast.type || i.broadcast.bytes)
 	    && i.rounding.type != rc_none))
     {
       as_bad (_("conflicting .insn operands"));
