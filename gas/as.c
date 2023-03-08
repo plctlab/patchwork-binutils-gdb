@@ -1307,11 +1307,7 @@ gas_init (void)
   input_scrub_begin ();
   expr_begin ();
 
-  int macro_strip_at = 0;
-#ifdef TC_I960
-  macro_strip_at = flag_mri;
-#endif
-  macro_init (flag_macro_alternate, flag_mri, macro_strip_at);
+  macro_init (flag_macro_alternate, flag_mri);
 
   dwarf2_init ();
 
