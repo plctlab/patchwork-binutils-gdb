@@ -5511,7 +5511,9 @@ There is one predefined 32-bit polynome
 @tab
 @end multitable
 
-There are five predefined 64-bit polynomes
+There are five predefined 64-bit polynomes available on binutils builds
+on 64-bit hosts. They are not available when built on 32-bit hosts unless
+the build is configured with @code{--enable-64-bit-bfd}.
 
 @multitable @columnfractions .3 .4 .4
 @item
@@ -5575,11 +5577,14 @@ bitreverse result (before xor'ing)
 bitreverse polynome before generating table
 @end multitable
 
+Again, 64-bit polynomes are only available when binutils is built on
+a 64-bit host.
+
 The parameters are explained in detail in
 
 @code{http://www.sunshine2k.de/articles/coding/crc/understanding_crc.html}
 
-Some of the predefined polynomes are the same, but differs in the other
+Some of the predefined polynomes look the same, but differs in the other
 parameters.
 
 Note - the generation of 64-bit polynomes on 32-bit hosts for 32-bit

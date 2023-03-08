@@ -34,6 +34,9 @@
 #include <stdbool.h>
 #include "bfd.h"
 
+#if defined(BFD64)
+#define ENABLE_CRC64		1
+
 #define	CRC_POLY_64_ECMA	0x42F0E1EBA9EA3693ull	/* Normal */
 #define	CRC_POLY_64_ECMA_EXP	0x6C40DF5F0B497347ull	/* CRC when testing "123456789" */
 #define	CRC_POLY_64_ECMA_R	0xC96C5795D7870F42ull	/* Reversed */
@@ -54,6 +57,8 @@
 #define	CRC_START_64_INV	0xFFFFFFFFFFFFFFFFull
 #define	CRC_END_64		0x0000000000000000ull
 #define	CRC_END_64_INV		0xFFFFFFFFFFFFFFFFull
+
+#endif
 
 #define	CRC_START_32		0xFFFFFFFFul
 #define	CRC_END_32		0xFFFFFFFFul
@@ -86,11 +91,13 @@ typedef enum algorithm
 
 typedef enum
 {
+#if defined(BFD64)
   CRC64_ECMA,
   CRC64_WE,
   CRC64_XZ,
   CRC64_ISO,
   CRC64_ISO_R,
+#endif
   CRC32,
   MAXALGO
 } poly_t;

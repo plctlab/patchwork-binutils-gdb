@@ -45,10 +45,6 @@ char *CRC_START = NULL;
 char *CRC_END = NULL;
 char *CRC_TABLE = NULL;
 
-
-
-
-
 const char *digest_section = ".text";
 const char *digest_label = "___CRC_LABEL__";
 bool digest_big_endian = false;
@@ -129,7 +125,7 @@ lang_add_crc32_table (bool big_endian)
 }
 
 /* ============ CRC-64 public functions ======================================*/
-
+#if defined(ENABLE_CRC64)
 void
 lang_add_crc64_syndrome (algorithm_desc_t * a)
 {
@@ -148,8 +144,9 @@ lang_add_crc64_syndrome (algorithm_desc_t * a)
       return;
     }
 }
+#endif
 
-#if (DEBUG_CRC == 1)
+#if (DEBUG_CRC == 1) && defined(ENABLE_CRC64)
 static void
 print_hash64_table (algorithm_desc_t * a)
 {
@@ -181,6 +178,7 @@ print_hash64_table (algorithm_desc_t * a)
 #define print_hash64_table(x)
 #endif
 
+#if defined(ENABLE_CRC64)
 static void
 lang_add_crc64_table (bool big_endian)
 {
@@ -224,7 +222,7 @@ lang_add_crc64_table (bool big_endian)
   if (local_table)
     free (crc64_table);
 }
-
+#endif
 /* ============ DIGEST COMMON functions ======================================*/
 
 void
@@ -244,7 +242,22 @@ lang_add_digest (bfd_vma size,
 
   algorithm.name = "CUSTOM";
   algorithm.big_endian = digest_big_endian;
-  if (size == 64)
+  if (size == 32)
+    {
+      algorithm.crc_algo = crc_algo_32;
+      algorithm.crc_size = size;
+      algorithm.poly.d32._0 = poly;	/* Set the polynom */
+      algorithm.initial.d32._0 = initial;	/* Set seed */
+      algorithm.xor_val.d32._0 = xor_val;	/* final XOR value */
+      algorithm.ireflect = ireflect;
+      algorithm.oreflect = oreflect;
+      algorithm.crc_tab = NULL;
+      algorithm.reciprocal = reciprocal;
+      algorithm.expected.d32._0 = 0;
+      lang_add_crc32_syndrome (&algorithm);
+    }
+#if defined(ENABLE_CRC64)
+  else if (size == 64)
     {
       algorithm.crc_algo = crc_algo_64;
       algorithm.crc_size = size;
@@ -259,20 +272,7 @@ lang_add_digest (bfd_vma size,
 
       lang_add_crc64_syndrome (&algorithm);
     }
-  else if (size == 32)
-    {
-      algorithm.crc_algo = crc_algo_32;
-      algorithm.crc_size = size;
-      algorithm.poly.d32._0 = poly;	/* Set the polynom */
-      algorithm.initial.d32._0 = initial;	/* Set seed */
-      algorithm.xor_val.d32._0 = xor_val;	/* final XOR value */
-      algorithm.ireflect = ireflect;
-      algorithm.oreflect = oreflect;
-      algorithm.crc_tab = NULL;
-      algorithm.reciprocal = reciprocal;
-      algorithm.expected.d32._0 = 0;
-      lang_add_crc32_syndrome (&algorithm);
-    }
+#endif
   else
     {
       einfo (_("%F%P: Illegal Size in DIGEST: %E\n"));
@@ -404,15 +404,16 @@ lang_set_digest (char *digest)
 #endif
 	  memcpy (&algorithm, &algorithms[a], sizeof (algorithm_desc_t));
 	  algorithm.big_endian = digest_big_endian;
-	  if (algorithm.crc_size == 64)
-	    {
-	      lang_add_crc64_syndrome (&algorithm);
-	    }
-	  else if (algorithm.crc_size == 32)
+	  if (algorithm.crc_size == 32)
 	    {
 	      lang_add_crc32_syndrome (&algorithm);
 	    }
-
+#if defined(ENABLE_CRC64)
+	  else if (algorithm.crc_size == 64)
+	    {
+	      lang_add_crc64_syndrome (&algorithm);
+	    }
+#endif
 	  return true;
 	}
 #if (DEBUG_CRC == 1)
@@ -433,15 +434,17 @@ lang_add_digest_table (bool big_endian)
     {
       lang_add_crc32_table (big_endian);
     }
+#if defined(ENABLE_CRC64)
   else if (algorithm.crc_algo == crc_algo_64)
     {
       lang_add_crc64_table (big_endian);
     }
+#endif
 }
 
 /* ============ CRC DEBUG functions ==========================================*/
+#if (DEBUG_CRC == 1) && defined(ENABLE_CRC64)
 
-#if (DEBUG_CRC == 1)
 static void
 debug_hex (char *prompt, unsigned char *section, bfd_vma address, bfd_vma sz)
 {
@@ -598,7 +601,7 @@ get_text_section_contents (void)
       return false;
     }
 
-#if (DEBUG_CRC == 1)
+#if (DEBUG_CRC == 1) && defined(ENABLE_CRC64)
   print_section (text_section);
 /*
   printf ("%s: [0x%08lx .. 0x%08lx]\n",
@@ -865,7 +868,7 @@ lang_generate_crc (void)
 			 _crc_area_end - _crc_area_start);
 #endif
 
-#if (DEBUG_CRC == 1)
+#if (DEBUG_CRC == 1) && defined(ENABLE_CRC64)
     printf ("size  = 0x%08u\n", (uint32_t) (_crc_area_end - _crc_area_start));
     printf ("start = 0x%016lx\n", _crc_area_start);
     printf ("end   = 0x%016lx\n", _crc_area_end);

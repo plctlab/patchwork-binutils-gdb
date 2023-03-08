@@ -36,6 +36,7 @@
 
 const algorithm_desc_t algorithms[MAXALGO+1] =
 {
+#if defined(ENABLE_CRC64)
   [CRC64_ECMA] =
 	{
 		crc_algo_64, 64, "CRC64-ECMA",
@@ -96,6 +97,7 @@ const algorithm_desc_t algorithms[MAXALGO+1] =
 		.crc_tab = NULL,
 		.expected.d64 = 0xb90956c775a41001
 	},
+#endif
   [CRC32] =
 	{
 		crc_algo_32, 32, "CRC32",
