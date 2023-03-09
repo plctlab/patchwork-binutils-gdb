@@ -182,6 +182,9 @@ riscv_elf_append_rela (bfd *abfd, asection *s, Elf_Internal_Rela *rel)
   const struct elf_backend_data *bed;
   bfd_byte *loc;
 
+  if (!s || !s->contents)
+    abort ();
+
   bed = get_elf_backend_data (abfd);
   loc = s->contents + (s->reloc_count++ * bed->s->sizeof_rela);
   bed->s->swap_reloca_out (abfd, rel, loc);
