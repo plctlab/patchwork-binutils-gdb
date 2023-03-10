@@ -145,6 +145,7 @@ static int error_index;
 %token NOLOAD DSECT COPY INFO OVERLAY
 %token READONLY
 %token TYPE
+%token BANK SECTOR ALIGN_SECTOR
 %token DEFINED TARGET_K SEARCH_DIR MAP ENTRY
 %token <integer> NEXT
 %token SIZEOF ALIGNOF ADDR LOADADDR MAX_K MIN_K
@@ -309,6 +310,9 @@ ifile_list:
 
 ifile_p1:
 		memory
+	|	BANK '(' NAME ')'
+		{ lang_add_bank($3); }
+		'{' sector_list '}'
 	|	sections
 	|	phdrs
 	|	startup
@@ -365,6 +369,17 @@ ifile_p1:
 		{ lang_memory_region_alias ($3, $5); }
 	|	LD_FEATURE '(' NAME ')'
 		{ lang_ld_feature ($3); }
+	;
+
+sector_list:
+	sector_list sector
+	|
+	;
+
+sector:
+		SECTOR '(' NAME ')' {
+			lang_add_sector($3);
+		} ';'
 	;
 
 input_list:
@@ -713,6 +728,10 @@ statement:
 	| TIMESTAMP
 		{
 		  lang_add_timestamp ();
+		}
+	| ALIGN_SECTOR
+		{
+		  lang_align_sector ();
 		}
 	| ASSERT_K
 		{ ldlex_expression (); }
