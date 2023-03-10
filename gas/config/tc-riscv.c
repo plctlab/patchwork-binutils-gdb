@@ -2184,7 +2184,7 @@ parse_relocation (char **str, bfd_reloc_code_real_type *reloc,
       {
 	size_t len = 1 + strlen (percent_op->str);
 
-	if (!ISSPACE ((*str)[len]) && (*str)[len] != '(')
+	if (is_part_of_name ((*str)[len]))
 	  continue;
 
 	*str += len;
