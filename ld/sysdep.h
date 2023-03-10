@@ -41,6 +41,8 @@
 #include <unistd.h>
 #endif
 
+#include <errno.h>
+
 #ifdef HAVE_REALPATH
 # define REALPATH(a,b) realpath (a, b)
 #else
