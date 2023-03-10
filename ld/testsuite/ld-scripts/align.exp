@@ -46,6 +46,9 @@ if ![is_aout_format] {
     run_dump_test align3
     run_dump_test align4
     run_dump_test align5
+    run_dump_test align_sector
+    run_dump_test align_dummy_sector
+    run_dump_test align_sector_fail
 }
 run_dump_test align2c
 set LDFLAGS "$saved_LDFLAGS"
