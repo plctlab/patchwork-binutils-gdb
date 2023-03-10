@@ -5884,6 +5884,12 @@ calc_crc32 (const unsigned char *input_str, size_t num_bytes)
 The @code{TIMESTAMP} command creates 64-bit integer with the number of seconds
 since Epoch (1970-01-01 00:00).
 
+@cindex output section strings
+@kindex ALIGN_SECTOR
+
+The @code{ALIGN_SECTOR} command will align the location counter to the next
+flash sector boundary. The sectors are defined by a @code{BANK} command.
+
 @kindex FILL(@var{expression})
 @cindex holes, filling
 @cindex unspecified memory
@@ -6574,7 +6580,104 @@ expression via the @code{ORIGIN(@var{memory})} and
   _fstack = ORIGIN(ram) + LENGTH(ram) - 4;
 @end group
 @end smallexample
+@page
+@node BANK
+@section BANK Command
+@kindex BANK
+@kindex SECTOR
+@cindex memory regions
+@cindex regions of memory
+@cindex allocating memory
 
+The @code{BANK} command defines the boundaries of flash memory sectors.
+It contains a list of @code{SECTOR} commands, each defining symbols for the
+@code{begin}, @code{end} and @code{size} of a sector prefixed by the bank name.
+You can have multiple banks. The first bank starts at address @code{0x00000000}.
+A bank with a name that starts with @code{dummy} is ignored and can be used
+as a filler.
+
+The @code{SECTOR} command has a single string parameter containing the size
+of the sector. It can contain a multiplier. Valid multipliers are
+@code{BYTES}, @code{KB} and @code{MB} for a multiplier of 1, 1024 and 1024*1024.
+@sp 1
+Example of @code{BANK} command defining 3 flash sectors.
+@sp 1
+@smallexample
+@group
+  BANK ( bank0 ) @{
+    SECTOR ("16 KB");
+    SECTOR ("16 KB");
+    SECTOR ("32 KB");
+  @}
+@end group
+@end smallexample
+
+@sp 1
+Example of a @code{BANK} command defining 3 flash sectors combined with
+@code{ALIGN_SECTOR} command.
+@sp 1
+@smallexample
+@group
+  BANK ( bank0 ) @{
+    SECTOR ("1 KB");
+    SECTOR ("1 KB");
+    SECTOR ("2 KB");
+  @}
+
+  SECTIONS
+  @{
+    .text : @{
+        sector0 = .;
+        ASCIZ "sector0"
+        endstring = .;
+        ALIGN_SECTOR
+        sector1 = .;
+    @}
+  @}
+
+  sector0   == 0x0000
+  endstring == 0x0008
+  sector1   == 0x0400
+@end group
+@end smallexample
+
+@page
+
+Example of using a dummy bank to shift the origin to 0x10000.
+@sp 1
+@smallexample
+@group
+  BANK ( dummy ) @{
+    SECTOR ("64 KB");
+  @}
+  BANK ( bank0 ) @{
+    SECTOR ("1 KB");
+    SECTOR ("1 KB");
+    SECTOR ("2 KB");
+  @}
+  MEMORY @{
+    rom : ORIGIN = 0x10000, LENGTH = 0x4000
+    ram : ORIGIN = 0x14000, LENGTH = 0x1000
+  @}
+  SECTIONS
+  @{
+    .text : @{
+        sector0 = .;
+        ASCIZ "sector0"
+        endstring = .;
+        ALIGN_SECTOR
+        sector1 = .;
+    @} > rom
+  @}
+
+  sector0   == 0x10000
+  endstring == 0x10008
+  sector1   == 0x10400
+@end group
+@end smallexample
+
+
+@page
 @node PHDRS
 @section PHDRS Command
 @kindex PHDRS
