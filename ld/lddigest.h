@@ -189,4 +189,11 @@ extern void lang_generate_crc
 extern void lang_generate_digest
   (void);
 
+extern void lang_add_bank
+  (const char *name);
+extern void lang_add_sector
+  (const char *size);
+extern void lang_align_sector
+  (void);
+
 #endif /* LDDIGEST_H */
