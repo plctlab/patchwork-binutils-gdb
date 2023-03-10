@@ -323,9 +323,10 @@ static inline unsigned int riscv_insn_length (insn_t insn)
 
 /* These fake label defines are use by both the assembler, and
    libopcodes.  The assembler uses this when it needs to generate a fake
-   label, and libopcodes uses it to hide the fake labels in its output.  */
-#define RISCV_FAKE_LABEL_NAME ".L0 "
-#define RISCV_FAKE_LABEL_CHAR ' '
+   label, and libopcodes uses it to hide the fake labels in its output.
+   See gas/write.h for constraints.  */
+#define RISCV_FAKE_LABEL_NAME ".L0?"
+#define RISCV_FAKE_LABEL_CHAR '?'
 
 /* Replace bits MASK << SHIFT of STRUCT with the equivalent bits in
    VALUE << SHIFT.  VALUE is evaluated exactly once.  */

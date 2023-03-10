@@ -38,8 +38,7 @@ struct expressionS;
 #define LOCAL_LABELS_FB 	1
 
 /* Symbols named FAKE_LABEL_NAME are emitted when generating DWARF, so make
-   sure FAKE_LABEL_NAME is printable.  It still must be distinct from any
-   real label name.  So, append a space, which other labels can't contain.  */
+   sure FAKE_LABEL_NAME is printable.  See write.h for constraints.  */
 #define FAKE_LABEL_NAME RISCV_FAKE_LABEL_NAME
 /* Changing the special character in FAKE_LABEL_NAME requires changing
    FAKE_LABEL_CHAR too.  */

@@ -33,3 +33,9 @@ m4	"!!<>'"
 	.altmacro
 
 m3	"!!<>'"
+
+	.macro	m2b v1, v2
+	m1 %v2-v1 17
+	.endm
+
+	m2b 81 243

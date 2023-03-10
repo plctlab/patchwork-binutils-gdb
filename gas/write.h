@@ -30,7 +30,8 @@
 /* This is a special character that is used to indicate a fake label.
    It must be present in FAKE_LABEL_NAME, although it does not have to
    be the first character.  It must not be a character that would be
-   found in a valid symbol name.
+   found in a valid symbol name, nor one that starts an operator, nor
+   one that's a separator of some kind.
 
    Also be aware that the function _bfd_elf_is_local_label_name in
    bfd/elf.c has an implicit assumption that FAKE_LABEL_CHAR is '\001'.

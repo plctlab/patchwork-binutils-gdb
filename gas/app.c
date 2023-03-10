@@ -200,6 +200,11 @@ do_scrub_begin (int m68k_mri ATTRIBUTE_UNUSED)
   lex['-'] = LEX_IS_SYMBOL_COMPONENT;
 #endif
 
+  /* If not otherwise used (which it shouldn't be - see write.h), mark the
+     fake label character as a possible part of symbol names.  */
+  if (!lex[(unsigned char) FAKE_LABEL_CHAR])
+    lex[(unsigned char) FAKE_LABEL_CHAR] = LEX_IS_SYMBOL_COMPONENT;
+
 #ifdef H_TICK_HEX
   if (enable_h_tick_hex)
     {
