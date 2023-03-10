@@ -1,5 +1,47 @@
 -*- text -*-
 
+* The linker script now support aligning to a Flash sector boundary.
+  The BANK command defines the flash bank name, and contains a list
+  of sector definitions.
+  symbols are defined for "begin", "end" and "size" of a sector.
+
+  An 'ALIGN_SECTOR' command will check the location counter
+  against the defined sectors and if inside a sector, it will
+  align to the sector boundary.
+
+  New commands:
+
+  BANK ( bankname ) { sector_list }
+  SECTOR ( "<size" ) ;  - sector definition: valid inside a BANK command
+  ALIGN_SECTOR
+
+  The size parameter is a string containing two elements.
+  A number and a modifier. Valid modifiers are "BYTES", "KB" and "MB".
+  The modifiers are not case sensitive.
+
+  Example:
+
+  BANK ( bank0 ) {
+    SECTOR ("1 KB");
+    SECTOR ("1 KB");
+    SECTOR ("2 KB");
+  }
+
+  SECTIONS
+  {
+    .text : {
+	sector0 = .;
+	ASCIZ "sector0"
+        endstring = .;
+	ALIGN_SECTOR
+	sector1 = .;
+    }
+  }
+
+  sector0   == 0x0000
+  endstring == 0x0008
+  sector1   == 0x0400
+
 * The linker script has a new command to insert a timestamp
   TIMESTAMP
   inserts the current time (seconds since Epoch) as a 64-bit value
