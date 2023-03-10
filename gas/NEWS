@@ -1,5 +1,7 @@
 -*- text -*-
 
+* A new .insn directive is recognized by x86 gas.
+
 Changes in 2.40:
 
 * Add support for Intel RAO-INT instructions.
