@@ -479,7 +479,7 @@ CFILES = ldctor.c ldemul.c ldexp.c ldfile.c ldlang.c \
 	ldmain.c ldmisc.c ldver.c ldwrite.c lexsup.c \
 	mri.c ldcref.c pe-dll.c pep-dll.c ldlex-wrapper.c \
 	plugin.c ldbuildid.c ldelf.c ldelfgen.c \
-	lddigest.c lddigest_tab.c ldcrc32.c ldcrc64.c ldreflect.c \
+	lddigest.c lddigest_tab.c ldcrc32.c ldcrc64.c ldreflect.c ldsectors.c \
 	pdb.c
 
 HFILES = ld.h ldctor.h ldemul.h ldexp.h ldfile.h \
@@ -497,7 +497,7 @@ GENERATED_HFILES = ldgram.h ldemul-list.h deffilep.h
 BUILT_SOURCES = $(GENERATED_HFILES)
 
 OFILES = ldgram.@OBJEXT@ ldlex-wrapper.@OBJEXT@ lexsup.@OBJEXT@ ldlang.@OBJEXT@ \
-	lddigest.@OBJEXT@ lddigest_tab.@OBJEXT@ \
+	lddigest.@OBJEXT@ lddigest_tab.@OBJEXT@ ldsectors.@OBJEXT@ \
 	ldcrc32.@OBJEXT@ ldcrc64.@OBJEXT@ ldreflect.@OBJEXT@ \
 	mri.@OBJEXT@ ldctor.@OBJEXT@ ldmain.@OBJEXT@ plugin.@OBJEXT@ \
 	ldwrite.@OBJEXT@ ldexp.@OBJEXT@  ldemul.@OBJEXT@ ldver.@OBJEXT@ ldmisc.@OBJEXT@ \
@@ -966,7 +966,7 @@ EXTRA_ld_new_SOURCES = deffilep.y ldlex.l
 EXTRA_ld_new_SOURCES += ldelf.c ldelfgen.c pdb.c pep-dll.c pe-dll.c
 
 ld_new_SOURCES = ldgram.y ldlex-wrapper.c lexsup.c ldlang.c mri.c ldctor.c ldmain.c \
-	lddigest.c lddigest_tab.c ldcrc32.c ldcrc64.c ldreflect.c \
+	lddigest.c lddigest_tab.c ldcrc32.c ldcrc64.c ldreflect.c ldsectors.c \
 	ldwrite.c ldexp.c ldemul.c ldver.c ldmisc.c ldfile.c ldcref.c plugin.c \
 	ldbuildid.c
 ld_new_DEPENDENCIES = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) \
