@@ -4,3 +4,6 @@
 # Don't accept a symbol without %hi() for 'u' operands.
 	auipc	x12,symbol
 	lui	x13,symbol
+# Accept unary operators starting the subject expression.
+	auipc	x14,%hi +symbol
+	lui	x15,%hi -0x12345678
