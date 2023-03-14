@@ -710,7 +710,6 @@ ldfile_open_command_file_1 (const char *name, enum script_open_style open_how)
       einfo (_("%F%P: cannot open linker script file %s: %E\n"), name);
       return;
     }
-
   track_dependency_files (name);
 
   lex_push_file (ldlex_input_stack, name, sysrooted);
@@ -727,6 +726,34 @@ void
 ldfile_open_command_file (const char *name)
 {
   ldfile_open_command_file_1 (name, script_nonT);
+}
+
+void
+ldfile_open_chip_file (const char *name)
+{
+  char *fullname;
+  char *proj   = getenv("PROJ_DIR");
+  if (proj != NULL)
+    {
+      ldfile_add_library_path(proj, false);
+    }
+  char *user   = getenv("LD_USER_DIR");
+  if (user != NULL)
+    {
+      fullname = concat(user, slash, name , (const char *) NULL);
+      ldfile_add_library_path(fullname, false);
+      free(fullname);
+    }
+  char *vendor = getenv("LD_VENDOR_DIR");
+  if (vendor != NULL)
+    {
+      fullname = concat(vendor, slash, name , (const char *) NULL);
+      ldfile_add_library_path(fullname, false);
+      free(fullname);
+    }
+  fullname = concat(name, ".inc", (const char *) NULL);
+  ldfile_open_command_file_1 (fullname, script_nonT);
+  free(fullname);
 }
 
 void

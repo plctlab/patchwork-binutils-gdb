@@ -46,6 +46,8 @@ extern void ldfile_add_library_path
   (const char *, bool cmdline);
 extern void ldfile_open_command_file
   (const char *name);
+extern void ldfile_open_chip_file
+  (const char *name);
 extern void ldfile_open_script_file
   (const char *name);
 extern void ldfile_open_default_command_file
