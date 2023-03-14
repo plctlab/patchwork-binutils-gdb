@@ -343,6 +343,9 @@ ifile_p1:
 	|	INCLUDE filename
 		{ ldfile_open_command_file ($2); }
 		ifile_list END
+	|	CHIP filename
+		{ ldfile_open_chip_file ($2); }
+		ifile_list END
 	|	NOCROSSREFS '(' nocrossref_list ')'
 		{
 		  lang_add_nocrossref ($3);
