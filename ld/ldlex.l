@@ -353,7 +353,7 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
 <MRI>"ABSOLUTE"			{ RTOKEN(ABSOLUTE); }
 <MRI>"ALIGNMOD"			{ RTOKEN(ALIGNMOD);}
 <MRI>"ALIGN"			{ RTOKEN(ALIGN_K);}
-<MRI>"CHIP"			{ RTOKEN(CHIP); }
+<SCRIPT,MRI>"CHIP"		{ RTOKEN(CHIP); }
 <MRI>"BASE"			{ RTOKEN(BASE); }
 <MRI>"ALIAS"			{ RTOKEN(ALIAS); }
 <MRI>"TRUNCATE"			{ RTOKEN(TRUNCATE); }
@@ -370,7 +370,7 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
 <MRI>"absolute"			{ RTOKEN(ABSOLUTE); }
 <MRI>"alignmod"			{ RTOKEN(ALIGNMOD);}
 <MRI>"align"			{ RTOKEN(ALIGN_K);}
-<MRI>"chip"			{ RTOKEN(CHIP); }
+<SCRIPT,MRI>"chip"		{ RTOKEN(CHIP); }
 <MRI>"base"			{ RTOKEN(BASE); }
 <MRI>"alias"			{ RTOKEN(ALIAS); }
 <MRI>"truncate"			{ RTOKEN(TRUNCATE); }
