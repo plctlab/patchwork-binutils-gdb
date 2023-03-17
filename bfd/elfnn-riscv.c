@@ -806,13 +806,31 @@ riscv_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_RISCV_HI20:
 	  if (bfd_link_pic (info))
 	    return bad_static_reloc (abfd, r_type, h);
-	  /* Fall through.  */
+	  goto static_reloc;
+
+	case R_RISCV_32:
+	  if (ARCH_SIZE > 32
+	      && bfd_link_pic (info)
+	      && (sec->flags & SEC_ALLOC) != 0)
+	    {
+	      if (h != NULL && bfd_is_abs_symbol (&h->root))
+		break;
+
+	      reloc_howto_type *r_t = riscv_elf_rtype_to_howto (abfd, r_type);
+	      _bfd_error_handler
+		(_("%pB: relocation %s against `%s' can not be used in RVNN "
+		   "when making a shared object"),
+		 abfd, r_t ? r_t->name : _("<unknown>"),
+		 h != NULL ? h->root.root.string : "a local symbol");
+	      bfd_set_error (bfd_error_bad_value);
+	      return false;
+	    }
+	  goto static_reloc;
 
 	case R_RISCV_COPY:
 	case R_RISCV_JUMP_SLOT:
 	case R_RISCV_RELATIVE:
 	case R_RISCV_64:
-	case R_RISCV_32:
 	  /* Fall through.  */
 
 	static_reloc:
@@ -2606,6 +2624,11 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	  break;
 
 	case R_RISCV_32:
+	  /* Non ABS symbol should be blocked in check_relocs.  */
+	  if (ARCH_SIZE > 32)
+	    break;
+	  /* Fall through.  */
+
 	case R_RISCV_64:
 	  if ((input_section->flags & SEC_ALLOC) == 0)
 	    break;
@@ -2628,7 +2651,6 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	    {
 	      Elf_Internal_Rela outrel;
 	      asection *sreloc;
-	      bool skip_static_relocation, skip_dynamic_relocation;
 
 	      /* When generating a shared object, these relocations
 		 are copied into the output file to be resolved at run
@@ -2637,12 +2659,27 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	      outrel.r_offset =
 		_bfd_elf_section_offset (output_bfd, info, input_section,
 					 rel->r_offset);
-	      skip_static_relocation = outrel.r_offset != (bfd_vma) -2;
-	      skip_dynamic_relocation = outrel.r_offset >= (bfd_vma) -2;
+
+	      bool skip = false;
+	      bool relocate = false;
+	      if (outrel.r_offset == (bfd_vma) -1)
+		skip = true;
+	      else if (outrel.r_offset == (bfd_vma) -2)
+		{
+		  skip = true;
+		  relocate = true;
+		}
+	      else if (h != NULL && bfd_is_abs_symbol (&h->root))
+		{
+		  /* Local absolute symbol.  */
+		  skip = (h->forced_local || (h->dynindx == -1));
+		  relocate = skip;
+		}
+
 	      outrel.r_offset += sec_addr (input_section);
 
-	      if (skip_dynamic_relocation)
-		memset (&outrel, 0, sizeof outrel);
+	      if (skip)
+		memset (&outrel, 0, sizeof outrel);	/* R_RISCV_NONE.  */
 	      else if (h != NULL && h->dynindx != -1
 		       && !(bfd_link_pic (info)
 			    && SYMBOLIC_BIND (info, h)
@@ -2659,7 +2696,7 @@ riscv_elf_relocate_section (bfd *output_bfd,
 
 	      sreloc = elf_section_data (input_section)->sreloc;
 	      riscv_elf_append_rela (output_bfd, sreloc, &outrel);
-	      if (skip_static_relocation)
+	      if (!relocate)
 		continue;
 	    }
 	  break;
