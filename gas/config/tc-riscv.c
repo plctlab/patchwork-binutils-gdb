@@ -1399,6 +1399,14 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 		  goto unknown_validate_operand;
 		}
 	      break;
+	    case 'f':
+	      switch (*++oparg)
+		{
+		case 'v': USE_BITS (OP_MASK_RS1, OP_SH_RS1); break;
+		default:
+		  goto unknown_validate_operand;
+		}
+	      break;
 	    default:
 	      goto unknown_validate_operand;
 	    }
@@ -3456,6 +3464,23 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 			  (unsigned) (imm_expr->X_add_number) & ~0x1fU);
 		      imm_expr->X_op = O_absent;
 		      asarg = expr_parse_end;
+		      continue;
+		    default:
+		      goto unknown_riscv_ip_operand;
+		    }
+		  break;
+		case 'f':
+		  switch (*++oparg)
+		    {
+		    case 'v':
+		      /* FLI.[HSDQ] value field for 'Zfa' extension.  */
+		      if (!arg_lookup (&asarg, riscv_fli_value,
+				       ARRAY_SIZE (riscv_fli_value), &regno))
+			{
+			  as_bad (_("improper fli value operand"));
+			  break;
+			}
+		      INSERT_OPERAND (RS1, *ip, regno);
 		      continue;
 		    default:
 		      goto unknown_riscv_ip_operand;
