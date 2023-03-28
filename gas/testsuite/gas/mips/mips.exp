@@ -536,7 +536,7 @@ mips_arch_create xlr 	64	mips64	{ oddspreg } \
 mips_arch_create r5900 	64	mips3	{ gpr_ilocks singlefloat nollsc } \
 			{ -march=r5900 -mtune=r5900 } { -mmips:5900 } \
 			{ mipsr5900el-*-* mips64r5900el-*-* }
-mips_arch_create allegrex 32	mips2	{ singlefloat oddspreg } \
+mips_arch_create allegrex 32	mips2	{ singlefloat ror oddspreg } \
 			{ -march=allegrex -mtune=allegrex } { -mmips:allegrex } \
 			{ allegrex-*-* allegrex-*-* }
 mips_arch_create mips16e2-interaptiv-mr2 32 mips16e2-32 {} \
