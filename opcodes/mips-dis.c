@@ -706,6 +706,10 @@ const struct mips_arch_choice mips_arch_choices[] =
     mips_cp0sel_names_xlr, ARRAY_SIZE (mips_cp0sel_names_xlr),
     mips_cp1_names_mips3264, mips_hwr_names_numeric },
 
+  { "allegrex", 1, bfd_mach_mips_allegrex, CPU_ALLEGREX,
+    ISA_MIPS2, 0, mips_cp0_names_numeric, NULL, 0,
+    mips_cp1_names_numeric, mips_hwr_names_numeric },
+
   /* This entry, mips16, is here only for ISA/processor selection; do
      not print its name.  */
   { "",		1, bfd_mach_mips16, CPU_MIPS16, ISA_MIPS64,
