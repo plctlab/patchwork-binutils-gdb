@@ -695,6 +695,7 @@ WARN_CFLAGS
 REPORT_BUGS_TEXI
 REPORT_BUGS_TO
 PKGVERSION
+DEFAULT_ARCH
 DEBUGDIR
 ENABLE_BFD_64_BIT_FALSE
 ENABLE_BFD_64_BIT_TRUE
@@ -13774,6 +13775,10 @@ do
 	TDEFINES="$TDEFINES $targ_cflags"
     fi
 done
+
+if test -n "$DEFAULT_ARCH"; then
+  TDEFINES="$TDEFINES -DDEFAULT_ARCH=\\\"${DEFAULT_ARCH}\\\""
+fi
 
 
 # This processing still needs to be done if we're to decide properly whether

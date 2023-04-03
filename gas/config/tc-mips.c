@@ -1422,6 +1422,15 @@ static int relaxed_micromips_16bit_branch_length (fragS *, asection *, int);
 static int relaxed_micromips_32bit_branch_length (fragS *, asection *, int);
 static void file_mips_check_options (void);
 
+/* A table describing all ISA and its 32bit and 64bit version for best matching */
+
+struct mips_isa_32_64
+{
+  int isa;
+  int isa_32;
+  int isa_64;
+};
+
 /* Table and functions used to map between CPU/ISA names, and
    ISA levels, and CPU numbers.  */
 
@@ -1439,6 +1448,7 @@ struct mips_cpu_info
 static const struct mips_cpu_info *mips_parse_cpu (const char *, const char *);
 static const struct mips_cpu_info *mips_cpu_info_from_isa (int);
 static const struct mips_cpu_info *mips_cpu_info_from_arch (int);
+static int mips_cpu_isa_32_64(int isa, int bits);
 
 /* Command-line options.  */
 const char *md_shortopts = "O::g::G:";
@@ -19979,6 +19989,28 @@ s_mips_mask (int reg_type)
     }
 }
 
+
+/* A table describing all ISA and its 32bit and 64bit version for best matching */
+static const struct mips_isa_32_64 mips_isa_32_64_table[] =
+{
+  { ISA_MIPS1, ISA_MIPS1, ISA_MIPS3 },
+  { ISA_MIPS2, ISA_MIPS2, ISA_MIPS3 },
+  { ISA_MIPS3, ISA_MIPS2, ISA_MIPS3 },
+  { ISA_MIPS4, ISA_MIPS2, ISA_MIPS4 },
+  { ISA_MIPS5, ISA_MIPS2, ISA_MIPS5 },
+  { ISA_MIPS32, ISA_MIPS32, ISA_MIPS64 },
+  { ISA_MIPS32R2, ISA_MIPS32R2, ISA_MIPS64R2 },
+  { ISA_MIPS32R3, ISA_MIPS32R3, ISA_MIPS64R3 },
+  { ISA_MIPS32R5, ISA_MIPS32R5, ISA_MIPS64R5 },
+  { ISA_MIPS32R6, ISA_MIPS32R6, ISA_MIPS64R6 },
+  { ISA_MIPS64, ISA_MIPS32, ISA_MIPS64 },
+  { ISA_MIPS64R2, ISA_MIPS32R2, ISA_MIPS64R2 },
+  { ISA_MIPS64R3, ISA_MIPS32R3, ISA_MIPS64R3 },
+  { ISA_MIPS64R5, ISA_MIPS32R5, ISA_MIPS64R5 },
+  { ISA_MIPS64R6, ISA_MIPS32R6, ISA_MIPS64R6 },
+  { 0, 0, 0 }
+};
+
 /* A table describing all the processors gas knows about.  Names are
    matched in the order listed.
 
@@ -20223,6 +20255,9 @@ static const struct mips_cpu_info *
 mips_parse_cpu (const char *option, const char *cpu_string)
 {
   const struct mips_cpu_info *p;
+  const struct mips_cpu_info *default_cpu;
+  int default_isa32 = ISA_MIPS1;
+  int default_isa64 = ISA_MIPS3;
 
   /* 'from-abi' selects the most compatible architecture for the given
      ABI: MIPS I for 32-bit ABIs and MIPS III for 64-bit ABIs.  For the
@@ -20236,19 +20271,26 @@ mips_parse_cpu (const char *option, const char *cpu_string)
      'mips64', just as we did in the days before 'from-abi'.  */
   if (strcasecmp (cpu_string, "from-abi") == 0)
     {
+	for (default_cpu = mips_cpu_info_table; default_cpu->name != 0; default_cpu++)
+	  if (mips_matching_cpu_name_p (default_cpu->name, MIPS_CPU_STRING_DEFAULT))
+	    {
+	      default_isa32 = mips_cpu_isa_32_64 (default_cpu->isa, 32);
+	      default_isa64 = mips_cpu_isa_32_64 (default_cpu->isa, 64);
+	      break;
+	    }
       if (ABI_NEEDS_32BIT_REGS (mips_abi))
-	return mips_cpu_info_from_isa (ISA_MIPS1);
+	return mips_cpu_info_from_isa (default_isa32);
 
       if (ABI_NEEDS_64BIT_REGS (mips_abi))
-	return mips_cpu_info_from_isa (ISA_MIPS3);
+	return mips_cpu_info_from_isa (default_isa64);
 
       if (file_mips_opts.gp >= 0)
 	return mips_cpu_info_from_isa (file_mips_opts.gp == 32
-				       ? ISA_MIPS1 : ISA_MIPS3);
+				       ? default_isa32 : default_isa64);
 
       return mips_cpu_info_from_isa (MIPS_DEFAULT_64BIT
-				     ? ISA_MIPS3
-				     : ISA_MIPS1);
+				     ? default_isa64
+				     : default_isa32);
     }
 
   /* 'default' has traditionally been a no-op.  Probably not very useful.  */
@@ -20260,6 +20302,24 @@ mips_parse_cpu (const char *option, const char *cpu_string)
       return p;
 
   as_bad (_("bad value (%s) for %s"), cpu_string, option);
+  return 0;
+}
+
+/* Return the best matching 32bit/64bit ISA of a ISA, according the table
+   mips_isa_32_64_table */
+static int
+mips_cpu_isa_32_64(int isa, int bits)
+{
+  int i;
+
+  for (i = 0; mips_isa_32_64_table[i].isa != 0; i++)
+    if (isa != mips_isa_32_64_table[i].isa)
+      continue;
+    else if (bits == 32)
+      return mips_isa_32_64_table[i].isa_32;
+    else if (bits == 64)
+      return mips_isa_32_64_table[i].isa_64;
+
   return 0;
 }
 

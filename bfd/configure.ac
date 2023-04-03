@@ -341,6 +341,10 @@ do
 	TDEFINES="$TDEFINES $targ_cflags"
     fi
 done
+
+if test -n "$DEFAULT_ARCH"; then
+  TDEFINES="$TDEFINES -DDEFAULT_ARCH=\\\"${DEFAULT_ARCH}\\\""
+fi
 AC_SUBST(TDEFINES)
 
 # This processing still needs to be done if we're to decide properly whether
