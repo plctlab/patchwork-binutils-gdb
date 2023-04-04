@@ -262,6 +262,30 @@ AC_CACHE_CHECK(linker --as-needed support, bfd_cv_ld_as_needed,
 
 LT_LIB_M
 
+build_info=
+makeinfo_too_old=
+AC_CHECK_PROGS([MAKEINFO], makeinfo, [$MISSING makeinfo])
+case " $build_configdirs " in
+  *" texinfo "*) MAKEINFO='$$r/$(BUILD_SUBDIR)/texinfo/makeinfo/makeinfo' ;;
+esac
+changequote(,)
+    # We require texinfo to be 5.0 or later, otherwise we fall back
+    # to /bin/true.
+    if ${MAKEINFO} --version \
+       | egrep 'texinfo[^0-9]*([5-9]|[1-9][0-9]\.)' >/dev/null 2>&1; then
+      build_info=yes
+    else
+      build_info=
+      makeinfo_too_old=t
+    fi
+changequote([,])
+if test -n "$makeinfo_too_old"; then
+    AC_MSG_WARN([
+*** Makeinfo is too old. Info documentation for BFD will not be built.])
+fi
+AC_SUBST(MAKEINFO)
+AM_CONDITIONAL(BUILD_INFO, test "${build_info}" = yes)
+
 # When building a shared libbfd, link against the pic version of libiberty
 # so that apps that use libbfd won't need libiberty just to satisfy any
 # libbfd references.

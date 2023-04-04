@@ -17,6 +17,8 @@
 ## <http://www.gnu.org/licenses/>.
 ##
 
+if BUILD_INFO
+
 DOCFILES = \
 	%D%/aoutx.texi \
 	%D%/archive.texi \
@@ -151,3 +153,11 @@ html-local: %D%/bfd/index.html
 	  --split=node -o %D%/bfd $(srcdir)/%D%/bfd.texi
 
 MAINTAINERCLEANFILES += %D%/bfd.info
+
+else
+
+# Workaround bug in automake: it can't handle conditionally building info pages
+# since GNU projects normally include info pages in the source distributions.
+%D%/bfd.info:
+
+endif

@@ -110,6 +110,10 @@ host_triplet = @host@
 target_triplet = @target@
 @INSTALL_LIBBFD_FALSE@am__append_1 = -rpath $(rpath_bfdlibdir)
 @PLUGINS_TRUE@am__append_2 = $(INCDIR)/plugin-api.h
+TEXI2DVI = texi2dvi
+@BUILD_INFO_TRUE@am__append_3 = $(MKDOC) doc/*.o doc/*.stamp
+@BUILD_INFO_TRUE@am__append_4 = doc/bfd.?? doc/bfd.??? texput.log
+@BUILD_INFO_TRUE@am__append_5 = $(DOCFILES) doc/bfd.info
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/../config/acx.m4 \
@@ -259,7 +263,7 @@ DVIS = doc/bfd.dvi
 PDFS = doc/bfd.pdf
 PSS = doc/bfd.ps
 HTMLS = doc/bfd.html
-TEXINFOS = doc/bfd.texi
+TEXINFOS =
 TEXI2PDF = $(TEXI2DVI) --pdf --batch
 MAKEINFOHTML = $(MAKEINFO) --html
 AM_MAKEINFOHTMLFLAGS = $(AM_MAKEINFOFLAGS)
@@ -488,12 +492,12 @@ zlibdir = @zlibdir@
 zlibinc = @zlibinc@
 AUTOMAKE_OPTIONS = no-dist foreign info-in-builddir no-texinfo.tex
 ACLOCAL_AMFLAGS = -I . -I .. -I ../config
-MOSTLYCLEANFILES = ofiles stamp-ofiles $(MKDOC) doc/*.o doc/*.stamp
+MOSTLYCLEANFILES = ofiles stamp-ofiles $(am__append_3)
 CLEANFILES = bfd.h dep.sed stmp-bfd-h DEP DEPA DEP1 DEP2 stmp-bin2-h \
 	stmp-lbfd-h stmp-lcoff-h
 DISTCLEANFILES = $(BUILD_CFILES) $(BUILD_HFILES) libtool-soversion \
-	doc/bfd.?? doc/bfd.??? texput.log
-MAINTAINERCLEANFILES = $(DOCFILES) doc/bfd.info
+	$(am__append_4)
+MAINTAINERCLEANFILES = $(am__append_5)
 INCDIR = $(srcdir)/../include
 CSEARCH = -I. -I$(srcdir) -I$(INCDIR)
 SUBDIRS = po
@@ -1228,66 +1232,66 @@ REGEN_HEADER = \
 	echo "\#endif"; \
 	)
 
-DOCFILES = \
-	doc/aoutx.texi \
-	doc/archive.texi \
-	doc/archures.texi \
-	doc/bfdio.texi \
-	doc/bfdt.texi \
-	doc/bfdver.texi \
-	doc/bfdwin.texi \
-	doc/cache.texi \
-	doc/coffcode.texi \
-	doc/corefile.texi \
-	doc/elfcode.texi \
-	doc/elf.texi \
-	doc/format.texi \
-	doc/hash.texi \
-	doc/libbfd.texi \
-	doc/linker.texi \
-	doc/mmo.texi \
-	doc/opncls.texi \
-	doc/reloc.texi \
-	doc/section.texi \
-	doc/syms.texi \
-	doc/targets.texi
+@BUILD_INFO_TRUE@DOCFILES = \
+@BUILD_INFO_TRUE@	doc/aoutx.texi \
+@BUILD_INFO_TRUE@	doc/archive.texi \
+@BUILD_INFO_TRUE@	doc/archures.texi \
+@BUILD_INFO_TRUE@	doc/bfdio.texi \
+@BUILD_INFO_TRUE@	doc/bfdt.texi \
+@BUILD_INFO_TRUE@	doc/bfdver.texi \
+@BUILD_INFO_TRUE@	doc/bfdwin.texi \
+@BUILD_INFO_TRUE@	doc/cache.texi \
+@BUILD_INFO_TRUE@	doc/coffcode.texi \
+@BUILD_INFO_TRUE@	doc/corefile.texi \
+@BUILD_INFO_TRUE@	doc/elfcode.texi \
+@BUILD_INFO_TRUE@	doc/elf.texi \
+@BUILD_INFO_TRUE@	doc/format.texi \
+@BUILD_INFO_TRUE@	doc/hash.texi \
+@BUILD_INFO_TRUE@	doc/libbfd.texi \
+@BUILD_INFO_TRUE@	doc/linker.texi \
+@BUILD_INFO_TRUE@	doc/mmo.texi \
+@BUILD_INFO_TRUE@	doc/opncls.texi \
+@BUILD_INFO_TRUE@	doc/reloc.texi \
+@BUILD_INFO_TRUE@	doc/section.texi \
+@BUILD_INFO_TRUE@	doc/syms.texi \
+@BUILD_INFO_TRUE@	doc/targets.texi
 
 
 # SRCDOC, SRCPROT, SRCIPROT only used to sidestep Sun Make bug in interaction
 # between VPATH and suffix rules.  If you use GNU Make, perhaps other Makes,
 # you don't need these three:
-SRCDOC = \
-	$(srcdir)/aoutx.h $(srcdir)/archive.c \
-	$(srcdir)/archures.c $(srcdir)/bfd.c \
-	$(srcdir)/bfdio.c $(srcdir)/bfdwin.c \
-	$(srcdir)/cache.c $(srcdir)/coffcode.h \
-	$(srcdir)/corefile.c $(srcdir)/elf.c \
-	$(srcdir)/elfcode.h $(srcdir)/format.c \
-	$(srcdir)/libbfd.c $(srcdir)/opncls.c \
-	$(srcdir)/reloc.c $(srcdir)/section.c \
-	$(srcdir)/syms.c $(srcdir)/targets.c \
-	$(srcdir)/hash.c $(srcdir)/linker.c \
-	$(srcdir)/mmo.c
+@BUILD_INFO_TRUE@SRCDOC = \
+@BUILD_INFO_TRUE@	$(srcdir)/aoutx.h $(srcdir)/archive.c \
+@BUILD_INFO_TRUE@	$(srcdir)/archures.c $(srcdir)/bfd.c \
+@BUILD_INFO_TRUE@	$(srcdir)/bfdio.c $(srcdir)/bfdwin.c \
+@BUILD_INFO_TRUE@	$(srcdir)/cache.c $(srcdir)/coffcode.h \
+@BUILD_INFO_TRUE@	$(srcdir)/corefile.c $(srcdir)/elf.c \
+@BUILD_INFO_TRUE@	$(srcdir)/elfcode.h $(srcdir)/format.c \
+@BUILD_INFO_TRUE@	$(srcdir)/libbfd.c $(srcdir)/opncls.c \
+@BUILD_INFO_TRUE@	$(srcdir)/reloc.c $(srcdir)/section.c \
+@BUILD_INFO_TRUE@	$(srcdir)/syms.c $(srcdir)/targets.c \
+@BUILD_INFO_TRUE@	$(srcdir)/hash.c $(srcdir)/linker.c \
+@BUILD_INFO_TRUE@	$(srcdir)/mmo.c
 
-SRCPROT = $(srcdir)/archive.c $(srcdir)/archures.c \
-	$(srcdir)/bfd.c $(srcdir)/coffcode.h $(srcdir)/corefile.c \
-	$(srcdir)/format.c $(srcdir)/libbfd.c \
-	$(srcdir)/bfdio.c $(srcdir)/bfdwin.c \
-	$(srcdir)/opncls.c $(srcdir)/reloc.c \
-	$(srcdir)/section.c $(srcdir)/syms.c \
-	$(srcdir)/targets.c
+@BUILD_INFO_TRUE@SRCPROT = $(srcdir)/archive.c $(srcdir)/archures.c \
+@BUILD_INFO_TRUE@	$(srcdir)/bfd.c $(srcdir)/coffcode.h $(srcdir)/corefile.c \
+@BUILD_INFO_TRUE@	$(srcdir)/format.c $(srcdir)/libbfd.c \
+@BUILD_INFO_TRUE@	$(srcdir)/bfdio.c $(srcdir)/bfdwin.c \
+@BUILD_INFO_TRUE@	$(srcdir)/opncls.c $(srcdir)/reloc.c \
+@BUILD_INFO_TRUE@	$(srcdir)/section.c $(srcdir)/syms.c \
+@BUILD_INFO_TRUE@	$(srcdir)/targets.c
 
-SRCIPROT = $(srcdir)/cache.c $(srcdir)/libbfd.c \
-	$(srcdir)/bfdio.c $(srcdir)/bfdwin.c \
-	$(srcdir)/reloc.c $(srcdir)/cpu-h8300.c \
-	$(srcdir)/archures.c
+@BUILD_INFO_TRUE@SRCIPROT = $(srcdir)/cache.c $(srcdir)/libbfd.c \
+@BUILD_INFO_TRUE@	$(srcdir)/bfdio.c $(srcdir)/bfdwin.c \
+@BUILD_INFO_TRUE@	$(srcdir)/reloc.c $(srcdir)/cpu-h8300.c \
+@BUILD_INFO_TRUE@	$(srcdir)/archures.c
 
-TEXIDIR = $(srcdir)/../texinfo/fsf
-info_TEXINFOS = doc/bfd.texi
-doc_bfd_TEXINFOS = $(DOCFILES) doc/bfdsumm.texi
-AM_MAKEINFOFLAGS = --no-split -I "$(srcdir)/doc" -I doc
-TEXI2DVI = texi2dvi -I "$(srcdir)/doc" -I doc
-MKDOC = doc/chew$(EXEEXT_FOR_BUILD)
+@BUILD_INFO_TRUE@TEXIDIR = $(srcdir)/../texinfo/fsf
+@BUILD_INFO_TRUE@info_TEXINFOS = doc/bfd.texi
+@BUILD_INFO_TRUE@doc_bfd_TEXINFOS = $(DOCFILES) doc/bfdsumm.texi
+@BUILD_INFO_TRUE@AM_MAKEINFOFLAGS = --no-split -I "$(srcdir)/doc" -I doc
+@BUILD_INFO_TRUE@TEXI2DVI = texi2dvi -I "$(srcdir)/doc" -I doc
+@BUILD_INFO_TRUE@MKDOC = doc/chew$(EXEEXT_FOR_BUILD)
 
 # We can't replace these rules with an implicit rule, because
 # makes without VPATH support couldn't find the .h files in `..'.
@@ -1296,18 +1300,18 @@ MKDOC = doc/chew$(EXEEXT_FOR_BUILD)
 # files, and permit people to rebuild them, without requiring the makeinfo
 # program.  If somebody tries to rebuild info, but none of the .texi files
 # have changed, then nothing will be rebuilt.
-REGEN_TEXI = \
-	( \
-	set -e; \
-	$(MKDOC) -f $(srcdir)/doc/doc.str < $< > $@.tmp; \
-	texi=$@; \
-	texi=$${texi%.stamp}.texi; \
-	test -e $$texi || test ! -f $(srcdir)/$$texi || $(LN_S) $(srcdir)/$$texi .; \
-	$(SHELL) $(srcdir)/../move-if-change $@.tmp $$texi; \
-	touch $@; \
-	)
+@BUILD_INFO_TRUE@REGEN_TEXI = \
+@BUILD_INFO_TRUE@	( \
+@BUILD_INFO_TRUE@	set -e; \
+@BUILD_INFO_TRUE@	$(MKDOC) -f $(srcdir)/doc/doc.str < $< > $@.tmp; \
+@BUILD_INFO_TRUE@	texi=$@; \
+@BUILD_INFO_TRUE@	texi=$${texi%.stamp}.texi; \
+@BUILD_INFO_TRUE@	test -e $$texi || test ! -f $(srcdir)/$$texi || $(LN_S) $(srcdir)/$$texi .; \
+@BUILD_INFO_TRUE@	$(SHELL) $(srcdir)/../move-if-change $@.tmp $$texi; \
+@BUILD_INFO_TRUE@	touch $@; \
+@BUILD_INFO_TRUE@	)
 
-noinst_TEXINFOS = doc/bfdint.texi
+@BUILD_INFO_TRUE@noinst_TEXINFOS = doc/bfdint.texi
 all: $(BUILT_SOURCES) config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -1758,24 +1762,24 @@ doc/$(am__dirstamp):
 	@$(MKDIR_P) doc
 	@: > doc/$(am__dirstamp)
 
-doc/bfd.info: doc/bfd.texi $(doc_bfd_TEXINFOS)
-	@test -f doc/$(am__dirstamp) || $(MAKE) $(AM_MAKEFLAGS) doc/$(am__dirstamp)
-	$(AM_V_MAKEINFO)restore=: && backupdir="$(am__leading_dot)am$$$$" && \
-	rm -rf $$backupdir && mkdir $$backupdir && \
-	if ($(MAKEINFO) --version) >/dev/null 2>&1; then \
-	  for f in $@ $@-[0-9] $@-[0-9][0-9] $(@:.info=).i[0-9] $(@:.info=).i[0-9][0-9]; do \
-	    if test -f $$f; then mv $$f $$backupdir; restore=mv; else :; fi; \
-	  done; \
-	else :; fi && \
-	if $(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -I doc -I $(srcdir)/doc \
-	 -o $@ `test -f 'doc/bfd.texi' || echo '$(srcdir)/'`doc/bfd.texi; \
-	then \
-	  rc=0; \
-	else \
-	  rc=$$?; \
-	  $$restore $$backupdir/* `echo "./$@" | sed 's|[^/]*$$||'`; \
-	fi; \
-	rm -rf $$backupdir; exit $$rc
+@BUILD_INFO_TRUE@doc/bfd.info: doc/bfd.texi $(doc_bfd_TEXINFOS)
+@BUILD_INFO_TRUE@	@test -f doc/$(am__dirstamp) || $(MAKE) $(AM_MAKEFLAGS) doc/$(am__dirstamp)
+@BUILD_INFO_TRUE@	$(AM_V_MAKEINFO)restore=: && backupdir="$(am__leading_dot)am$$$$" && \
+@BUILD_INFO_TRUE@	rm -rf $$backupdir && mkdir $$backupdir && \
+@BUILD_INFO_TRUE@	if ($(MAKEINFO) --version) >/dev/null 2>&1; then \
+@BUILD_INFO_TRUE@	  for f in $@ $@-[0-9] $@-[0-9][0-9] $(@:.info=).i[0-9] $(@:.info=).i[0-9][0-9]; do \
+@BUILD_INFO_TRUE@	    if test -f $$f; then mv $$f $$backupdir; restore=mv; else :; fi; \
+@BUILD_INFO_TRUE@	  done; \
+@BUILD_INFO_TRUE@	else :; fi && \
+@BUILD_INFO_TRUE@	if $(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -I doc -I $(srcdir)/doc \
+@BUILD_INFO_TRUE@	 -o $@ `test -f 'doc/bfd.texi' || echo '$(srcdir)/'`doc/bfd.texi; \
+@BUILD_INFO_TRUE@	then \
+@BUILD_INFO_TRUE@	  rc=0; \
+@BUILD_INFO_TRUE@	else \
+@BUILD_INFO_TRUE@	  rc=$$?; \
+@BUILD_INFO_TRUE@	  $$restore $$backupdir/* `echo "./$@" | sed 's|[^/]*$$||'`; \
+@BUILD_INFO_TRUE@	fi; \
+@BUILD_INFO_TRUE@	rm -rf $$backupdir; exit $$rc
 
 doc/bfd.dvi: doc/bfd.texi $(doc_bfd_TEXINFOS) doc/$(am__dirstamp)
 	$(AM_V_TEXI2DVI)TEXINPUTS="$(am__TEXINFO_TEX_DIR)$(PATH_SEPARATOR)$$TEXINPUTS" \
@@ -2064,6 +2068,7 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
+@BUILD_INFO_FALSE@html-local:
 clean: clean-recursive
 
 clean-am: clean-aminfo clean-bfdlibLTLIBRARIES clean-generic \
@@ -2457,48 +2462,52 @@ coff-tic54x.lo: coff-tic54x.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC)$(LTCOMPILE) -c -o $@ $< $(NO_WERROR)
 
-$(MKDOC): doc/chew.stamp ; @true
-doc/chew.stamp: $(srcdir)/doc/chew.c doc/$(am__dirstamp)
-	$(AM_V_CCLD)$(CC_FOR_BUILD) -o doc/chw$$$$$(EXEEXT_FOR_BUILD) $(CFLAGS_FOR_BUILD) \
-	  $(LDFLAGS_FOR_BUILD) \
-	  -I. -I$(srcdir) -Idoc -I$(srcdir)/../include -I$(srcdir)/../intl -I../intl \
-	  $(srcdir)/doc/chew.c && \
-	$(SHELL) $(srcdir)/../move-if-change \
-	  doc/chw$$$$$(EXEEXT_FOR_BUILD) $(MKDOC) && \
-	touch $@
+@BUILD_INFO_TRUE@$(MKDOC): doc/chew.stamp ; @true
+@BUILD_INFO_TRUE@doc/chew.stamp: $(srcdir)/doc/chew.c doc/$(am__dirstamp)
+@BUILD_INFO_TRUE@	$(AM_V_CCLD)$(CC_FOR_BUILD) -o doc/chw$$$$$(EXEEXT_FOR_BUILD) $(CFLAGS_FOR_BUILD) \
+@BUILD_INFO_TRUE@	  $(LDFLAGS_FOR_BUILD) \
+@BUILD_INFO_TRUE@	  -I. -I$(srcdir) -Idoc -I$(srcdir)/../include -I$(srcdir)/../intl -I../intl \
+@BUILD_INFO_TRUE@	  $(srcdir)/doc/chew.c && \
+@BUILD_INFO_TRUE@	$(SHELL) $(srcdir)/../move-if-change \
+@BUILD_INFO_TRUE@	  doc/chw$$$$$(EXEEXT_FOR_BUILD) $(MKDOC) && \
+@BUILD_INFO_TRUE@	touch $@
 
-.PRECIOUS: doc/%.stamp
-doc/%.texi: doc/%.stamp ; @true
-doc/%.stamp: $(srcdir)/%.h $(srcdir)/doc/doc.str $(MKDOC) doc/$(am__dirstamp)
-	$(AM_V_GEN)$(REGEN_TEXI)
-doc/%.stamp: $(srcdir)/%.c $(srcdir)/doc/doc.str $(MKDOC) doc/$(am__dirstamp)
-	$(AM_V_GEN)$(REGEN_TEXI)
+@BUILD_INFO_TRUE@.PRECIOUS: doc/%.stamp
+@BUILD_INFO_TRUE@doc/%.texi: doc/%.stamp ; @true
+@BUILD_INFO_TRUE@doc/%.stamp: $(srcdir)/%.h $(srcdir)/doc/doc.str $(MKDOC) doc/$(am__dirstamp)
+@BUILD_INFO_TRUE@	$(AM_V_GEN)$(REGEN_TEXI)
+@BUILD_INFO_TRUE@doc/%.stamp: $(srcdir)/%.c $(srcdir)/doc/doc.str $(MKDOC) doc/$(am__dirstamp)
+@BUILD_INFO_TRUE@	$(AM_V_GEN)$(REGEN_TEXI)
 
 # Avoid the %.stamp generating a builddir/bfd.texi that overrides the
 # srcdir/ as well as regenerating doc/bfd.info for each make run.
-doc/bfd.stamp: $(srcdir)/doc/bfd.texi ; $(AM_V_at)touch $@
+@BUILD_INFO_TRUE@doc/bfd.stamp: $(srcdir)/doc/bfd.texi ; $(AM_V_at)touch $@
 
 # We use bfdt.texi, rather than bfd.texi, to avoid conflicting with
 # bfd.texi on an 8.3 filesystem.
-doc/bfdt.stamp: $(srcdir)/bfd.c $(srcdir)/doc/doc.str $(MKDOC) doc/$(am__dirstamp)
-	$(AM_V_GEN)$(REGEN_TEXI)
+@BUILD_INFO_TRUE@doc/bfdt.stamp: $(srcdir)/bfd.c $(srcdir)/doc/doc.str $(MKDOC) doc/$(am__dirstamp)
+@BUILD_INFO_TRUE@	$(AM_V_GEN)$(REGEN_TEXI)
 
-doc/bfdver.texi: $(srcdir)/Makefile.in
-	$(AM_V_GEN)\
-	$(MKDIR_P) $(@D); \
-	echo "@set VERSION $(VERSION)" > $@; \
-	if test -n "$(PKGVERSION)"; then \
-	  echo "@set VERSION_PACKAGE $(PKGVERSION)" >> $@; \
-	fi; \
-	echo "@set UPDATED `date '+%B %Y'`" >> $@; \
-	if test -n "$(REPORT_BUGS_TEXI)"; then \
-	  echo "@set BUGURL $(REPORT_BUGS_TEXI)" >> $@; \
-	fi
+@BUILD_INFO_TRUE@doc/bfdver.texi: $(srcdir)/Makefile.in
+@BUILD_INFO_TRUE@	$(AM_V_GEN)\
+@BUILD_INFO_TRUE@	$(MKDIR_P) $(@D); \
+@BUILD_INFO_TRUE@	echo "@set VERSION $(VERSION)" > $@; \
+@BUILD_INFO_TRUE@	if test -n "$(PKGVERSION)"; then \
+@BUILD_INFO_TRUE@	  echo "@set VERSION_PACKAGE $(PKGVERSION)" >> $@; \
+@BUILD_INFO_TRUE@	fi; \
+@BUILD_INFO_TRUE@	echo "@set UPDATED `date '+%B %Y'`" >> $@; \
+@BUILD_INFO_TRUE@	if test -n "$(REPORT_BUGS_TEXI)"; then \
+@BUILD_INFO_TRUE@	  echo "@set BUGURL $(REPORT_BUGS_TEXI)" >> $@; \
+@BUILD_INFO_TRUE@	fi
 
-html-local: doc/bfd/index.html
-doc/bfd/index.html: doc/bfd.texi $(bfd_TEXINFOS) doc/$(am__dirstamp)
-	$(AM_V_at)$(MAKEINFOHTML) $(AM_MAKEINFOHTMLFLAGS) $(MAKEINFOFLAGS) \
-	  --split=node -o doc/bfd $(srcdir)/doc/bfd.texi
+@BUILD_INFO_TRUE@html-local: doc/bfd/index.html
+@BUILD_INFO_TRUE@doc/bfd/index.html: doc/bfd.texi $(bfd_TEXINFOS) doc/$(am__dirstamp)
+@BUILD_INFO_TRUE@	$(AM_V_at)$(MAKEINFOHTML) $(AM_MAKEINFOHTMLFLAGS) $(MAKEINFOFLAGS) \
+@BUILD_INFO_TRUE@	  --split=node -o doc/bfd $(srcdir)/doc/bfd.texi
+
+# Workaround bug in automake: it can't handle conditionally building info pages
+# since GNU projects normally include info pages in the source distributions.
+@BUILD_INFO_FALSE@doc/bfd.info:
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
