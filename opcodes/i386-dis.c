@@ -8921,7 +8921,11 @@ static const struct dis386 rm_table[][8] = {
 #define BND_PREFIX	0x04
 #define NOTRACK_PREFIX	0x05
 
-static int
+static enum {
+  ckp_okay,
+  ckp_bogus,
+  ckp_fetch_error,
+}
 ckprefix (instr_info *ins)
 {
   int newrex, i, length;
@@ -8931,7 +8935,8 @@ ckprefix (instr_info *ins)
   /* The maximum instruction length is 15bytes.  */
   while (length < MAX_CODE_LENGTH - 1)
     {
-      FETCH_DATA (ins->info, ins->codep + 1);
+      if (!fetch_code (ins->info, ins->codep + 1))
+	return ckp_fetch_error;
       newrex = 0;
       switch (*ins->codep)
 	{
@@ -8955,7 +8960,7 @@ ckprefix (instr_info *ins)
 	  if (ins->address_mode == mode_64bit)
 	    newrex = *ins->codep;
 	  else
-	    return 1;
+	    return ckp_okay;
 	  ins->last_rex_prefix = i;
 	  break;
 	case 0xf3:
@@ -9023,27 +9028,23 @@ ckprefix (instr_info *ins)
 	      ins->codep++;
 	      /* This ensures that the previous REX prefixes are noticed
 		 as unused prefixes, as in the return case below.  */
-	      ins->rex_used = ins->rex;
-	      return 1;
+	      return ins->rex ? ckp_bogus : ckp_okay;
 	    }
 	  ins->prefixes = PREFIX_FWAIT;
 	  break;
 	default:
-	  return 1;
+	  return ckp_okay;
 	}
       /* Rex is ignored when followed by another prefix.  */
       if (ins->rex)
-	{
-	  ins->rex_used = ins->rex;
-	  return 1;
-	}
+	return ckp_bogus;
       if (*ins->codep != FWAIT_OPCODE)
 	ins->all_prefixes[i++] = *ins->codep;
       ins->rex = newrex;
       ins->codep++;
       length++;
     }
-  return 0;
+  return ckp_bogus;
 }
 
 /* Return the name of the prefix byte PREF, or NULL if PREF is not a
@@ -9886,8 +9887,12 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
 
   sizeflag = priv.orig_sizeflag;
 
-  if (!ckprefix (&ins) || ins.rex_used)
+  switch (ckprefix (&ins))
     {
+    case ckp_okay:
+      break;
+
+    case ckp_bogus:
       /* Too many prefixes or unused REX prefixes.  */
       for (i = 0;
 	   i < (int) ARRAY_SIZE (ins.all_prefixes) && ins.all_prefixes[i];
@@ -9896,6 +9901,9 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
 			 (i == 0 ? "" : " "),
 			 prefix_name (&ins, ins.all_prefixes[i], sizeflag));
       return i;
+
+    case ckp_fetch_error:
+      return fetch_error (&ins);
     }
 
   ins.insn_codep = ins.codep;
