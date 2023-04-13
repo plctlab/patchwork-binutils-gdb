@@ -338,6 +338,8 @@ if test -z "$host" ; then
     AC_MSG_ERROR(Unrecognized host system type; please check config.sub.)
 fi
 
+AM_CONDITIONAL(ENABLE_SHARED, test "${enable_shared}" = yes)
+
 # host-specific stuff:
 
 ALL_LINGUAS="bg da de es fi fr ga id it ja pt_BR ru sr sv tr uk vi zh_CN zh_TW"

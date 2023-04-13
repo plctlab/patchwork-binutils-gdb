@@ -676,6 +676,8 @@ INCINTL
 LIBINTL_DEP
 LIBINTL
 USE_NLS
+ENABLE_SHARED_FALSE
+ENABLE_SHARED_TRUE
 WARN_WRITE_STRINGS
 NO_WERROR
 WARN_CFLAGS_FOR_BUILD
@@ -11625,7 +11627,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11628 "configure"
+#line 11630 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11731,7 +11733,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11734 "configure"
+#line 11736 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -16051,6 +16053,15 @@ if test -z "$host" ; then
     as_fn_error $? "Unrecognized host system type; please check config.sub." "$LINENO" 5
 fi
 
+ if test "${enable_shared}" = yes; then
+  ENABLE_SHARED_TRUE=
+  ENABLE_SHARED_FALSE='#'
+else
+  ENABLE_SHARED_TRUE='#'
+  ENABLE_SHARED_FALSE=
+fi
+
+
 # host-specific stuff:
 
 ALL_LINGUAS="bg da de es fi fr ga id it ja pt_BR ru sr sv tr uk vi zh_CN zh_TW"
@@ -17676,6 +17687,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${ENABLE_LIBCTF_TRUE}" && test -z "${ENABLE_LIBCTF_FALSE}"; then
   as_fn_error $? "conditional \"ENABLE_LIBCTF\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${ENABLE_SHARED_TRUE}" && test -z "${ENABLE_SHARED_FALSE}"; then
+  as_fn_error $? "conditional \"ENABLE_SHARED\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${MAINTAINER_MODE_TRUE}" && test -z "${MAINTAINER_MODE_FALSE}"; then

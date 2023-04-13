@@ -172,8 +172,9 @@ am__installdirs = "$(DESTDIR)$(bfdplugindir)" "$(DESTDIR)$(bindir)" \
 	"$(DESTDIR)$(infodir)" "$(DESTDIR)$(man1dir)"
 LTLIBRARIES = $(bfdplugin_LTLIBRARIES) $(noinst_LTLIBRARIES)
 libdep_la_LIBADD =
-am_libdep_la_OBJECTS = libdep_plugin.lo
+@ENABLE_SHARED_TRUE@am_libdep_la_OBJECTS = libdep_plugin.lo
 libdep_la_OBJECTS = $(am_libdep_la_OBJECTS)
+@ENABLE_SHARED_TRUE@am_libdep_la_rpath = -rpath $(bfdplugindir)
 libldtestplug_la_LIBADD =
 am_libldtestplug_la_OBJECTS = libldtestplug_la-testplug.lo
 libldtestplug_la_OBJECTS = $(am_libldtestplug_la_OBJECTS)
@@ -1044,13 +1045,14 @@ libldtestplug4_la_SOURCES = testplug4.c
 libldtestplug4_la_CFLAGS = -g -O2
 libldtestplug4_la_LDFLAGS = -no-undefined -rpath /nowhere
 bfdplugindir = $(libdir)/bfd-plugins
-bfdplugin_LTLIBRARIES = libdep.la
-libdep_la_SOURCES = libdep_plugin.c
-libdep_la_LDFLAGS = -no-undefined -rpath /nowhere -module -avoid-version
-libdep_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	--tag=disable-static \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(libdep_la_LDFLAGS) $(LDFLAGS) -o $@
+@ENABLE_SHARED_FALSE@bfdplugin_LTLIBRARIES = 
+@ENABLE_SHARED_TRUE@bfdplugin_LTLIBRARIES = libdep.la
+@ENABLE_SHARED_TRUE@libdep_la_SOURCES = libdep_plugin.c
+@ENABLE_SHARED_TRUE@libdep_la_LDFLAGS = -no-undefined -rpath /nowhere -module -avoid-version
+@ENABLE_SHARED_TRUE@libdep_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+@ENABLE_SHARED_TRUE@	--tag=disable-static \
+@ENABLE_SHARED_TRUE@	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+@ENABLE_SHARED_TRUE@	$(libdep_la_LDFLAGS) $(LDFLAGS) -o $@
 
 MAINTAINERCLEANFILES = configdoc.texi ld.1 ld.info
 
@@ -2755,6 +2757,7 @@ install-data-local: install-bfdpluginLTLIBRARIES
 	for f in ldscripts/* ; do \
 	  $(INSTALL_DATA) $$f $(DESTDIR)$(scriptdir)/$$f ; \
 	done
+	test -d $(DESTDIR)$(bfdplugindir) || $(MKDIR_P) $(DESTDIR)$(bfdplugindir)
 	rm -f $(DESTDIR)$(bfdplugindir)/libdep.la
 	rm -f $(DESTDIR)$(bfdplugindir)/libdep.dll.a
 diststuff: info $(EXTRA_DIST)
