@@ -1154,7 +1154,7 @@ types not mentioned here.
 The second parameter is @var{litP} which is a pointer to a byte array where the
 converted value should be stored.  The value is converted into LITTLENUMs and
 is stored in the target's endian-ness order.  (@var{LITTLENUM} is defined in
-gas/bignum.h).  Single precision values occupy 2 littlenums.  Double precision
+@file{gas/bignum.h}).  Single precision values occupy 2 littlenums.  Double precision
 values occupy 4 littlenums and extended precision values occupy either 5 or 6
 littlenums, depending upon the target.
 
@@ -1932,10 +1932,20 @@ original filename and line number that they are applicable to.
 @section Test suite
 @cindex test suite
 
-The test suite is kind of lame for most processors.  Often it only checks to
-see if a couple of files can be assembled without the assembler reporting any
-errors.  For more complete testing, write a test which either examines the
-assembler listing, or runs @code{objdump} and examines its output.  For the
+The test suite uses dejagnu.  It is invoked by running @command{make check} from
+the main gas directory or, recursively, from the main binutils direcctory.
+
+Some tests are run for all targets. These are situated in the
+@file{gas/testsuite/gas/all} subdirectory. These tests require a @code{nop}
+instruction, otherwise many of them will fail, including crashing the test
+suite driver.
+
+If you create a subdirectory for architecture foo_arch, create a file
+@file{foo_arch/foo_arch.exp} which contains the TCL commands run by
+dejagnu.
+
+It is best to write tests which either examine the
+assembler listing, or run @code{objdump} and examine its output.  For the
 latter, the TCL procedure @code{run_dump_test} may come in handy.  It takes the
 base name of a file, and looks for @file{@var{file}.d}.  This file should
 contain as its initial lines a set of variable settings in @samp{#} comments,
@@ -1957,10 +1967,17 @@ The non-commented parts of the file are interpreted as regular expressions, one
 per line.  Blank lines in the @code{objdump} or @code{nm} output are skipped,
 as are blank lines in the @code{.d} file; the other lines are tested to see if
 the regular expression matches the program output.  If it does not, the test
-fails.
+fails.  Whitespace is significant.  Note that this means the tests must be
+modified if the @code{objdump} output style is changed.
 
-Note that this means the tests must be modified if the @code{objdump} output
-style is changed.
+A simple example of this is contained in the @file{testsuite/gas/aarch64}
+directory.
+
+If you want to run only the tests for foo_arch, use
+
+@example
+$ make check RUNTESTFLAGS="foo_arch.exp"
+@end example
 
 @bye
 @c Local Variables:
