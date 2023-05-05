@@ -307,6 +307,11 @@ typedef struct disassemble_info
   /* Set to true if the disassembler applied styling to the output,
      otherwise, set to false.  */
   bool created_styled_output;
+
+  /* Predict the size of an instruction.  */
+  int (* predict_insn_length)
+    (bfd_vma, int,  struct disassemble_info *);
+
 } disassemble_info;
 
 /* This struct is used to pass information about valid disassembler
@@ -366,6 +371,7 @@ typedef int (*disassembler_ftype) (bfd_vma, disassemble_info *);
 extern int print_insn_m32c		(bfd_vma, disassemble_info *);
 extern int print_insn_mep		(bfd_vma, disassemble_info *);
 extern int print_insn_s12z		(bfd_vma, disassemble_info *);
+extern int print_insn_nanomips		(bfd_vma, disassemble_info *);
 extern int print_insn_sh		(bfd_vma, disassemble_info *);
 extern int print_insn_sparc		(bfd_vma, disassemble_info *);
 extern int print_insn_rx		(bfd_vma, disassemble_info *);
@@ -380,6 +386,7 @@ extern disassembler_ftype cris_get_disassembler (bfd *);
 extern void print_aarch64_disassembler_options (FILE *);
 extern void print_i386_disassembler_options (FILE *);
 extern void print_mips_disassembler_options (FILE *);
+extern void print_nanomips_disassembler_options (FILE *);
 extern void print_nfp_disassembler_options (FILE *);
 extern void print_ppc_disassembler_options (FILE *);
 extern void print_riscv_disassembler_options (FILE *);
@@ -474,6 +481,10 @@ extern asymbol *generic_symbol_at_address
 /* Always true.  */
 extern bool generic_symbol_is_valid
   (asymbol *, struct disassemble_info *);
+
+/* Generic insn length, returns 2nd argument.  */
+extern int generic_predict_insn_length
+  (bfd_vma, int, struct disassemble_info *);
 
 /* Method to initialize a disassemble_info struct.  This should be
    called by all applications creating such a struct.  */
