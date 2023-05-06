@@ -20251,6 +20251,24 @@ mips_parse_cpu (const char *option, const char *cpu_string)
 				     : ISA_MIPS1);
     }
 
+  /* mipsisa32r6-linux-gnu refuses -n32/-64 swtiches:
+	-march=mips32r6 is not compatible with the selected ABI
+     Let's workaround it when -march options are not given explicitly.
+     We treat it some like -march=from-abi */
+  if ((strcasecmp (cpu_string, "mips32r6") == 0 || strcasecmp (cpu_string, "mips64r6") == 0)
+	 && strcasecmp (option, "default CPU") == 0)
+    {
+      if (ABI_NEEDS_32BIT_REGS (mips_abi))
+	return mips_cpu_info_from_isa (ISA_MIPS32R6);
+
+      if (ABI_NEEDS_64BIT_REGS (mips_abi))
+	return mips_cpu_info_from_isa (ISA_MIPS64R6);
+
+      if (file_mips_opts.gp >= 0)
+	return mips_cpu_info_from_isa (file_mips_opts.gp == 32
+				       ? ISA_MIPS32R6 : ISA_MIPS64R6);
+    }
+
   /* 'default' has traditionally been a no-op.  Probably not very useful.  */
   if (strcasecmp (cpu_string, "default") == 0)
     return 0;
