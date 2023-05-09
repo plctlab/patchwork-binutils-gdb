@@ -62,6 +62,8 @@ pdb_archive_p (bfd *abfd)
   return _bfd_no_cleanup;
 }
 
+#define pdb_object_p pdb_archive_p
+
 static bfd *
 pdb_get_elt_at_index (bfd *abfd, symindex sym_index)
 {
@@ -774,7 +776,7 @@ pdb_write_contents (bfd *abfd)
 const bfd_target pdb_vec =
 {
   "pdb",
-  bfd_target_unknown_flavour,
+  bfd_target_pdb_flavour,
   BFD_ENDIAN_LITTLE,		/* target byte order */
   BFD_ENDIAN_LITTLE,		/* target headers byte order */
   0,				/* object flags */
@@ -793,7 +795,7 @@ const bfd_target pdb_vec =
 
   {				/* bfd_check_format */
     _bfd_dummy_target,
-    _bfd_dummy_target,
+    pdb_object_p,
     pdb_archive_p,
     _bfd_dummy_target
   },

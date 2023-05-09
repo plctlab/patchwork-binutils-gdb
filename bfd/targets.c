@@ -168,7 +168,8 @@ DESCRIPTION
 .  bfd_target_mach_o_flavour,
 .  bfd_target_pef_flavour,
 .  bfd_target_pef_xlib_flavour,
-.  bfd_target_sym_flavour
+.  bfd_target_sym_flavour,
+.  bfd_target_pdb_flavour
 .};
 .
 .enum bfd_endian { BFD_ENDIAN_BIG, BFD_ENDIAN_LITTLE, BFD_ENDIAN_UNKNOWN };
@@ -1859,6 +1860,7 @@ bfd_flavour_name (enum bfd_flavour flavour)
     case bfd_target_pef_flavour: return "PEF";
     case bfd_target_pef_xlib_flavour: return "PEF_XLIB";
     case bfd_target_sym_flavour: return "SYM";
+    case bfd_target_pdb_flavour: return "PDB";
     /* There is no "default" case here so that -Wswitch (part of -Wall)
        catches missing entries.  */
     }
