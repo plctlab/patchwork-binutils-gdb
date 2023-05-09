@@ -1,0 +1,39 @@
+# Copyright 2023 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+if {![istarget i*86-*-mingw*]
+  && ![istarget x86_64-*-mingw*]} {
+    return 0
+}
+
+set obj [standard_output_file enum1.o]
+
+if {[target_assemble ${srcdir}/${subdir}/enum1.s ${obj} ""] != ""} then {
+  untested "failed to assemble"
+  return -1
+}
+
+set exe [standard_output_file enum1.exe]
+set pdb [standard_output_file enum1.pdb]
+
+if {[target_link ${obj} ${exe} "--pdb=${pdb}"] != "" } then {
+  untested "failed to link"
+  return -1
+}
+
+clean_restart ${pdb}
+
+gdb_test "ptype enum enum1" "type = enum enum1 \{red, green, blue = -1, yellow = 32768, purple = 4294967296\}.*" "ptype enum enum1"
+gdb_test "ptype enum enum2" "type = enum enum2 \{foo = 1, bar = 1, baz, xyzzy, plugh = 5\}.*" "ptype enum enum2"
