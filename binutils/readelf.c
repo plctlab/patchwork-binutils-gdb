@@ -2963,7 +2963,7 @@ get_machine_name (unsigned e_machine)
     case EM_CEVA_X2:		return "CEVA X2 Processor Family";
     case EM_BPF:		return "Linux BPF";
     case EM_GRAPHCORE_IPU:	return "Graphcore Intelligent Processing Unit";
-    case EM_IMG1:		return "Imagination Technologies";
+    case EM_NANOMIPS:		return "nanoMIPS";
       /* 250 */
     case EM_NFP:		return "Netronome Flow Processor";
     case EM_VE:			return "NEC Vector Engine";

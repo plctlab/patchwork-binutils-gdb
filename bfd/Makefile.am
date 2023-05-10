@@ -142,6 +142,7 @@ ALL_MACHINES = \
 	cpu-moxie.lo \
 	cpu-msp430.lo \
 	cpu-mt.lo \
+	cpu-nanomips.lo \
 	cpu-nds32.lo \
 	cpu-nfp.lo \
 	cpu-nios2.lo \
@@ -547,6 +548,7 @@ BFD64_BACKENDS = \
 	coff64-rs6000.lo \
 	elf32-ia64.lo \
 	elf32-mips.lo \
+	elf32-nanomips.lo \
 	elf32-score.lo \
 	elf32-score7.lo \
 	elf64-alpha.lo \
@@ -564,6 +566,8 @@ BFD64_BACKENDS = \
 	elfxx-mips.lo \
 	elf64-mmix.lo \
 	elf64-nfp.lo \
+	elf64-nanomips.lo \
+	elfxx-nanomips.lo \
 	elf64-ppc.lo \
 	elf32-riscv.lo \
 	elf64-riscv.lo \
@@ -607,6 +611,7 @@ BFD64_BACKENDS_CFILES = \
 	elf64-mips.c \
 	elf64-mmix.c \
 	elf64-nfp.c \
+	elf64-nanomips.c \
 	elf64-ppc.c \
 	elf64-s390.c \
 	elf64-sparc.c \
@@ -620,6 +625,7 @@ BFD64_BACKENDS_CFILES = \
 	elfxx-ia64.c \
 	elfxx-loongarch.c \
 	elfxx-mips.c \
+	elfxx-nanomips.c \
 	elfxx-riscv.c \
 	mach-o-aarch64.c \
 	mach-o-x86-64.c \
@@ -684,6 +690,7 @@ BUILD_CFILES = \
 	elf32-ia64.c elf64-ia64.c \
 	elf32-loongarch.c elf64-loongarch.c \
 	elf32-riscv.c elf64-riscv.c \
+	elf32-nanomips.c elf64-nanomips.c \
 	peigen.c pepigen.c pex64igen.c pe-aarch64igen.c pe-loongarch64igen.c
 
 CFILES = $(SOURCE_CFILES) $(BUILD_CFILES)
@@ -885,6 +892,18 @@ pe-aarch64igen.c: peXXigen.c
 pe-loongarch64igen.c: peXXigen.c
 	$(AM_V_at)echo "#line 1 \"peXXigen.c\"" > $@
 	$(AM_V_GEN)$(SED) -e s/XX/peLoongArch64/g < $< >> $@
+
+elf32-nanomips.c : elfnn-nanomips.c
+	rm -f elf32-nanomips.c
+	echo "#line 1 \"$(srcdir)/elfnn-nanomips.c\"" > elf32-nanomips.new
+	sed -e s/NN/32/g < $(srcdir)/elfnn-nanomips.c >> elf32-nanomips.new
+	mv -f elf32-nanomips.new elf32-nanomips.c
+
+elf64-nanomips.c : elfnn-nanomips.c
+	rm -f elf64-nanomips.c
+	echo "#line 1 \"$(srcdir)/elfnn-nanomips.c\"" > elf64-nanomips.new
+	sed -e s/NN/64/g < $(srcdir)/elfnn-nanomips.c >> elf64-nanomips.new
+	mv -f elf64-nanomips.new elf64-nanomips.c
 
 host-aout.lo: Makefile
 
