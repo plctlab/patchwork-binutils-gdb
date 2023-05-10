@@ -346,7 +346,7 @@
 #define EM_CEVA_X2	246	/* CEVA X2 Processor Family */
 #define EM_BPF		247	/* Linux BPF – in-kernel virtual machine.  */
 #define EM_GRAPHCORE_IPU 248	/* Graphcore Intelligent Processing Unit */
-#define EM_IMG1		249	/* Imagination Technologies */
+#define EM_NANOMIPS		249	/* nanoMIPS */
 #define EM_NFP		250	/* Netronome Flow Processor.  */
 #define EM_VE		251	/* NEC Vector Engine */
 #define EM_CSKY		252	/* C-SKY processor family.  */

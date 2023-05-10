@@ -563,6 +563,9 @@ DESCRIPTION
 .#define bfd_mach_amdgcn_gfx1030 0x036
 .#define bfd_mach_amdgcn_gfx1031 0x037
 .#define bfd_mach_amdgcn_gfx1032 0x038
+.  bfd_arch_nanomips,      {* nanoMIPS.  *}
+.#define bfd_mach_nanomipsisa32r6       32
+.#define bfd_mach_nanomipsisa64r6       64
 .  bfd_arch_last
 .  };
 */
@@ -663,6 +666,7 @@ extern const bfd_arch_info_type bfd_moxie_arch;
 extern const bfd_arch_info_type bfd_ft32_arch;
 extern const bfd_arch_info_type bfd_msp430_arch;
 extern const bfd_arch_info_type bfd_mt_arch;
+extern const bfd_arch_info_type bfd_nanomips_arch;
 extern const bfd_arch_info_type bfd_nds32_arch;
 extern const bfd_arch_info_type bfd_nfp_arch;
 extern const bfd_arch_info_type bfd_nios2_arch;
@@ -751,6 +755,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_ft32_arch,
     &bfd_msp430_arch,
     &bfd_mt_arch,
+    &bfd_nanomips_arch,
     &bfd_nds32_arch,
     &bfd_nfp_arch,
     &bfd_nios2_arch,
