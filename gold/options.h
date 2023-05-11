@@ -1239,7 +1239,9 @@ class General_options
 	      N_("Strip LTO intermediate code sections"), NULL);
 
   DEFINE_string(section_ordering_file, options::TWO_DASHES, '\0', NULL,
-		N_("Layout sections in the order specified"),
+		N_("Layout sections in the order specified. May also be "
+		   "specified using the environment variable "
+		   "'GLOBAL_SECTION_ORDERING_FILE'"),
 		N_("FILENAME"));
 
   DEFINE_special(section_start, options::TWO_DASHES, '\0',

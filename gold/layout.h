@@ -617,7 +617,7 @@ class Layout
 
   // Read the sequence of input sections from the file specified with
   // linker option --section-ordering-file.
-  void
+  Exit_status
   read_layout_from_file();
 
   // Layout an input reloc section when doing a relocatable link.  The

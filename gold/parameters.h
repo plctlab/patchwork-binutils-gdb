@@ -176,7 +176,36 @@ class Parameters
   bool
   incremental_update() const;
 
- private:
+  // Get section_ordering_file. This first tries the user-option from
+  // '--section-ordering-file'. It ifs not present, it tries the file from the
+  // env variable 'GLOBAL_SECTION_ORDERING_FILE'.
+  const char *get_section_ordering_file() const;
+
+  // Set that we should throw error if we have IO issues with the
+  // section_order_file. It we are using the user-provided argument we throw
+  // error in the event of IO issue. If we are using the env version we ignore
+  // IO errors and stop using the section_ordering_file.
+  bool
+  section_ordering_file_mayfail() const
+  {
+    return this->section_ordering_file_from_env_ == NULL;
+  }
+
+  // Only relevent if we are using the env variable section_ordering_file. It
+  // indicates we failed doing IO on the file, so we want to pretend it never
+  // existed.
+  void
+  set_section_ordering_file_failure()
+  {
+    this->section_ordering_file_has_failed_ = true;
+  }
+
+  // Read environment variable 'GLOBAL_SECTION_ORDERING_FILE' and, if present,
+  // use its value for the section_ordering_file. Only relevent of user-option
+  // '--section-ordering-file' is not present.
+  void set_section_ordering_file_from_env();
+
+private:
   void
   set_target_once(Target*);
 
@@ -197,6 +226,8 @@ class Parameters
   int debug_;
   int incremental_mode_;
   Set_parameters_target_once* set_parameters_target_once_;
+  const char *section_ordering_file_from_env_ = NULL;
+  bool section_ordering_file_has_failed_ = false;
 };
 
 // This is a global variable.
@@ -204,6 +235,12 @@ extern const Parameters* parameters;
 
 // We use free functions for these since they affect a global variable
 // that is internal to parameters.cc.
+
+extern void
+set_parameters_section_ordering_file_failure();
+
+extern void
+set_parameters_section_ordering_file_from_env();
 
 extern void
 set_parameters_errors(Errors* errors);

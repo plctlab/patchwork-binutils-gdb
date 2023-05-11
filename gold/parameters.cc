@@ -231,6 +231,49 @@ Parameters::check_rodata_segment()
     gold_error(_("-Trodata-segment is meaningless without --rosegment"));
 }
 
+// Set the section_ordering_file using 'GLOBAL_SECTION_ORDERING_FILE' if the
+// user-option '--section-ordering-file' wasn't specified.
+void
+Parameters::set_section_ordering_file_from_env()
+{
+  const char *ret;
+  // If we have user-option or already had a failure, nothing to do.
+  if (this->options().section_ordering_file()
+  || this->section_ordering_file_has_failed_)
+    return;
+
+  // Read filepath from environment.
+  ret = getenv("GLOBAL_SECTION_ORDERING_FILE");
+
+  // If not set (or error), indicate we should stop trying to return.
+  if (ret == NULL)
+    {
+      this->section_ordering_file_has_failed_ = true;
+      return;
+    }
+
+  // Set env file.
+  section_ordering_file_from_env_ = ret;
+}
+
+// Return section_ordering_file, first checking user-option then checking env
+// variable input.
+const char *
+Parameters::get_section_ordering_file() const
+{
+  // If we have user-option return it.
+  const char *ret = this->options().section_ordering_file();
+  if (ret)
+    return ret;
+
+  // If we had any error using the env file then pretend it never existed.
+  if (this->section_ordering_file_has_failed_)
+    return NULL;
+
+  // Finally return env file. This may be NULL if it was never specified.
+  return this->section_ordering_file_from_env_;
+}
+
 // Return the name of the entry symbol.
 
 const char*
@@ -281,6 +324,14 @@ Parameters::incremental_update() const
   return (this->incremental_mode_ == General_options::INCREMENTAL_UPDATE
 	  || this->incremental_mode_ == General_options::INCREMENTAL_AUTO);
 }
+
+void
+set_parameters_section_ordering_file_failure()
+{ static_parameters.set_section_ordering_file_failure(); }
+
+void
+set_parameters_section_ordering_file_from_env()
+{ static_parameters.set_section_ordering_file_from_env(); }
 
 void
 set_parameters_errors(Errors* errors)

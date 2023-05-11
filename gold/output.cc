@@ -2532,7 +2532,7 @@ Output_section::add_input_section(Layout* layout,
       /* If section ordering is requested by specifying a ordering file,
 	 using --section-ordering-file, match the section name with
 	 a pattern.  */
-      if (parameters->options().section_ordering_file())
+      if (parameters->get_section_ordering_file())
 	{
 	  unsigned int section_order_index =
 	    layout->find_section_order_index(std::string(secname));

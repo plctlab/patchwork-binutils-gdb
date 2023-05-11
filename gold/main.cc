@@ -174,6 +174,8 @@ main(int argc, char** argv)
   // Store some options in the globally accessible parameters.
   set_parameters_options(&command_line.options());
 
+  set_parameters_section_ordering_file_from_env();
+
   // Do this as early as possible (since it prints a welcome message).
   write_debug_script(command_line.options().output_file_name(),
                      program_name, args.c_str());
@@ -232,8 +234,9 @@ main(int argc, char** argv)
   if (layout.incremental_inputs() != NULL)
     layout.incremental_inputs()->report_command_line(argc, argv);
 
-  if (parameters->options().section_ordering_file())
-    layout.read_layout_from_file();
+  if (parameters->get_section_ordering_file())
+    if (layout.read_layout_from_file() == GOLD_ERR)
+      set_parameters_section_ordering_file_failure();
 
   // Load plugin libraries.
   if (command_line.options().has_plugins())

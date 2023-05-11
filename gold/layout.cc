@@ -2918,17 +2918,22 @@ Layout::find_section_order_index(const std::string& section_name)
 // Read the sequence of input sections from the file specified with
 // option --section-ordering-file.
 
-void
+Exit_status
 Layout::read_layout_from_file()
 {
-  const char* filename = parameters->options().section_ordering_file();
+  const char* filename = parameters->get_section_ordering_file();
+  bool mayfail = parameters->section_ordering_file_mayfail();
   std::ifstream in;
   std::string line;
 
   in.open(filename);
-  if (!in)
-    gold_fatal(_("unable to open --section-ordering-file file %s: %s"),
-	       filename, strerror(errno));
+  if (!in) {
+      if(mayfail)
+          gold_fatal(_("unable to open --section-ordering-file file %s: %s"),
+                     filename, strerror(errno));
+      else
+          return GOLD_ERR;
+  }
 
   File_read::record_file_read(filename);
 
@@ -2953,6 +2958,8 @@ Layout::read_layout_from_file()
       position++;
       std::getline(in, line);
     }
+
+  return GOLD_OK;
 }
 
 // Finalize the layout.  When this is called, we have created all the
