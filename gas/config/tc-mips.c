@@ -15453,8 +15453,7 @@ mips_frob_file (void)
 	 there isn't supposed to be a matching LO.  Ignore %gots against
 	 constants; we'll report an error for those later.  */
       if (got16_reloc_p (l->fixp->fx_r_type)
-	  && !(l->fixp->fx_addsy
-	       && pic_need_relax (l->fixp->fx_addsy)))
+	  && !pic_need_relax (l->fixp->fx_addsy))
 	continue;
 
       /* Check quickly whether the next fixup happens to be a matching %lo.  */
@@ -17708,6 +17707,9 @@ static bool
 pic_need_relax (symbolS *sym)
 {
   asection *symsec;
+
+  if (!sym)
+    return false;
 
   /* Handle the case of a symbol equated to another symbol.  */
   while (symbol_equated_reloc_p (sym))
