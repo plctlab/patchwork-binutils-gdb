@@ -583,22 +583,37 @@ static const char i386_trampoline[] =
   "\tpopl %%ecx\n"
   "\tjmp *%%eax\n";
 
+/* Save integer arg regs in parameter space reserved by our caller
+   above the return address.  Allocate space for four fp arg regs plus
+   parameter space possibly used by __delayLoadHelper2 plus alignment.
+   We enter with the stack offset from 16-byte alignment by the return
+   address, so allocate 64 + 32 + 8 = 104 bytes.
+   FIXME: do we need to save avx ymm0-5 used to pass vectors args?  If
+   so, how to do it without blowing up on cpus without avx, cpuid?  */
 static const char i386_x64_trampoline[] =
-  "\tsubq $72, %%rsp\n"
-  "\t.seh_stackalloc 72\n"
+  "\tsubq $104, %%rsp\n"
+  "\t.seh_stackalloc 104\n"
   "\t.seh_endprologue\n"
-  "\tmovq %%rcx, 64(%%rsp)\n"
-  "\tmovq %%rdx, 56(%%rsp)\n"
-  "\tmovq %%r8, 48(%%rsp)\n"
-  "\tmovq %%r9, 40(%%rsp)\n"
-  "\tmovq  %%rax, %%rdx\n"
-  "\tleaq  __DELAY_IMPORT_DESCRIPTOR_%s(%%rip), %%rcx\n"
+  "\tmovq %%rcx, 104+8(%%rsp)\n"
+  "\tmovq %%rdx, 104+16(%%rsp)\n"
+  "\tmovq %%r8, 104+24(%%rsp)\n"
+  "\tmovq %%r9, 104+32(%%rsp)\n"
+  "\tmovaps %%xmm0, 32(%%rsp)\n"
+  "\tmovaps %%xmm1, 48(%%rsp)\n"
+  "\tmovaps %%xmm2, 64(%%rsp)\n"
+  "\tmovaps %%xmm3, 80(%%rsp)\n"
+  "\tmovq %%rax, %%rdx\n"
+  "\tleaq __DELAY_IMPORT_DESCRIPTOR_%s(%%rip), %%rcx\n"
   "\tcall __delayLoadHelper2\n"
-  "\tmovq 40(%%rsp), %%r9\n"
-  "\tmovq 48(%%rsp), %%r8\n"
-  "\tmovq 56(%%rsp), %%rdx\n"
-  "\tmovq 64(%%rsp), %%rcx\n"
-  "\taddq $72, %%rsp\n"
+  "\tmovq 104+8(%%rsp), %%rcx\n"
+  "\tmovq 104+16(%%rsp), %%rdx\n"
+  "\tmovq 104+24(%%rsp), %%r8\n"
+  "\tmovq 104+32(%%rsp), %%r9\n"
+  "\tmovaps 32(%%rsp), %%xmm0\n"
+  "\tmovaps 48(%%rsp), %%xmm1\n"
+  "\tmovaps 64(%%rsp), %%xmm2\n"
+  "\tmovaps 80(%%rsp), %%xmm3\n"
+  "\taddq $104, %%rsp\n"
   "\tjmp *%%rax\n";
 
 struct mac
