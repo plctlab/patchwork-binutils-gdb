@@ -1316,6 +1316,9 @@ static const unsigned int mips_isa_table[] = {
 /* The Enhanced VA Scheme (EVA) extension has instructions which are
    only valid for the R6 ISA.  */
 #define ASE_EVA_R6		0x02000000
+/* The Virtualization ASE has Global INValidate (GINV)
+   instructions which are only valid when both ASEs are enabled.  */
+#define ASE_GINV_VIRT          0x08000000
 
 /* MIPS ISA defines, use instead of hardcoding ISA level.  */
 
@@ -2350,6 +2353,9 @@ extern const int bfd_mips16_num_opcodes;
    "+&" 0 vector element index
    "+*" 5-bit register vector element index at bit 16
    "+|" 8-bit mask at bit 16
+
+   GINV ASE usage:
+   "+\" 2 bit Global TLB invalidate type at bit 8
 
    Other:
    "()" parens surrounding optional value
