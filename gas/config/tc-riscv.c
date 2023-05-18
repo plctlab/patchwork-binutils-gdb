@@ -2357,6 +2357,16 @@ my_getVsetvliExpression (expressionS *ep, char *str)
     {
       my_getExpression (ep, str);
       str = expr_parse_end;
+      unsigned int imm_vlmul = EXTRACT_OPERAND (VLMUL, ep->X_add_number);
+      if (!riscv_vlmul[imm_vlmul])
+	as_warn (_("The vtype encoding of vlmul = %#x is reserved."), imm_vlmul);
+      unsigned int imm_vsew = EXTRACT_OPERAND (VSEW, ep->X_add_number);
+      if (!riscv_vsew[imm_vsew])
+	as_warn (_("The vtype encoding of vsew = %#x is reserved."), imm_vsew);
+      unsigned int imm_vtype_res = ep->X_add_number >> 8;
+      if (imm_vtype_res)
+	as_warn (_("The vtype encoding of %#lx is reserved."),
+		 (unsigned long) ep->X_add_number);
     }
 }
 
