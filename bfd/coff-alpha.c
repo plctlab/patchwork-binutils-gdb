@@ -1422,11 +1422,11 @@ alpha_relocate_section (bfd *output_bfd,
 	  lita_sec->used_by_bfd = lita_sec_data;
 	}
 
-      if (lita_sec_data->gp != 0)
+      if (lita_sec_data->u.gp != 0)
 	{
 	  /* If we already assigned a gp to this section, we better
 	     stick with that value.  */
-	  gp = lita_sec_data->gp;
+	  gp = lita_sec_data->u.gp;
 	}
       else
 	{
@@ -1459,7 +1459,7 @@ alpha_relocate_section (bfd *output_bfd,
 
 	    }
 
-	  lita_sec_data->gp = gp;
+	  lita_sec_data->u.gp = gp;
 	}
 
       _bfd_set_gp_value (output_bfd, gp);

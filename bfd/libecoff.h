@@ -80,11 +80,10 @@ struct ecoff_backend_data
   members of the embedded bfd_coff_backend_data struct.  */
 #define ECOFF_NO_LONG_SECTION_NAMES (false), _bfd_ecoff_no_long_sections
 
-struct mips_hi
+struct mips_hi16
 {
-  struct mips_hi *next;
-  bfd_byte *addr;
-  bfd_vma addend;
+  struct mips_hi16 *next;
+  arelent rel;
 };
 
 /* This is the target specific information kept for ECOFF files.  */
@@ -154,9 +153,6 @@ typedef struct ecoff_tdata
      particular ECOFF file.  This is not valid until
      ecoff_compute_section_file_positions is called.  */
   bool rdata_in_text;
-
-  /* Used by coff-mips.c to track REFHI relocs for pairing with REFLO.  */
-  struct mips_hi *mips_refhi_list;
 } ecoff_data_type;
 
 /* Each canonical asymbol really looks like this.  */
@@ -195,13 +191,18 @@ typedef struct ecoff_symbol_struct
 
 struct ecoff_section_tdata
 {
-  /* When producing an executable (i.e., final, non-relocatable link)
-     on the Alpha, we may need to use multiple global pointer values
-     to span the entire .lita section.  In essence, we allow each
-     input .lita section to have its own gp value.  To support this,
-     we need to keep track of the gp values that we picked for each
-     input .lita section . */
-  bfd_vma gp;
+  union
+  {
+    /* When producing an executable (i.e., final, non-relocatable link)
+       on the Alpha, we may need to use multiple global pointer values
+       to span the entire .lita section.  In essence, we allow each
+       input .lita section to have its own gp value.  To support this,
+       we need to keep track of the gp values that we picked for each
+       input .lita section . */
+    bfd_vma gp;
+    /* Used by coff-mips.c to track hi16 relocs.  */
+    struct mips_hi16 *mips_hi16_list;
+  } u;
 };
 
 /* An accessor macro for the ecoff_section_tdata structure.  */

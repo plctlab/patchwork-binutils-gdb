@@ -427,17 +427,11 @@ static bfd_reloc_status_type
 mips_refhi_reloc (bfd *abfd,
 		  arelent *reloc_entry,
 		  asymbol *symbol,
-		  void * data,
+		  void *data ATTRIBUTE_UNUSED,
 		  asection *input_section,
 		  bfd *output_bfd,
 		  char **error_message ATTRIBUTE_UNUSED)
 {
-  bfd_reloc_status_type ret;
-  bfd_vma relocation;
-  struct mips_hi *n;
-
-  /* If we're relocating, and this an external symbol, we don't want
-     to change anything.  */
   if (output_bfd != (bfd *) NULL
       && (symbol->flags & BSF_SECTION_SYM) == 0
       && reloc_entry->addend == 0)
@@ -446,36 +440,33 @@ mips_refhi_reloc (bfd *abfd,
       return bfd_reloc_ok;
     }
 
-  ret = bfd_reloc_ok;
-  if (bfd_is_und_section (symbol->section)
-      && output_bfd == (bfd *) NULL)
-    ret = bfd_reloc_undefined;
+  /* Is this the call via bfd_perform_relocation in mips_reflo_reloc?
+     If so, continue and apply the reloc.  */
+  struct ecoff_section_tdata *sdata = input_section->used_by_bfd;
+  if (sdata != NULL
+      && sdata->u.mips_hi16_list != NULL
+      && reloc_entry == &sdata->u.mips_hi16_list->rel)
+    return bfd_reloc_continue;
 
-  if (bfd_is_com_section (symbol->section))
-    relocation = 0;
-  else
-    relocation = symbol->value;
-
-  relocation += symbol->section->output_section->vma;
-  relocation += symbol->section->output_offset;
-  relocation += reloc_entry->addend;
-
-  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
-    return bfd_reloc_outofrange;
-
+  if (sdata == NULL)
+    {
+      sdata = bfd_zalloc (abfd, sizeof (*sdata));
+      input_section->used_by_bfd = sdata;
+      if (sdata == NULL)
+	return bfd_reloc_outofrange;
+    }
   /* Save the information, and let REFLO do the actual relocation.  */
-  n = (struct mips_hi *) bfd_malloc ((bfd_size_type) sizeof *n);
+  struct mips_hi16 *n = bfd_malloc (sizeof (*n));
   if (n == NULL)
     return bfd_reloc_outofrange;
-  n->addr = (bfd_byte *) data + reloc_entry->address;
-  n->addend = relocation;
-  n->next = ecoff_data (abfd)->mips_refhi_list;
-  ecoff_data (abfd)->mips_refhi_list = n;
+  n->rel = *reloc_entry;
+  n->next = sdata->u.mips_hi16_list;
+  sdata->u.mips_hi16_list = n;
 
   if (output_bfd != (bfd *) NULL)
     reloc_entry->address += input_section->output_offset;
 
-  return ret;
+  return bfd_reloc_ok;
 }
 
 /* Do a REFLO relocation.  This is a straightforward 16 bit inplace
@@ -491,54 +482,36 @@ mips_reflo_reloc (bfd *abfd,
 		  bfd *output_bfd,
 		  char **error_message)
 {
-  if (ecoff_data (abfd)->mips_refhi_list != NULL)
+  bfd_size_type octets = (reloc_entry->address
+			  * OCTETS_PER_BYTE (abfd, input_section));
+
+  if (!bfd_reloc_offset_in_range (reloc_entry->howto, abfd,
+				  input_section, octets))
+    return bfd_reloc_outofrange;
+
+  struct ecoff_section_tdata* sdata = input_section->used_by_bfd;
+  if (sdata != NULL && sdata->u.mips_hi16_list != NULL)
     {
-      struct mips_hi *l;
+      struct mips_hi16 *hi;
+      bfd_byte *loc = (bfd_byte *) data + octets;
+      /* Adjustment for the high part addend.  See longer explanation
+	 in elfxx-mips.c _bfd_mips_elf_lo16_reloc.  */
+      bfd_vma vallo = (bfd_get_32 (abfd, loc) & 0x8000) ^ 0x8000;
 
-      l = ecoff_data (abfd)->mips_refhi_list;
-      while (l != NULL)
+      while ((hi = sdata->u.mips_hi16_list) != NULL)
 	{
-	  unsigned long insn;
-	  unsigned long val;
-	  unsigned long vallo;
-	  struct mips_hi *next;
-	  bfd_size_type octets = (reloc_entry->address
-				  * OCTETS_PER_BYTE (abfd, input_section));
-	  bfd_byte *loc = (bfd_byte *) data + octets;
+	  bfd_reloc_status_type ret;
 
-	  if (!bfd_reloc_offset_in_range (reloc_entry->howto, abfd,
-					  input_section, octets))
-	    return bfd_reloc_outofrange;
+	  /* Apply the REFHI relocation.  */
+	  hi->rel.addend += vallo;
+	  ret = bfd_perform_relocation (abfd, &hi->rel, data, input_section,
+					output_bfd, error_message);
+	  if (ret != bfd_reloc_ok)
+	    return ret;
 
-	  /* Do the REFHI relocation.  Note that we actually don't
-	     need to know anything about the REFLO itself, except
-	     where to find the low 16 bits of the addend needed by the
-	     REFHI.  */
-	  insn = bfd_get_32 (abfd, l->addr);
-	  vallo = bfd_get_32 (abfd, loc) & 0xffff;
-	  val = ((insn & 0xffff) << 16) + vallo;
-	  val += l->addend;
-
-	  /* The low order 16 bits are always treated as a signed
-	     value.  Therefore, a negative value in the low order bits
-	     requires an adjustment in the high order bits.  We need
-	     to make this adjustment in two ways: once for the bits we
-	     took from the data, and once for the bits we are putting
-	     back in to the data.  */
-	  if ((vallo & 0x8000) != 0)
-	    val -= 0x10000;
-	  if ((val & 0x8000) != 0)
-	    val += 0x10000;
-
-	  insn = (insn &~ (unsigned) 0xffff) | ((val >> 16) & 0xffff);
-	  bfd_put_32 (abfd, (bfd_vma) insn, l->addr);
-
-	  next = l->next;
-	  free (l);
-	  l = next;
+	  sdata->u.mips_hi16_list = hi->next;
+	  free (hi);
 	}
-
-      ecoff_data (abfd)->mips_refhi_list = NULL;
     }
 
   /* Now do the REFLO reloc in the usual way.  */

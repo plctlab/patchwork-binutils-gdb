@@ -109,18 +109,40 @@ _bfd_ecoff_mkobject_hook (bfd *abfd, void * filehdr, void * aouthdr)
   return (void *) ecoff;
 }
 
+/* Free the mips_hi16_list attached to S.  Return true if there were
+   unmatched hi16 relocs.  */
+
+static bool
+free_mips_hi16_list (asection *s)
+{
+  struct ecoff_section_tdata* sdata = s->used_by_bfd;
+  if (sdata != NULL)
+    {
+      struct mips_hi16 *hi;
+      struct mips_hi16 **hip = &sdata->u.mips_hi16_list;
+      bool ret = *hip != NULL;
+
+      while ((hi = *hip) != NULL)
+	{
+	  *hip = hi->next;
+	  free (hi);
+	}
+      return ret;
+    }
+  return false;
+}
+
 bool
 _bfd_ecoff_close_and_cleanup (bfd *abfd)
 {
-  struct ecoff_tdata *tdata = ecoff_data (abfd);
-
-  if (tdata != NULL && bfd_get_format (abfd) == bfd_object)
-    while (tdata->mips_refhi_list != NULL)
-      {
-	struct mips_hi *ref = tdata->mips_refhi_list;
-	tdata->mips_refhi_list = ref->next;
-	free (ref);
-      }
+  if (bfd_get_format (abfd) == bfd_object
+      && ecoff_backend (abfd)->arch == bfd_arch_mips)
+    {
+      for (asection *s = abfd->sections; s; s = s->next)
+	if (free_mips_hi16_list (s))
+	  _bfd_error_handler
+	    (_("%pB(%pA): unmatched hi16 reloc"), abfd, s);
+    }
   return _bfd_generic_close_and_cleanup (abfd);
 }
 
