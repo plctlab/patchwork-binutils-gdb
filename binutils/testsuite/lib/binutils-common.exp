@@ -654,6 +654,7 @@ proc prune_warnings_extra { text } {
     regsub -all "(^|\n)(\[^\n\]*: NOTE: This behaviour is deprecated\[^\n\]*\n?)+" $text "\\1" text
     regsub -all "(^|\n)(\[^\n\]*: warning:\[^\n\]*has a LOAD segment with RWX permissions\[^\n\]*\n?)+" $text "\\1" text
     regsub -all "(^|\n)(\[^\n\]*: warning:\[^\n\]*has a TLS segment with execute permission\[^\n\]*\n?)+" $text "\\1" text
+    regsub -all "(^|\n)(\[^\n\]*lto-wrapper: warning: using serial compilation of \[0-9\]+ LTRANS jobs\[^\n\]*\n?)+" $text "\\1" text
     return $text
 }
 
