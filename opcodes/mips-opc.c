@@ -412,6 +412,7 @@ decode_mips_operand (const char *p)
 
 /* Global INValidate (GINV) support.  */
 #define GINV	ASE_GINV
+#define GINVVZ	ASE_GINV_VIRT
 
 /* Loongson MultiMedia extensions Instructions (MMI) support.  */
 #define LMMI	ASE_LOONGSON_MMI
@@ -3329,6 +3330,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 /* MIPS Global INValidate (GINV) ASE.  */
 {"ginvi",		"s",		0x7c00003d, 0xfc1fffff, RD_1,			0,		0,		GINV,	0 },
 {"ginvt",		"s,+\\",	0x7c0000bd, 0xfc1ffcff, RD_1,			0,		0,		GINV,	0 },
+{"ginvgt",		"s,+\\",	0x7c0000fd, 0xfc1ffcff, RD_1,			0,		0,		GINVVZ,	0 },
 
 /* Move bc0* after mftr and mttr to avoid opcode collision.  */
 {"bc0f",		"p",		0x41000000, 0xffff0000,	RD_CC|CBD,		0,		I1,		0,	I4_32 },
