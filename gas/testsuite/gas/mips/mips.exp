@@ -732,10 +732,10 @@ if { [istarget mips*-*-vxworks*] } {
 	run_dump_test_arches "fix-rm7000-1" \
 					[mips_arch_list_matching mips3 !singlefloat \
 						!mips64r6]
-    }
-    run_dump_test_arches "fix-rm7000-2" \
+	run_dump_test_arches "fix-rm7000-2" \
 					[mips_arch_list_matching mips3 !singlefloat \
 						!mips64r6]
+    }
     run_dump_test_arches "24k-branch-delay-1" \
 					[mips_arch_list_matching mips1]
     run_dump_test_arches "24k-triple-stores-1" \
@@ -2135,7 +2135,9 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test_arches "ginv-err"	[mips_arch_list_matching mips32r6]
 
     run_dump_test_arches "llpscp-32" [mips_arch_list_matching mips32r6]
-    run_dump_test_arch "llpscp-64" "" mips64r6
+    if $has_newabi {
+	run_dump_test_arch "llpscp-64" "" mips64r6
+    }
 
     run_dump_test "pr14798${imips}"
     run_dump_test "insn-isa-mode"
