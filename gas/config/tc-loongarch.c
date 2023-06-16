@@ -207,6 +207,8 @@ md_parse_option (int c, const char *arg)
 
 static struct htab *r_htab = NULL;
 static struct htab *f_htab = NULL;
+static struct htab *fc_htab = NULL;
+static struct htab *fcn_htab = NULL;
 static struct htab *c_htab = NULL;
 static struct htab *cr_htab = NULL;
 static struct htab *v_htab = NULL;
@@ -268,6 +270,20 @@ loongarch_after_parse_args ()
 
       for (i = 0; i < ARRAY_SIZE (loongarch_f_normal_name); i++)
 	str_hash_insert (f_htab, loongarch_f_normal_name[i], (void *) (i + 1),
+			 0);
+
+      if (!fc_htab)
+	fc_htab = str_htab_create (), str_hash_insert (fc_htab, "", 0, 0);
+
+      for (i = 0; i < ARRAY_SIZE (loongarch_fc_normal_name); i++)
+	str_hash_insert (fc_htab, loongarch_fc_normal_name[i], (void *) (i + 1),
+			 0);
+
+      if (!fcn_htab)
+	fcn_htab = str_htab_create (), str_hash_insert (fcn_htab, "", 0, 0);
+
+      for (i = 0; i < ARRAY_SIZE (loongarch_fc_numeric_name); i++)
+	str_hash_insert (fcn_htab, loongarch_fc_numeric_name[i], (void *) (i + 1),
 			 0);
 
       if (!c_htab)
@@ -638,7 +654,21 @@ loongarch_args_parser_can_match_arg_helper (char esc_ch1, char esc_ch2,
       ret = imm - 1;
       break;
     case 'f':
-      imm = (intptr_t) str_hash_find (f_htab, arg);
+      switch (esc_ch2)
+	{
+	case 'c':
+	  imm = (intptr_t) str_hash_find (fc_htab, arg);
+	  if (0 >= imm)
+	    {
+	      imm = (intptr_t) str_hash_find (fcn_htab, arg);
+	      if (0 < imm)
+		as_warn ("\"$r%ld\" is deprecated, using \"$fcsr%ld\" instead",
+			 imm - 1, imm - 1);
+	    }
+	  break;
+	default:
+	  imm = (intptr_t) str_hash_find (f_htab, arg);
+	}
       ip->match_now = 0 < imm;
       ret = imm - 1;
       break;
