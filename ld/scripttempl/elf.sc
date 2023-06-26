@@ -78,6 +78,8 @@
 #	USER_LABEL_PREFIX - prefix to add to user-visible symbols.
 #	RODATA_NAME, SDATA_NAME, SBSS_NAME, BSS_NAME - base parts of names
 #		for standard sections, without initial "." or suffixes.
+#       SYMBOL_ABI_ALIGNMENT - minimum alignment in bytes which needs to be
+#               applied to every symbol definition
 #
 # When adding sections, do note that the names of some sections are used
 # when specifying the start address of the next.
@@ -165,6 +167,7 @@ if test -z "$GOT"; then
     GOTPLT=".got.plt      ${RELOCATING-0} : { *(.got.plt)${RELOCATING+ *(.igot.plt)} }"
   fi
 fi
+test -z "${SYMBOL_ABI_ALIGNMENT}" && SYMBOL_ABI_ALIGNMENT=1
 REL_IFUNC=".rel.ifunc    ${RELOCATING-0} : { *(.rel.ifunc) }"
 RELA_IFUNC=".rela.ifunc   ${RELOCATING-0} : { *(.rela.ifunc) }"
 REL_IPLT=".rel.iplt     ${RELOCATING-0} :
@@ -678,7 +681,7 @@ cat <<EOF
   ${DATA_SDATA-${OTHER_SDATA_SECTIONS}}
   ${RELOCATING+${DATA_END_SYMBOLS-${CREATE_SHLIB+PROVIDE (}${USER_LABEL_PREFIX}_edata = .${CREATE_SHLIB+)}; PROVIDE (${USER_LABEL_PREFIX}edata = .);}}
   ${PERSISTENT}
-  ${RELOCATING+. = .;}
+  ${RELOCATING+. = ALIGN(${SYMBOL_ABI_ALIGNMENT});}
   ${RELOCATING+${CREATE_SHLIB+PROVIDE (}${USER_LABEL_PREFIX}__bss_start = .${CREATE_SHLIB+)};}
   ${RELOCATING+${OTHER_BSS_SYMBOLS}}
   ${DATA_SDATA-${SBSS}}
