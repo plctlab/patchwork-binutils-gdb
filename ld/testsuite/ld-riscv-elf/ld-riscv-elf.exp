@@ -124,6 +124,7 @@ if [istarget "riscv*-*-*"] {
     run_dump_test "pcgp-relax-01"
     run_dump_test "pcgp-relax-01-norelaxgp"
     run_dump_test "pcgp-relax-02"
+    run_dump_test "gp-relax"
     run_dump_test "c-lui"
     run_dump_test "c-lui-2"
     run_dump_test "disas-jalr"

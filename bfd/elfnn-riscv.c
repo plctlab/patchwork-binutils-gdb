@@ -4983,6 +4983,13 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 	  if (h->type != STT_FUNC)
 	    reserve_size =
 	      (h->size - rel->r_addend) > h->size ? 0 : h->size - rel->r_addend;
+
+          /* For global pointer relative addressing, it is sufficient to ensure
+             that the symbol's base address falls within the range of global
+             pointer relative addressing.  */
+          if (h->type == STT_OBJECT)
+            reserve_size = 0;
+
 	  symtype = h->type;
 	}
 
