@@ -1043,6 +1043,10 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
   if ((hdr->sh_flags & SHF_EXCLUDE) != 0)
     flags |= SEC_EXCLUDE;
 
+  if (get_elf_backend_data (abfd)->elf_machine_code == EM_X86_64)
+    if ((hdr->sh_flags & SHF_X86_64_LARGE) != 0)
+      flags |= SEC_ELF_LARGE;
+
   switch (elf_elfheader (abfd)->e_ident[EI_OSABI])
     {
       /* FIXME: We should not recognize SHF_GNU_MBIND for ELFOSABI_NONE,
@@ -3359,6 +3363,8 @@ elf_fake_sections (bfd *abfd, asection *asect, void *fsarg)
     }
   if ((asect->flags & (SEC_GROUP | SEC_EXCLUDE)) == SEC_EXCLUDE)
     this_hdr->sh_flags |= SHF_EXCLUDE;
+  if (asect->flags & SEC_ELF_LARGE)
+    this_hdr->sh_flags |= SHF_X86_64_LARGE;
 
   /* If the section has relocs, set up a section header for the
      SHT_REL[A] section.  If two relocation sections are required for
@@ -7939,6 +7945,9 @@ _bfd_elf_init_private_section_data (bfd *ibfd,
   /* FIXME: Is this correct for all OS/PROC specific flags?  */
   elf_section_flags (osec) = (elf_section_flags (isec)
 			      & (SHF_MASKOS | SHF_MASKPROC));
+
+  if (get_elf_backend_data (ibfd)->elf_machine_code == EM_X86_64)
+    elf_section_flags (osec) = (elf_section_flags (isec) & ~SHF_X86_64_LARGE);
 
   /* Copy sh_info from input for mbind section.  */
   if ((elf_tdata (ibfd)->has_gnu_osabi & elf_gnu_osabi_mbind) != 0

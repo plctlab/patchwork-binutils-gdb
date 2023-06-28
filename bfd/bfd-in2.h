@@ -907,6 +907,9 @@ typedef struct bfd_section
   /* This section contains vliw code.  This is for Toshiba MeP only.  */
 #define SEC_MEP_VLIW               0x20000000
 
+  /* This section has the SHF_X86_64_LARGE flag.  This is ELF x86-64 only.  */
+#define SEC_ELF_LARGE              0x20000000
+
   /* All symbols, sizes and relocations in this section are octets
      instead of bytes.  Required for DWARF debug sections as DWARF
      information is organized in octets, not bytes.  */

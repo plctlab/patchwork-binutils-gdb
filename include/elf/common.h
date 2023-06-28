@@ -588,6 +588,8 @@
 
 #define SHF_GNU_MBIND	0x01000000	/* Mbind section.  */
 
+#define SHF_X86_64_LARGE 0x10000000
+
 /* Compression types.  */
 #define ELFCOMPRESS_ZLIB   1		/* Compressed with zlib.  */
 #define ELFCOMPRESS_ZSTD   2		/* Compressed with zstd  */

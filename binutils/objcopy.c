@@ -797,6 +797,7 @@ parse_flags (const char *s)
       PARSE_FLAG ("contents", SEC_HAS_CONTENTS);
       PARSE_FLAG ("merge", SEC_MERGE);
       PARSE_FLAG ("strings", SEC_STRINGS);
+      PARSE_FLAG ("large", SEC_ELF_LARGE);
 #undef PARSE_FLAG
       else
 	{
@@ -807,7 +808,7 @@ parse_flags (const char *s)
 	  copy[len] = '\0';
 	  non_fatal (_("unrecognized section flag `%s'"), copy);
 	  fatal (_("supported flags: %s"),
-		 "alloc, load, noload, readonly, debug, code, data, rom, exclude, share, contents, merge, strings");
+		 "alloc, load, noload, readonly, debug, code, data, rom, exclude, share, contents, merge, strings, large");
 	}
 
       s = snext;
