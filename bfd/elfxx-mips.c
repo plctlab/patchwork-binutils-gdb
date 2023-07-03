@@ -7871,6 +7871,10 @@ _bfd_mips_elf_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
   switch (sym->st_shndx)
     {
     case SHN_COMMON:
+      /* __gnu_lto_slim shouldn't mark as COMMON and move to .scommon:
+	lto plugin doesn't expect so.  */
+      if (strcmp (*namep, "__gnu_lto_slim") == 0)
+	break;
       /* Common symbols less than the GP size are automatically
 	 treated as SHN_MIPS_SCOMMON symbols.  */
       if (sym->st_size > elf_gp_size (abfd)
