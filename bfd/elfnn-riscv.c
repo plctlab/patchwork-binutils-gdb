@@ -2934,16 +2934,22 @@ riscv_elf_finish_dynamic_symbol (bfd *output_bfd,
       /* Calculate the address of the PLT header.  */
       header_address = sec_addr (plt);
 
-      /* Calculate the index of the entry and the offset of .got.plt entry.
-	 For static executables, we don't reserve anything.  */
+      /* Calculate the index of the entry and the offset of .got.plt entry.*/
       if (plt == htab->elf.splt)
 	{
+	  /* Reserve PLT header. */
 	  plt_idx = (h->plt.offset - PLT_HEADER_SIZE) / PLT_ENTRY_SIZE;
 	  got_offset = GOTPLT_HEADER_SIZE + (plt_idx * GOT_ENTRY_SIZE);
 	}
       else
 	{
-	  plt_idx = h->plt.offset / PLT_ENTRY_SIZE;
+	 /* For static executables, we don't reserve anything.
+	    And we add relocs in backward order to fix wrong relocation indexing.
+	    See:
+	    https://sourceware.org/git/?p=binutils-gdb.git;a=commit;h=51a8a7c2e3cc0730831963651a55d23d1fae624d
+	  */
+
+	  plt_idx = htab->last_iplt_index--;
 	  got_offset = plt_idx * GOT_ENTRY_SIZE;
 	}
 

@@ -269,6 +269,8 @@ if [istarget "riscv*-*-*"] {
     run_dump_test_ifunc "ifunc-plt-got-overwrite" rv64 exe
     run_dump_test_ifunc "ifunc-plt-got-overwrite" rv64 pie
     run_dump_test_ifunc "ifunc-plt-got-overwrite" rv64 pic
+    run_dump_test_ifunc "ifunc-plt-got-overwrite-02" rv32 exe
+    run_dump_test_ifunc "ifunc-plt-got-overwrite-02" rv64 exe
 
     # Setup shared libraries.
     run_ld_link_tests {
