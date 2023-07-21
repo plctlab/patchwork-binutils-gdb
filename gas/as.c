@@ -383,6 +383,8 @@ Options:\n\
   fprintf (stream, _("\
   -W  --no-warn           suppress warnings\n"));
   fprintf (stream, _("\
+  --no-group-check        suppress the warning when attaching a group to a section that already has a group.\n"));  
+  fprintf (stream, _("\
   --warn                  don't suppress warnings\n"));
   fprintf (stream, _("\
   --fatal-warnings        treat warnings as errors\n"));
@@ -511,7 +513,8 @@ parse_args (int * pargc, char *** pargv)
       OPTION_NOCOMPRESS_DEBUG,
       OPTION_NO_PAD_SECTIONS,
       OPTION_MULTIBYTE_HANDLING,  /* = STD_BASE + 40 */
-      OPTION_SFRAME
+      OPTION_SFRAME,
+      OPTION_NO_GROUP_CHECK
     /* When you add options here, check that they do
        not collide with OPTION_MD_BASE.  See as.h.  */
     };
@@ -585,6 +588,7 @@ parse_args (int * pargc, char *** pargv)
     ,{"nocpp", no_argument, NULL, OPTION_NOCPP}
     ,{"no-pad-sections", no_argument, NULL, OPTION_NO_PAD_SECTIONS}
     ,{"no-warn", no_argument, NULL, 'W'}
+    ,{"no-group-check", no_argument, NULL, OPTION_NO_GROUP_CHECK}
     ,{"reduce-memory-overheads", no_argument, NULL, OPTION_REDUCE_MEMORY_OVERHEADS}
     ,{"statistics", no_argument, NULL, OPTION_STATISTICS}
     ,{"strip-local-absolute", no_argument, NULL, OPTION_STRIP_LOCAL_ABSOLUTE}
@@ -990,6 +994,10 @@ This program has absolutely no warranty.\n"));
 	  else
 	    as_fatal (_("Invalid --size-check= option: `%s'"), optarg);
 	  break;
+  
+  case OPTION_NO_GROUP_CHECK:
+    flag_no_group_check = 1;
+    break;
 
 	case OPTION_ELF_STT_COMMON:
 	  if (strcasecmp (optarg, "no") == 0)

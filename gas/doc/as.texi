@@ -961,6 +961,10 @@ Print the @command{as} version and exit.
 @itemx --no-warn
 Suppress warning messages.
 
+@item --no-group-check
+Suppress the warning when attaching a group to a section that already has a
+group.
+
 @item --fatal-warnings
 Treat warnings as errors.
 

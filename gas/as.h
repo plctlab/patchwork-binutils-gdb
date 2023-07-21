@@ -605,6 +605,9 @@ COMMON const char *        found_comment_file;
 /* If .size directive failure should be error or warning.  */
 COMMON int flag_allow_nonconst_size;
 
+/* True if the check for an existing group of sections should be inhibited.   */
+COMMON int flag_no_group_check;
+
 /* If we should generate ELF common symbols with the STT_COMMON type.  */
 extern int flag_use_elf_stt_common;
 
