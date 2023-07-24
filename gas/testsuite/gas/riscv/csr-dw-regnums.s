@@ -342,6 +342,11 @@ _start:
 	.cfi_offset hstateen1h, 6260
 	.cfi_offset hstateen2h, 6264
 	.cfi_offset hstateen3h, 6268
+	# Smcntrpmf extension
+	.cfi_offset mcyclecfg, 3204
+	.cfi_offset minstretcfg, 3208
+	.cfi_offset mcyclecfgh, 7204
+	.cfi_offset minstretcfgh, 7208
 	# Ssaia extension
 	.cfi_offset siselect, 1344
 	.cfi_offset sireg, 1348
@@ -412,8 +417,6 @@ _start:
 	.cfi_offset mibound, 3596
 	.cfi_offset mdbase, 3600
 	.cfi_offset mdbound, 3604
-	.cfi_offset mscounteren, 3204
-	.cfi_offset mhcounteren, 3208
 	.cfi_offset ustatus, 0
 	.cfi_offset uie, 16
 	.cfi_offset utvec, 20

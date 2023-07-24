@@ -1133,6 +1133,30 @@
 .*Info: macro .*
 .*Warning: invalid CSR `hstateen3h', needs `ssstateen' extension
 .*Info: macro .*
+.*Warning: invalid CSR `mcyclecfg', needs `smcntrpmf' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mcyclecfg', needs `smcntrpmf' extension
+.*Info: macro .*
+.*Warning: invalid CSR `minstretcfg', needs `smcntrpmf' extension
+.*Info: macro .*
+.*Warning: invalid CSR `minstretcfg', needs `smcntrpmf' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mcyclecfgh', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `mcyclecfgh', needs `smcntrpmf' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mcyclecfgh', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `mcyclecfgh', needs `smcntrpmf' extension
+.*Info: macro .*
+.*Warning: invalid CSR `minstretcfgh', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `minstretcfgh', needs `smcntrpmf' extension
+.*Info: macro .*
+.*Warning: invalid CSR `minstretcfgh', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `minstretcfgh', needs `smcntrpmf' extension
+.*Info: macro .*
 .*Warning: invalid CSR `siselect', needs `ssaia' extension
 .*Info: macro .*
 .*Warning: invalid CSR `siselect', needs `ssaia' extension

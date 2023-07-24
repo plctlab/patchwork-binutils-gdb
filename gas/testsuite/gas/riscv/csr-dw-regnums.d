@@ -344,6 +344,10 @@ Contents of the .* section:
   DW_CFA_offset_extended_sf: r5661 \(hstateen1h\) at cfa\+6260
   DW_CFA_offset_extended_sf: r5662 \(hstateen2h\) at cfa\+6264
   DW_CFA_offset_extended_sf: r5663 \(hstateen3h\) at cfa\+6268
+  DW_CFA_offset_extended_sf: r4897 \(mcyclecfg\) at cfa\+3204
+  DW_CFA_offset_extended_sf: r4898 \(minstretcfg\) at cfa\+3208
+  DW_CFA_offset_extended_sf: r5921 \(mcyclecfgh\) at cfa\+7204
+  DW_CFA_offset_extended_sf: r5922 \(minstretcfgh\) at cfa\+7208
   DW_CFA_offset_extended_sf: r4432 \(siselect\) at cfa\+1344
   DW_CFA_offset_extended_sf: r4433 \(sireg\) at cfa\+1348
   DW_CFA_offset_extended_sf: r4444 \(stopei\) at cfa\+1392
@@ -410,8 +414,6 @@ Contents of the .* section:
   DW_CFA_offset_extended_sf: r4995 \(mibound\) at cfa\+3596
   DW_CFA_offset_extended_sf: r4996 \(mdbase\) at cfa\+3600
   DW_CFA_offset_extended_sf: r4997 \(mdbound\) at cfa\+3604
-  DW_CFA_offset_extended_sf: r4897 \(mscounteren\) at cfa\+3204
-  DW_CFA_offset_extended_sf: r4898 \(mhcounteren\) at cfa\+3208
   DW_CFA_offset_extended: r4096 \(ustatus\) at cfa\+0
   DW_CFA_offset_extended_sf: r4100 \(uie\) at cfa\+16
   DW_CFA_offset_extended_sf: r4101 \(utvec\) at cfa\+20

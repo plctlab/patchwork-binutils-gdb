@@ -372,6 +372,12 @@
 	csr hstateen2h
 	csr hstateen3h
 
+	# Smcntrpmf extension
+	csr mcyclecfg
+	csr minstretcfg
+	csr mcyclecfgh
+	csr minstretcfgh
+
 	# Ssaia
 	csr siselect
 	csr sireg
@@ -446,8 +452,6 @@
 	csr mibound		# 0x383 in 1.9.1, dropped in 1.10
 	csr mdbase		# 0x384 in 1.9.1, dropped in 1.10
 	csr mdbound		# 0x385 in 1.9.1, dropped in 1.10
-	csr mscounteren		# 0x321 in 1.9.1, dropped in 1.10
-	csr mhcounteren		# 0x322 in 1.9.1, dropped in 1.10
 	csr ustatus		# 0x0   in 1.9.1, dropped in 1.12
 	csr uie			# 0x4   in 1.9.1, dropped in 1.12
 	csr utvec		# 0x5   in 1.9.1, dropped in 1.12

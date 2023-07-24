@@ -753,6 +753,30 @@
 .*Info: macro .*
 .*Warning: invalid CSR `hstateen3h', needs `ssstateen' extension
 .*Info: macro .*
+.*Warning: invalid CSR `mcyclecfg', needs `smcntrpmf' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mcyclecfg', needs `smcntrpmf' extension
+.*Info: macro .*
+.*Warning: invalid CSR `minstretcfg', needs `smcntrpmf' extension
+.*Info: macro .*
+.*Warning: invalid CSR `minstretcfg', needs `smcntrpmf' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mcyclecfgh', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `mcyclecfgh', needs `smcntrpmf' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mcyclecfgh', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `mcyclecfgh', needs `smcntrpmf' extension
+.*Info: macro .*
+.*Warning: invalid CSR `minstretcfgh', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `minstretcfgh', needs `smcntrpmf' extension
+.*Info: macro .*
+.*Warning: invalid CSR `minstretcfgh', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `minstretcfgh', needs `smcntrpmf' extension
+.*Info: macro .*
 .*Warning: invalid CSR `siselect', needs `ssaia' extension
 .*Info: macro .*
 .*Warning: invalid CSR `siselect', needs `ssaia' extension
@@ -1250,14 +1274,6 @@
 .*Warning: invalid CSR `mdbound' for the privileged spec `1.12'
 .*Info: macro .*
 .*Warning: invalid CSR `mdbound' for the privileged spec `1.12'
-.*Info: macro .*
-.*Warning: invalid CSR `mscounteren' for the privileged spec `1.12'
-.*Info: macro .*
-.*Warning: invalid CSR `mscounteren' for the privileged spec `1.12'
-.*Info: macro .*
-.*Warning: invalid CSR `mhcounteren' for the privileged spec `1.12'
-.*Info: macro .*
-.*Warning: invalid CSR `mhcounteren' for the privileged spec `1.12'
 .*Info: macro .*
 .*Warning: invalid CSR `ustatus' for the privileged spec `1.12'
 .*Info: macro .*
