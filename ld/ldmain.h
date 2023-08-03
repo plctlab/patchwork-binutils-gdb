@@ -56,6 +56,8 @@ extern char *error_handling_script;
   do { link_info.disable_target_specific_optimizations = 2; } while (0)
 #define ENABLE_RELAXATION		\
   do { link_info.disable_target_specific_optimizations = 0; } while (0)
+#define ENABLE_TP_AS_GP                 \
+  do { link_info.tp_as_gp = true; } while (0)
 
 extern void add_ysym (const char *);
 extern void add_wrap (const char *);

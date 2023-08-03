@@ -451,6 +451,8 @@ static const struct ld_option ld_options[] =
     '\0', NULL, N_("Reduce code size by using target specific optimizations"), TWO_DASHES },
   { {"no-relax", no_argument, NULL, OPTION_NO_RELAX},
     '\0', NULL, N_("Do not use relaxation techniques to reduce code size"), TWO_DASHES },
+  { {"tp-as-gp", no_argument, NULL, OPTION_RELAX_TP_AS_GP},
+    '\0', NULL, N_("Use tp as gp when there is no multithreaded scenario that requires the tp"), TWO_DASHES },
   { {"retain-symbols-file", required_argument, NULL,
      OPTION_RETAIN_SYMBOLS_FILE},
     '\0', N_("FILE"), N_("Keep only symbols listed in FILE"), TWO_DASHES },
@@ -1274,6 +1276,9 @@ parse_args (unsigned argc, char **argv)
 	case OPTION_RELAX:
 	  ENABLE_RELAXATION;
 	  break;
+        case OPTION_RELAX_TP_AS_GP:
+          ENABLE_TP_AS_GP;
+          break;
 	case OPTION_RETAIN_SYMBOLS_FILE:
 	  add_keepsyms_file (optarg);
 	  break;

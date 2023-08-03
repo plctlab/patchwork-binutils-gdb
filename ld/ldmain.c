@@ -339,6 +339,7 @@ main (int argc, char **argv)
   link_info.combreloc = true;
   link_info.strip_discarded = true;
   link_info.prohibit_multiple_definition_absolute = false;
+  link_info.tp_as_gp = 0;
   link_info.textrel_check = DEFAULT_LD_TEXTREL_CHECK;
   link_info.emit_hash = DEFAULT_EMIT_SYSV_HASH;
   link_info.emit_gnu_hash = DEFAULT_EMIT_GNU_HASH;

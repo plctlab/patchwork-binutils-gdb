@@ -112,6 +112,12 @@ END_RELOC_NUMBERS (R_RISCV_max)
 /* File uses the 32E base integer instruction.  */
 #define EF_RISCV_RVE 0x0008
 
+/* Enable the switch of option --tp-as-gp.  */
+#define ENABLE_TP_AS_GP 0x1
+
+/* Use the switch of option --tp-as-gp.  */
+#define USED_TP_AS_GP 0x2
+
 /* The name of the global pointer symbol.  */
 #define RISCV_GP_SYMBOL "__global_pointer$"
 

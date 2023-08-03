@@ -557,6 +557,12 @@ struct bfd_link_info
   /* TRUE if commonpagesize is set on command-line.  */
   unsigned int commonpagesize_is_set : 1;
 
+  /* Tri-state variable:
+     0 => option --tp-as-gp is not specified by user.
+     1 => option --tp-as-gp is specified by user, but not used.
+     3 => option --tp-as-gp is specified by user, and has been used.  */
+  unsigned int tp_as_gp: 2;
+
   /* Char that may appear as the first char of a symbol, but should be
      skipped (like symbol_leading_char) when looking up symbols in
      wrap_hash.  Used by PowerPC Linux for 'dot' symbols.  */

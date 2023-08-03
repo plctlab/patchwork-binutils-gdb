@@ -1573,17 +1573,6 @@ dtpoff (struct bfd_link_info *info, bfd_vma address)
   return address - elf_hash_table (info)->tls_sec->vma - DTP_OFFSET;
 }
 
-/* Return the relocation value for a static TLS tp-relative relocation.  */
-
-static bfd_vma
-tpoff (struct bfd_link_info *info, bfd_vma address)
-{
-  /* If tls_sec is NULL, we should have signalled an error already.  */
-  if (elf_hash_table (info)->tls_sec == NULL)
-    return 0;
-  return address - elf_hash_table (info)->tls_sec->vma - TP_OFFSET;
-}
-
 /* Return the global pointer's value, or 0 if it is not in use.  */
 
 static bfd_vma
@@ -1596,6 +1585,25 @@ riscv_global_pointer_value (struct bfd_link_info *info)
     return 0;
 
   return h->u.def.value + sec_addr (h->u.def.section);
+}
+
+/* Return the relocation value for a static TLS tp-relative relocation.  */
+
+static bfd_vma
+tpoff (struct bfd_link_info *info, bfd_vma address)
+{
+  /* If tls_sec is NULL, we try to use tp as gp, otherwise signal an error.  */
+  if (elf_hash_table (info)->tls_sec == NULL)
+  {
+    if (info->tp_as_gp & USED_TP_AS_GP)
+    {
+      bfd_vma gp = riscv_global_pointer_value (info);
+      bfd_vma tp = gp + 0x1000;
+      return address - tp;
+    }
+    return 0;
+  }
+  return address - elf_hash_table (info)->tls_sec->vma - TP_OFFSET;
 }
 
 /* Emplace a static relocation.  */
@@ -4464,6 +4472,28 @@ _bfd_riscv_relax_lui (bfd *abfd,
 	  abort ();
 	}
     }
+
+  unsigned sym = ELFNN_R_SYM (rel->r_info);
+  if ((link_info->tp_as_gp & ENABLE_TP_AS_GP)
+      && (elf_hash_table (link_info)->tls_sec == NULL))
+  {
+    bfd_vma tp = gp + 0x1000;
+    if (undefined_weak
+        || VALID_ITYPE_IMM (symval)
+        || (symval >= tp
+	    && VALID_ITYPE_IMM (symval - tp + max_alignment + reserve_size))
+        || (symval < tp
+	    && VALID_ITYPE_IMM (symval - tp - max_alignment - reserve_size)))
+    {
+      link_info->tp_as_gp |= USED_TP_AS_GP;
+      if (ELFNN_R_TYPE (rel->r_info) == R_RISCV_HI20)
+        rel->r_info = ELFNN_R_INFO (sym, R_RISCV_TPREL_HI20);
+      if (ELFNN_R_TYPE (rel->r_info) == R_RISCV_LO12_I)
+        rel->r_info = ELFNN_R_INFO (sym, R_RISCV_TPREL_LO12_I);
+      if (ELFNN_R_TYPE (rel->r_info) == R_RISCV_LO12_S)
+        rel->r_info = ELFNN_R_INFO (sym, R_RISCV_TPREL_LO12_S);
+    }
+  }
 
   /* Can we relax LUI to C.LUI?  Alignment might move the section forward;
      account for this assuming page alignment at worst. In the presence of 
