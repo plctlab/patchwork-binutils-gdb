@@ -11556,6 +11556,24 @@ get_relocs (asection *sec, int count)
   return relocs;
 }
 
+static bool
+swap_reloc_out (bfd *obfd, Elf_Internal_Rela *rel, bfd_byte *loc, asection *s)
+{
+  if ((size_t) (loc - s->contents) >= s->size)
+    return false;
+  bfd_elf64_swap_reloca_out (obfd, rel, loc);
+  return true;
+}
+
+static bool
+count_and_swap_reloc_out (bfd *obfd, Elf_Internal_Rela *rel, asection *s)
+{
+  bfd_byte *loc = s->contents;
+  loc += s->reloc_count++ * sizeof (Elf64_External_Rela);
+  return swap_reloc_out (obfd, rel, loc, s);
+}
+
+
 /* Convert the relocs R[0] thru R[-NUM_REL+1], which are all no-symbol
    forms, to the equivalent relocs against the global symbol given by
    STUB_ENTRY->H.  */
@@ -11834,7 +11852,6 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	    {
 	      /* Create a reloc for the branch lookup table entry.  */
 	      Elf_Internal_Rela rela;
-	      bfd_byte *rl;
 
 	      rela.r_offset = (br_entry->offset
 			       + htab->brlt->output_offset
@@ -11842,10 +11859,8 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	      rela.r_info = ELF64_R_INFO (0, R_PPC64_RELATIVE);
 	      rela.r_addend = targ;
 
-	      rl = htab->relbrlt->contents;
-	      rl += (htab->relbrlt->reloc_count++
-		     * sizeof (Elf64_External_Rela));
-	      bfd_elf64_swap_reloca_out (htab->relbrlt->owner, &rela, rl);
+	      BFD_ASSERT (count_and_swap_reloc_out (htab->relbrlt->owner, &rela,
+						    htab->relbrlt));
 	    }
 	  else if (info->emitrelocations)
 	    {
@@ -14639,9 +14654,8 @@ build_global_entry_stubs_and_plt (struct elf_link_hash_entry *h, void *inf)
 		rela.r_offset = (plt->output_section->vma
 				 + plt->output_offset
 				 + ent->plt.offset);
-		loc = relplt->contents + (relplt->reloc_count++
-					  * sizeof (Elf64_External_Rela));
-		bfd_elf64_swap_reloca_out (info->output_bfd, &rela, loc);
+		BFD_ASSERT (count_and_swap_reloc_out (info->output_bfd, &rela,
+						      relplt));
 	      }
 	  }
 	else
@@ -14656,7 +14670,8 @@ build_global_entry_stubs_and_plt (struct elf_link_hash_entry *h, void *inf)
 		      / PLT_ENTRY_SIZE (htab) * sizeof (Elf64_External_Rela)));
 	    if (h->type == STT_GNU_IFUNC && is_static_defined (h))
 	      htab->elf.ifunc_resolvers = true;
-	    bfd_elf64_swap_reloca_out (info->output_bfd, &rela, loc);
+	    BFD_ASSERT (swap_reloc_out (info->output_bfd, &rela,
+					loc, htab->elf.srelplt));
 	  }
       }
 
@@ -14777,7 +14792,6 @@ write_plt_relocs_for_local_syms (struct bfd_link_info *info)
 	      Elf_Internal_Sym *sym;
 	      asection *sym_sec;
 	      asection *plt, *relplt;
-	      bfd_byte *loc;
 	      bfd_vma val;
 
 	      if (!get_sym_h (NULL, &sym, &sym_sec, NULL, &local_syms,
@@ -14809,7 +14823,7 @@ write_plt_relocs_for_local_syms (struct bfd_link_info *info)
 
 	      if (relplt == NULL)
 		{
-		  loc = plt->contents + ent->plt.offset;
+		  bfd_byte *loc = plt->contents + ent->plt.offset;
 		  bfd_put_64 (info->output_bfd, val, loc);
 		  if (htab->opd_abi)
 		    {
@@ -14838,9 +14852,8 @@ write_plt_relocs_for_local_syms (struct bfd_link_info *info)
 			rela.r_info = ELF64_R_INFO (0, R_PPC64_RELATIVE);
 		    }
 		  rela.r_addend = val;
-		  loc = relplt->contents + (relplt->reloc_count++
-					    * sizeof (Elf64_External_Rela));
-		  bfd_elf64_swap_reloca_out (info->output_bfd, &rela, loc);
+		  BFD_ASSERT (count_and_swap_reloc_out (info->output_bfd,
+							 &rela, relplt));
 		}
 	    }
 
@@ -16978,11 +16991,9 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 			outrel.r_info = ELF64_R_INFO (indx, R_PPC64_DTPMOD64);
 			if (tls_type == (TLS_TLS | TLS_GD))
 			  {
-			    loc = relgot->contents;
-			    loc += (relgot->reloc_count++
-				    * sizeof (Elf64_External_Rela));
-			    bfd_elf64_swap_reloca_out (output_bfd,
-						       &outrel, loc);
+			    BFD_ASSERT (count_and_swap_reloc_out (output_bfd,
+								  &outrel,
+								  relgot));
 			    outrel.r_offset += 8;
 			    outrel.r_addend = orig_rel.r_addend;
 			    outrel.r_info
@@ -17022,12 +17033,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		      }
 		    if (!(info->enable_dt_relr
 			  && ELF64_R_TYPE (outrel.r_info) == R_PPC64_RELATIVE))
-		      {
-			loc = relgot->contents;
-			loc += (relgot->reloc_count++
-				* sizeof (Elf64_External_Rela));
-			bfd_elf64_swap_reloca_out (output_bfd, &outrel, loc);
-		      }
+		      BFD_ASSERT (count_and_swap_reloc_out (output_bfd,
+							    &outrel, relgot));
 		  }
 
 		/* Init the .got section contents here if we're not
@@ -17513,12 +17520,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		  if (sreloc == NULL)
 		    abort ();
 
-		  if (sreloc->reloc_count * sizeof (Elf64_External_Rela)
-		      >= sreloc->size)
-		    abort ();
-		  loc = sreloc->contents;
-		  loc += sreloc->reloc_count++ * sizeof (Elf64_External_Rela);
-		  bfd_elf64_swap_reloca_out (output_bfd, &outrel, loc);
+		  BFD_ASSERT (count_and_swap_reloc_out (output_bfd, &outrel,
+							sreloc));
 		}
 
 	      if (!warned_dynamic
@@ -18150,7 +18153,6 @@ ppc64_elf_finish_dynamic_symbol (bfd *output_bfd,
       /* This symbol needs a copy reloc.  Set it up.  */
       Elf_Internal_Rela rela;
       asection *srel;
-      bfd_byte *loc;
 
       if (h->dynindx == -1)
 	abort ();
@@ -18162,9 +18164,7 @@ ppc64_elf_finish_dynamic_symbol (bfd *output_bfd,
 	srel = htab->elf.sreldynrelro;
       else
 	srel = htab->elf.srelbss;
-      loc = srel->contents;
-      loc += srel->reloc_count++ * sizeof (Elf64_External_Rela);
-      bfd_elf64_swap_reloca_out (output_bfd, &rela, loc);
+      BFD_ASSERT (count_and_swap_reloc_out (output_bfd, &rela, srel));
     }
 
   return true;
