@@ -4152,4 +4152,6 @@ elf_loongarch64_hash_symbol (struct elf_link_hash_entry *h)
 #define elf_backend_grok_psinfo loongarch_elf_grok_psinfo
 #define elf_backend_hash_symbol elf_loongarch64_hash_symbol
 
+#define elf_backend_dtrel_excludes_plt 1
+
 #include "elfNN-target.h"
