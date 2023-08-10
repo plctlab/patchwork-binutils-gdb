@@ -715,6 +715,8 @@
 					/*   note name must be "CORE".  */
 #define NT_RISCV_CSR    0x900		/* RISC-V Control and Status Registers */
 					/*   note name must be "GDB".  */
+#define NT_RISCV_VECTOR 0x900		/* RISC-V Vector Registers */
+					/*   note name must be "CORE".  */
 #define NT_SIGINFO	0x53494749	/* Fields of siginfo_t.  */
 #define NT_FILE		0x46494c45	/* Description of mapped files.  */
 
