@@ -1239,7 +1239,7 @@ if { [istarget mips*-*-vxworks*] } {
 
     run_dump_test "comdat-reloc"
 
-    run_dump_test "${tmips}mips${el}16-e"
+    run_dump_test "${tmips}mips${el}16-e${imips}"
     run_dump_test "${tmips}mips${el}16-f"
 
     run_dump_test "elf-consthilo"
@@ -1536,7 +1536,8 @@ if { [istarget mips*-*-vxworks*] } {
 	[mips_arch_list_matching mips1 !singlefloat]
 
     run_dump_test "mips16-vis-1"
-    run_dump_test "call-nonpic-1"
+    # Irix sets use_e_mips_abi_o32=0.  See gas/configure.ac.
+    run_dump_test "call-nonpic-1${imips}"
     run_dump_test "mips32-sync"
     run_dump_test_arches "mips32r2-sync" [lsort -dictionary -unique [concat \
 					[mips_arch_list_matching mips32r2] \
@@ -2147,5 +2148,11 @@ if { [istarget mips*-*-vxworks*] } {
 	run_dump_test "global-local-symtab-n64"
 	run_dump_test "global-local-symtab-sort-n32${tmips}"
 	run_dump_test "global-local-symtab-sort-n64${tmips}"
+    }
+
+    # Gas doesn't generate .pdr section for Irix objects by default.
+    # See `int mips_flag_pdr` in tc-mips.c.
+    if [istarget *-*-irix*] {
+      run_dump_test "irix-no-pdr"
     }
 }
