@@ -1,4 +1,5 @@
 #PROG: objcopy
+#as: -32 -mips1
 #objdump: -drt
 #name: Mixed MIPS16 and microMIPS disassembly
 
