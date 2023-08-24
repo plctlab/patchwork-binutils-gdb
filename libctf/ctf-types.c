@@ -232,7 +232,8 @@ ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
  end_iter:
   ctf_next_destroy (i);
   *it = NULL;
-  return ctf_set_errno (ofp, ECTF_NEXT_END);
+  ctf_set_errno (ofp, ECTF_NEXT_END);
+  return -1;
 }
 
 /* Iterate over the members of an ENUM.  We pass the string name and associated
