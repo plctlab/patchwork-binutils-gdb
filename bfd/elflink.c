@@ -3586,10 +3586,19 @@ elf_link_is_defined_archive_symbol (bfd * abfd, carsym * symdef)
       abfd = abfd->plugin_dummy_bfd;
       hdr = &elf_tdata (abfd)->symtab_hdr;
     }
-  else if ((abfd->flags & DYNAMIC) == 0 || elf_dynsymtab (abfd) == 0)
-    hdr = &elf_tdata (abfd)->symtab_hdr;
   else
-    hdr = &elf_tdata (abfd)->dynsymtab_hdr;
+    {
+      if (elf_use_dt_symtab_p (abfd))
+	{
+	  bfd_set_error (bfd_error_wrong_format);
+	  return false;
+	}
+
+      if ((abfd->flags & DYNAMIC) == 0 || elf_dynsymtab (abfd) == 0)
+	hdr = &elf_tdata (abfd)->symtab_hdr;
+      else
+	hdr = &elf_tdata (abfd)->dynsymtab_hdr;
+    }
 
   symcount = hdr->sh_size / get_elf_backend_data (abfd)->s->sizeof_sym;
 
