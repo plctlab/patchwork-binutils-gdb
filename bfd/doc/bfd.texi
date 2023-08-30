@@ -210,7 +210,6 @@ IEEE-695.
 * Targets::
 * Architectures::
 * Opening and Closing::
-* Internal::
 * File Caching::
 * Linker Functions::
 * Hash Tables::
@@ -266,13 +265,10 @@ structures.
 @node Architectures, Opening and Closing, Targets, BFD front end
 @include  archures.texi
 
-@node Opening and Closing, Internal, Architectures, BFD front end
+@node Opening and Closing, File Caching, Architectures, BFD front end
 @include  opncls.texi
 
-@node Internal, File Caching, Opening and Closing, BFD front end
-@include  libbfd.texi
-
-@node File Caching, Linker Functions, Internal, BFD front end
+@node File Caching, Linker Functions, Opening and Closing, BFD front end
 @include  cache.texi
 
 @node Linker Functions, Hash Tables, File Caching, BFD front end

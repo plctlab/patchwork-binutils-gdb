@@ -32,7 +32,6 @@ DOCFILES = \
 	%D%/elf.texi \
 	%D%/format.texi \
 	%D%/hash.texi \
-	%D%/libbfd.texi \
 	%D%/linker.texi \
 	%D%/mmo.texi \
 	%D%/opncls.texi \

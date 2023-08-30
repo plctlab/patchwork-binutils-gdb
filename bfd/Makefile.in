@@ -1243,7 +1243,6 @@ DOCFILES = \
 	doc/elf.texi \
 	doc/format.texi \
 	doc/hash.texi \
-	doc/libbfd.texi \
 	doc/linker.texi \
 	doc/mmo.texi \
 	doc/opncls.texi \
