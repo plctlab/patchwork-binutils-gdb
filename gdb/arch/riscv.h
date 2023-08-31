@@ -52,7 +52,7 @@ struct riscv_gdbarch_features
      any vector size.  */
   int vlen = 0;
 
-  /* When true this target is RV32E.  */
+  /* When true this target is RV32E or RV64E.  */
   bool embedded = false;
 
   /* Track if the target description has an fcsr, fflags, and frm
