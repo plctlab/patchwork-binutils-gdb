@@ -123,3 +123,8 @@ extern void
 bfd_elf32_riscv_set_data_segment_info (struct bfd_link_info *, int *);
 extern void
 bfd_elf64_riscv_set_data_segment_info (struct bfd_link_info *, int *);
+
+extern void
+bfd_elf32_riscv_update_x3_reg_usage (struct bfd_link_info *);
+extern void
+bfd_elf64_riscv_update_x3_reg_usage (struct bfd_link_info *);

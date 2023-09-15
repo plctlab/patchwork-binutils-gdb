@@ -7,3 +7,4 @@
 Attribute Section: riscv
 File Attributes
   Tag_RISCV_arch: "rv32i2p1_a2p0_xbar2p0_xfoo2p0"
+  Tag_RISCV_x3_reg_usage: reserved

@@ -111,6 +111,8 @@ gld${EMULATION_NAME}_after_allocation (void)
   bfd_elf${ELFSIZE}_riscv_set_data_segment_info (&link_info, (int *) phase);
 
   ldelf_map_segments (need_layout);
+
+  bfd_elf${ELFSIZE}_riscv_update_x3_reg_usage (&link_info);
 }
 
 /* This is a convenient point to tell BFD about target specific flags.

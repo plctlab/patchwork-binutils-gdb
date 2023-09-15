@@ -142,6 +142,16 @@ riscv_get_priv_spec_class_from_numbers (unsigned int major,
   *class = class_t;
 }
 
+/* Check if the value of Tag_RISCV_x3_reg_usage is defined or not.  */
+
+bool
+riscv_elf_is_unknown_x3_reg_usage (int value)
+{
+  return (value != X3_DEFAULT
+	  && value != X3_RELAX
+	  && value != X3_RESERVED);
+}
+
 /* Define mapping symbols for riscv.  */
 
 bool

@@ -140,6 +140,9 @@ struct riscv_elf_link_hash_table
 
   /* Relocations for variant CC symbols may be present.  */
   int variant_cc;
+
+  /* The usage of x3, will be updated to output elf attribute.  */
+  int x3_reg_usage;
 };
 
 /* Instruction access functions. */
@@ -3668,6 +3671,15 @@ riscv_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 	 initialized.  */
       out_attr[0].i = 1;
 
+      /* Filter the unknow value for Tag_RISCV_x3_reg_usage.  */
+      if (riscv_elf_is_unknown_x3_reg_usage (out_attr[Tag_RISCV_x3_reg_usage].i))
+	out_attr[Tag_RISCV_x3_reg_usage].i = X3_DEFAULT;
+      /* Disable gp relaxations if x3 is reserved.
+	 The priority of elf x3_reg_usage attribute is higher than the ld
+	 --[no-]relax-gp options.  */
+      if (out_attr[Tag_RISCV_x3_reg_usage].i == X3_RESERVED)
+	riscv_elf_hash_table (info)->params->relax_gp = false;
+
       return true;
     }
 
@@ -3782,6 +3794,30 @@ riscv_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 	       ibfd, in_attr[i].i, out_attr[i].i);
 	    result = false;
 	  }
+	break;
+
+      case Tag_RISCV_x3_reg_usage:
+	/* Filter the unknow value for Tag_RISCV_x3_reg_usage.  */
+	if (riscv_elf_is_unknown_x3_reg_usage (in_attr[Tag_RISCV_x3_reg_usage].i))
+	  in_attr[Tag_RISCV_x3_reg_usage].i = X3_DEFAULT;
+
+	if (out_attr[i].i == X3_DEFAULT)
+	  out_attr[i].i = in_attr[i].i;
+	else if (in_attr[i].i != X3_DEFAULT
+		 && out_attr[i].i != in_attr[i].i)
+	  {
+	    _bfd_error_handler
+	      (_("error: %pB use Tag_RISCV_x3_reg_usage (%d) but output "
+		 "use Tag_RISCV_x3_reg_usage (%d)"),
+	       ibfd, in_attr[i].i, out_attr[i].i);
+	    result = false;
+	  }
+
+	/* Disable gp relaxations if x3 is reserved.
+	   The priority of elf x3_reg_usage attribute is higher than the ld
+	   --[no-]relax-gp options.  */
+	if (out_attr[i].i == X3_RESERVED)
+	  riscv_elf_hash_table (info)->params->relax_gp = false;
 	break;
 
       default:
@@ -4427,6 +4463,9 @@ _bfd_riscv_relax_lui (bfd *abfd,
 	  || (symval < gp
 	      && VALID_ITYPE_IMM (symval - gp - max_alignment - reserve_size))))
     {
+      if (!undefined_weak && gp)
+	htab->x3_reg_usage = X3_RELAX;
+
       unsigned sym = ELFNN_R_SYM (rel->r_info);
       switch (ELFNN_R_TYPE (rel->r_info))
 	{
@@ -4692,6 +4731,9 @@ _bfd_riscv_relax_pc (bfd *abfd ATTRIBUTE_UNUSED,
 	  || (symval < gp
 	      && VALID_ITYPE_IMM (symval - gp - max_alignment - reserve_size))))
     {
+      if (!undefined_weak && gp)
+	htab->x3_reg_usage = X3_RELAX;
+
       unsigned sym = hi_reloc.hi_sym;
       switch (ELFNN_R_TYPE (rel->r_info))
 	{
@@ -4762,6 +4804,18 @@ bfd_elfNN_riscv_set_data_segment_info (struct bfd_link_info *info,
 {
   struct riscv_elf_link_hash_table *htab = riscv_elf_hash_table (info);
   htab->data_segment_phase = data_segment_phase;
+}
+
+/* Called by after_allocation, after all the relaxations (ldelf_map_segments)
+   finishing, to update the value of output Tag_RISCV_x3_reg_usage.  */
+
+void
+bfd_elfNN_riscv_update_x3_reg_usage (struct bfd_link_info *info)
+{
+  struct riscv_elf_link_hash_table *htab = riscv_elf_hash_table (info);
+  enum riscv_x3_reg_usage x = htab->x3_reg_usage == X3_RELAX
+			      ? X3_RELAX : X3_RESERVED;
+  bfd_elf_add_proc_attr_int (info->output_bfd, Tag_RISCV_x3_reg_usage, x);
 }
 
 /* Relax a section.

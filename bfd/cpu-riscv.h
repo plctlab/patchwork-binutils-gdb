@@ -81,5 +81,15 @@ riscv_get_priv_spec_class_from_numbers (unsigned int,
 					unsigned int,
 					enum riscv_spec_class *);
 
+enum riscv_x3_reg_usage
+{
+  X3_DEFAULT = 0,
+  X3_RELAX,
+  X3_RESERVED = 4,
+};
+
+extern bool
+riscv_elf_is_unknown_x3_reg_usage (int);
+
 extern bool
 riscv_elf_is_mapping_symbols (const char *);

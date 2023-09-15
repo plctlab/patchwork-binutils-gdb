@@ -17868,6 +17868,7 @@ static struct riscv_attr_tag_t riscv_attr_tag[] =
   T(priv_spec_revision),
   T(unaligned_access),
   T(stack_align),
+  T(x3_reg_usage),
 #undef T
 };
 
@@ -17923,6 +17924,21 @@ display_riscv_attribute (unsigned char *p,
       break;
     case Tag_RISCV_arch:
       p = display_tag_value (-1, p, end);
+      break;
+    case Tag_RISCV_x3_reg_usage:
+      READ_ULEB (val, p, end);
+      switch (val)
+	{
+	case 1:
+	  printf (_("relaxation\n"));
+	  break;
+	case 4:
+	  printf (_("reserved\n"));
+	  break;
+	default:
+	  printf (_("unknown\n"));
+	  break;
+	}
       break;
     default:
       return display_tag_value (tag, p, end);

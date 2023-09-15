@@ -7,3 +7,4 @@
 Attribute Section: riscv
 File Attributes
   Tag_RISCV_arch: [a-zA-Z0-9_\"].*
+  Tag_RISCV_x3_reg_usage: reserved

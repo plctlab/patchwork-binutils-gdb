@@ -4767,6 +4767,7 @@ riscv_convert_symbolic_attribute (const char *name)
     T(priv_spec_revision),
     T(unaligned_access),
     T(stack_align),
+    T(x3_reg_usage),
 #undef T
   };
 
@@ -4819,6 +4820,17 @@ s_riscv_attribute (int ignored ATTRIBUTE_UNUSED)
       if (start_assemble)
        as_fatal (_("privileged elf attributes must set before "
 		   "any instructions"));
+      break;
+
+    /* The usage of x3,
+       0: default.
+       1: gp relaxation.
+       4: reserved.
+       others: not defined yet.  */
+    case Tag_RISCV_x3_reg_usage:
+      attr = elf_known_obj_attributes_proc (stdoutput);
+      if (riscv_elf_is_unknown_x3_reg_usage (attr[tag].i))
+	as_warn (_("unknown value for Tag_RISCV_x3_reg_usage"));
       break;
 
     default:
