@@ -174,7 +174,7 @@ track_dependency_files (const char *filename)
 {
   struct dependency_file *dep
     = (struct dependency_file *) xmalloc (sizeof (*dep));
-  dep->name = xstrdup (filename);
+  dep->name = lrealpath (filename);
   dep->next = NULL;
   if (dependency_files == NULL)
     dependency_files = dep;
