@@ -1399,6 +1399,11 @@ Specify that the object's filters be processed immediately at runtime.
 @item max-page-size=@var{value}
 Set the maximum memory page size supported to @var{value}.
 
+@item mark-plt
+@itemx nomark-plt
+Mark PLT entries with dynamic tags, DT_X86_64_PLT, DT_X86_64_PLTSZ and
+DT_X86_64_PLTENT.  Supported for x86_64.
+
 @item muldefs
 Allow multiple definitions.
 
