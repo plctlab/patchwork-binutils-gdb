@@ -59,6 +59,7 @@ enum microblaze_instr
   aputd, taputd, caputd, tcaputd, naputd, tnaputd, ncaputd, tncaputd,
   eagetd, teagetd, ecagetd, tecagetd, neagetd, tneagetd, necagetd, tnecagetd,
   eaputd, teaputd, ecaputd, tecaputd, neaputd, tneaputd, necaputd, tnecaputd,
+  clz, mbar, sleep, hibernate, suspend, swapb, swaph,
   invalid_inst
 };
 
