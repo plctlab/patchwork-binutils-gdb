@@ -2260,7 +2260,8 @@ micromips_reloc_shuffle_p (unsigned int r_type)
 {
   return (micromips_reloc_p (r_type)
 	  && r_type != R_MICROMIPS_PC7_S1
-	  && r_type != R_MICROMIPS_PC10_S1);
+	  && r_type != R_MICROMIPS_PC10_S1
+	  && r_type != R_MICROMIPS_GPREL7_S2);
 }
 
 static inline bool
