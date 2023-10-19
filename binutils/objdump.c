@@ -104,6 +104,7 @@ static int with_line_numbers;		/* -l */
 static bool with_source_code;		/* -S */
 static int show_raw_insn;		/* --show-raw-insn */
 static int dump_dwarf_section_info;	/* --dwarf */
+static int disassemble_with_frame_info; /* -c  */
 static int dump_stab_section_info;	/* --stabs */
 static int dump_ctf_section_info;       /* --ctf */
 static char *dump_ctf_section_name;
@@ -351,6 +352,8 @@ usage (FILE *stream, int status)
       fprintf (stream, _("\
   -b, --target=BFDNAME           Specify the target object format as BFDNAME\n"));
       fprintf (stream, _("\
+  -c, --disassemble-with-cfi     Include call frame information when disassembling\n"));
+      fprintf (stream, _("\
   -m, --architecture=MACHINE     Specify the target architecture as MACHINE\n"));
       fprintf (stream, _("\
   -j, --section=NAME             Only display information for section NAME\n"));
@@ -503,6 +506,7 @@ static struct option long_options[]=
   {"demangle", optional_argument, NULL, 'C'},
   {"disassemble", optional_argument, NULL, 'd'},
   {"disassemble-all", no_argument, NULL, 'D'},
+  {"disassemble-with-cfi", no_argument, NULL, 'c'},
   {"disassemble-zeroes", no_argument, NULL, 'z'},
   {"disassembler-options", required_argument, NULL, 'M'},
   {"dwarf", optional_argument, NULL, OPTION_DWARF},
@@ -3523,10 +3527,12 @@ disassemble_bytes (struct disassemble_info *inf,
 		printf ("    ");
 	    }
 
+	  int nc = 0;
+	  
 	  if (! insns)
-	    printf ("%s", buf);
+	    nc = printf ("%s", buf);
 	  else if (sfile.pos)
-	    printf ("%s", sfile.buffer);
+	    nc = printf ("%s", sfile.buffer);
 
 	  if (prefix_addresses
 	      ? show_raw_insn > 0
@@ -3582,6 +3588,22 @@ disassemble_bytes (struct disassemble_info *inf,
 		}
 	    }
 
+	  if (disassemble_with_frame_info)
+	    {
+	      void * fc;
+
+	      fc = dwarf_frame_for_addr (addr_offset);
+	      if (fc != NULL)
+		{
+		  if (nc < 24)
+		    printf ("%*c cfi: ", 24 - nc, '#');
+		  else
+		    printf (" # cfi: ");
+		    
+		  dwarf_display_frame (fc);
+		}
+	    }
+      
 	  if (!wide_output)
 	    putchar ('\n');
 	  else
@@ -5663,8 +5685,16 @@ dump_bfd (bfd *abfd, bool is_mainfile)
       if (dump_dynamic_symtab)
 	dump_symbols (abfd, true);
     }
+
+  if (disassemble_with_frame_info)
+    {
+      dwarf_record_frame_info ();
+      dump_dwarf_section_info = true;
+    }
+
   if (dump_dwarf_section_info)
     dump_dwarf (abfd, is_mainfile);
+
   if (is_mainfile || process_links)
     {
       if (dump_ctf_section_info)
@@ -5734,6 +5764,9 @@ dump_bfd (bfd *abfd, bool is_mainfile)
 
   if (is_mainfile)
     free_debug_memory ();
+
+  if (disassemble_with_frame_info)
+    dwarf_release_frame_info ();
 }
 
 static void
@@ -5893,7 +5926,7 @@ main (int argc, char **argv)
   set_default_bfd_target ();
 
   while ((c = getopt_long (argc, argv,
-			   "CDE:FGHI:LM:P:RSTU:VW::ab:defghij:lm:prstvwxz",
+			   "CDE:FGHI:LM:P:RSTU:VW::ab:cdefghij:lm:prstvwxz",
 			   long_options, (int *) 0))
 	 != EOF)
     {
@@ -6084,6 +6117,9 @@ main (int argc, char **argv)
 	  dump_dynamic_symtab = true;
 	  seenflag = true;
 	  break;
+	case 'c':
+	  disassemble_with_frame_info = true;
+	  /* Fall through.  */
 	case 'd':
 	  disassemble = true;
 	  seenflag = true;

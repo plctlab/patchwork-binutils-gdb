@@ -238,6 +238,11 @@ extern unsigned long dwarf_start_die;
 
 extern int dwarf_check;
 
+extern void   dwarf_record_frame_info (void);
+extern void * dwarf_frame_for_addr (uint64_t);
+extern void   dwarf_display_frame (void *);
+extern void   dwarf_release_frame_info (void);
+
 extern void init_dwarf_regnames_by_elf_machine_code (unsigned int);
 extern void init_dwarf_regnames_by_bfd_arch_and_mach (enum bfd_architecture arch,
 						      unsigned long mach);
