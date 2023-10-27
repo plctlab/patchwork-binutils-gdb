@@ -72,6 +72,9 @@ static const char * const *riscv_fpr_names;
 /* If set, disassemble as most general instruction.  */
 static bool no_aliases = false;
 
+/* If set, disassemble without checking architectire string, just like what
+   we did at the beginning.  */
+static bool all_ext = false;
 
 /* Set default RISC-V disassembler options.  */
 
@@ -95,6 +98,8 @@ parse_riscv_dis_option_without_args (const char *option)
       riscv_gpr_names = riscv_gpr_names_numeric;
       riscv_fpr_names = riscv_fpr_names_numeric;
     }
+  else if (strcmp (option, "max") == 0)
+    all_ext = true;
   else
     return false;
   return true;
@@ -734,7 +739,8 @@ riscv_disassemble_insn (bfd_vma memaddr,
 	  if ((op->xlen_requirement != 0) && (op->xlen_requirement != xlen))
 	    continue;
 	  /* Is this instruction supported by the current architecture?  */
-	  if (!riscv_multi_subset_supports (&riscv_rps_dis, op->insn_class))
+	  if (!all_ext
+	      && !riscv_multi_subset_supports (&riscv_rps_dis, op->insn_class))
 	    continue;
 
 	  /* It's a match.  */
