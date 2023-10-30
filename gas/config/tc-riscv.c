@@ -2063,6 +2063,11 @@ macro (struct riscv_cl_insn *ip, expressionS *imm_expr,
 		  BFD_RELOC_RISCV_PCREL_HI20, BFD_RELOC_RISCV_PCREL_LO12_I);
       break;
 
+    case M_FLQ:
+      pcrel_load (rd, rs1, imm_expr, "flq",
+		  BFD_RELOC_RISCV_PCREL_HI20, BFD_RELOC_RISCV_PCREL_LO12_I);
+      break;
+
     case M_SB:
       pcrel_store (rs2, rs1, imm_expr, "sb",
 		   BFD_RELOC_RISCV_PCREL_HI20, BFD_RELOC_RISCV_PCREL_LO12_S);
@@ -2090,6 +2095,11 @@ macro (struct riscv_cl_insn *ip, expressionS *imm_expr,
 
     case M_FSD:
       pcrel_store (rs2, rs1, imm_expr, "fsd",
+		   BFD_RELOC_RISCV_PCREL_HI20, BFD_RELOC_RISCV_PCREL_LO12_S);
+      break;
+
+    case M_FSQ:
+      pcrel_store (rs2, rs1, imm_expr, "fsq",
 		   BFD_RELOC_RISCV_PCREL_HI20, BFD_RELOC_RISCV_PCREL_LO12_S);
       break;
 
