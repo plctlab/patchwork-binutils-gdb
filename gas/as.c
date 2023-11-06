@@ -1300,6 +1300,7 @@ gas_early_init (int *argcp, char ***argvp)
 static void
 gas_init (void)
 {
+  messages_init ();
   symbol_begin ();
   frag_init ();
   subsegs_begin ();
@@ -1485,6 +1486,8 @@ main (int argc, char ** argv)
 #endif
 
   input_scrub_end ();
+
+  messages_end ();
 
   /* Use xexit instead of return, because under VMS environments they
      may not place the same interpretation on the value given.  */

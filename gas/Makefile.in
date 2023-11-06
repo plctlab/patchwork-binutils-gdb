@@ -881,7 +881,9 @@ AM_CPPFLAGS = -I. -I$(srcdir) -I../bfd -I$(srcdir)/config \
 
 # How to link with both our special library facilities
 # and the system's installed libraries.
-GASLIBS = @OPCODES_LIB@ ../bfd/libbfd.la ../libiberty/libiberty.a
+
+# FIXME:
+GASLIBS = @OPCODES_LIB@ ../bfd/libbfd.la ../libiberty/libiberty.a /home/david/coding-3/gcc-newgit-canvas-2023/build/gcc/libdiagnostics.so
 
 # Files to be copied away after each stage in building.
 STAGESTUFF = *.@OBJEXT@ $(noinst_PROGRAMS)

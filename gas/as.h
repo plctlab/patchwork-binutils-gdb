@@ -474,6 +474,9 @@ void   as_bad_value_out_of_range (const char *, offsetT, offsetT, offsetT,
 void   print_version_id (void);
 char * app_push (void);
 
+void messages_init (void);
+void messages_end (void);
+
 /* Number of littlenums required to hold an extended precision number.	*/
 #define MAX_LITTLENUMS 6
 

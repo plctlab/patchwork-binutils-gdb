@@ -21,6 +21,14 @@
 #include <limits.h>
 #include <signal.h>
 
+// FIXME: do some configury thing for this
+#define USE_LIBDIAGNOSTICS 1
+
+#if USE_LIBDIAGNOSTICS
+// FIXME: need to fix this path, obviously
+#include "/home/david/coding-3/gcc-newgit-canvas-2023/src/gcc/libdiagnostics.h"
+#endif
+
 /* If the system doesn't provide strsignal, we get it defined in
    libiberty but no declaration is supplied.  Because, reasons. */
 #if !defined (HAVE_STRSIGNAL) && !defined (strsignal)
@@ -101,6 +109,29 @@ had_warnings (void)
   return warning_count;
 }
 
+#if USE_LIBDIAGNOSTICS
+static diagnostic_manager *diag_mgr;
+#endif
+
+void messages_init (void)
+{
+#if USE_LIBDIAGNOSTICS
+  diag_mgr = diagnostic_manager_new ();
+  diagnostic_manager_add_text_sink (diag_mgr, stderr,
+				    DIAGNOSTIC_COLORIZE_IF_TTY);
+  diagnostic_manager_add_sarif_sink (diag_mgr, stderr,
+				     DIAGNOSTIC_SARIF_VERSION_2_1_0);
+#endif
+}
+
+void messages_end (void)
+{
+#if USE_LIBDIAGNOSTICS
+  diagnostic_manager_release (diag_mgr);
+  diag_mgr = NULL;
+#endif
+}
+
 /* Nonzero if we've hit a 'bad error', and should not write an obj file,
    and exit with a nonzero error code.  */
 
@@ -172,16 +203,34 @@ as_tsktsk (const char *format, ...)
 static void
 as_warn_internal (const char *file, unsigned int line, char *buffer)
 {
+#if !USE_LIBDIAGNOSTICS
   bool context = false;
+#endif
 
   ++warning_count;
 
   if (file == NULL)
     {
       file = as_where_top (&line);
+#if !USE_LIBDIAGNOSTICS
       context = true;
+#endif
     }
 
+#if USE_LIBDIAGNOSTICS
+  const diagnostic_file *file_obj
+    = diagnostic_manager_new_file (diag_mgr, file, NULL);
+
+  diagnostic_location_t loc
+    = diagnostic_manager_new_location_from_file_and_line (diag_mgr,
+							  file_obj,
+							  line);
+
+  diagnostic *d = diagnostic_begin (diag_mgr,
+				    DIAGNOSTIC_LEVEL_WARNING);
+  diagnostic_set_location (d, loc);
+  diagnostic_finish (d, "%s", buffer);
+#else
   identify (file);
   if (file)
     {
@@ -199,6 +248,7 @@ as_warn_internal (const char *file, unsigned int line, char *buffer)
 #ifndef NO_LISTING
   listing_warning (buffer);
 #endif
+#endif /* #else clause of #if USE_LIBDIAGNOSTICS */
 }
 
 /* Send to stderr a string as a warning, and locate warning
@@ -246,16 +296,33 @@ as_warn_where (const char *file, unsigned int line, const char *format, ...)
 static void
 as_bad_internal (const char *file, unsigned int line, char *buffer)
 {
+#if !USE_LIBDIAGNOSTICS
   bool context = false;
+#endif
 
   ++error_count;
 
   if (file == NULL)
     {
       file = as_where_top (&line);
+#if !USE_LIBDIAGNOSTICS
       context = true;
+#endif
     }
 
+#if USE_LIBDIAGNOSTICS
+  const diagnostic_file *file_obj
+    = diagnostic_manager_new_file (diag_mgr, file, NULL);
+  diagnostic_location_t loc
+    = diagnostic_manager_new_location_from_file_and_line (diag_mgr,
+							  file_obj,
+							  line);
+
+  diagnostic *d = diagnostic_begin (diag_mgr,
+				    DIAGNOSTIC_LEVEL_ERROR);
+  diagnostic_set_location (d, loc);
+  diagnostic_finish (d, "%s", buffer);
+#else
   identify (file);
   if (file)
     {
@@ -269,6 +336,7 @@ as_bad_internal (const char *file, unsigned int line, char *buffer)
 
   if (context)
     as_report_context ();
+#endif /* #else clause of #if USE_LIBDIAGNOSTICS */
 
 #ifndef NO_LISTING
   listing_error (buffer);
