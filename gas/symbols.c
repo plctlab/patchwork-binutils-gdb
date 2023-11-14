@@ -720,6 +720,16 @@ symbol_table_insert (symbolS *symbolP)
 
   htab_insert (sy_hash, symbolP, 1);
 }
+
+/* Remove a symbol from the symbol table.  */
+
+void
+symbol_table_remove (symbolS *symbolP)
+{
+  know (symbolP);
+
+  htab_remove_elt (sy_hash, symbolP);
+}
 
 /* If a symbol name does not exist, create it as undefined, and insert
    it into the symbol table.  Return a pointer to it.  */

@@ -71,6 +71,7 @@ void symbol_end (void);
 void dot_symbol_init (void);
 void symbol_print_statistics (FILE *);
 void symbol_table_insert (symbolS * symbolP);
+void symbol_table_remove (symbolS * symbolP);
 valueT resolve_symbol_value (symbolS *);
 void resolve_local_symbol_values (void);
 int snapshot_symbol (symbolS **, valueT *, segT *, fragS **);
