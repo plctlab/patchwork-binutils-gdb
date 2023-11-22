@@ -807,8 +807,36 @@ riscv_disassemble_insn (bfd_vma memaddr,
   return insnlen;
 }
 
-/* Return true if we find the suitable mapping symbol,
-   and also update the STATE.  Otherwise, return false.  */
+/* If we find the suitable mapping symbol update the STATE.
+   Otherwise, do nothing.  */
+
+static void
+riscv_update_map_state (int n,
+			enum riscv_seg_mstate *state,
+			struct disassemble_info *info)
+{
+  const char *name;
+
+  /* If the symbol is in a different section, ignore it.  */
+  if (info->section != NULL
+      && info->section != info->symtab[n]->section)
+    return;
+
+  name = bfd_asymbol_name(info->symtab[n]);
+  if (strcmp (name, "$x") == 0)
+    *state = MAP_INSN;
+  else if (strcmp (name, "$d") == 0)
+    *state = MAP_DATA;
+  else if (strncmp (name, "$xrv", 4) == 0)
+    {
+      *state = MAP_INSN;
+      riscv_release_subset_list (&riscv_subsets);
+      riscv_parse_subset (&riscv_rps_dis, name + 2);
+    }
+}
+
+/* Return true if we find the suitable mapping symbol.
+   Otherwise, return false.  */
 
 static bool
 riscv_get_map_state (int n,
@@ -823,20 +851,9 @@ riscv_get_map_state (int n,
     return false;
 
   name = bfd_asymbol_name(info->symtab[n]);
-  if (strcmp (name, "$x") == 0)
-    *state = MAP_INSN;
-  else if (strcmp (name, "$d") == 0)
-    *state = MAP_DATA;
-  else if (strncmp (name, "$xrv", 4) == 0)
-    {
-      *state = MAP_INSN;
-      riscv_release_subset_list (&riscv_subsets);
-      riscv_parse_subset (&riscv_rps_dis, name + 2);
-    }
-  else
-    return false;
-
-  return true;
+  return (strcmp (name, "$x") == 0
+	  || strcmp (name, "$d") == 0
+	  || strncmp (name, "$xrv", 4) == 0);
 }
 
 /* Check the sorted symbol table (sorted by the symbol value), find the
@@ -897,6 +914,11 @@ riscv_search_mapping_symbol (bfd_vma memaddr,
 	}
     }
 
+  if (found)
+    riscv_update_map_state (symbol, &mstate, info);
+  else
+    riscv_update_map_state (info->symtab_size - 1, &mstate, info);
+
   /* We can not find the suitable mapping symbol above.  Therefore, we
      look forwards and try to find it again, but don't go pass the start
      of the section.  Otherwise a data section without mapping symbols
@@ -921,6 +943,10 @@ riscv_search_mapping_symbol (bfd_vma memaddr,
 	      break;
 	    }
 	}
+      if (found)
+	riscv_update_map_state (symbol, &mstate, info);
+      else
+	riscv_update_map_state (0, &mstate, info);
     }
 
   /* Save the information for next use.  */
@@ -955,9 +981,12 @@ riscv_data_length (bfd_vma memaddr,
 	      if (addr - memaddr < length)
 		length = addr - memaddr;
 	      found = true;
+	      riscv_update_map_state (n, &m, info);
 	      break;
 	    }
 	}
+      if (!found)
+	riscv_update_map_state (0, &m, info);
     }
   if (!found)
     {
