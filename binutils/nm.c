@@ -1816,6 +1816,9 @@ print_value (bfd *abfd ATTRIBUTE_UNUSED, bfd_vma val)
   switch (print_width)
     {
     case 32:
+      printf (print_format_string, 0xffffffff & (uint64_t) val);
+      break;
+
     case 64:
       printf (print_format_string, (uint64_t) val);
       break;
