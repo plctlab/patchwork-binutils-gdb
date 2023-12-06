@@ -254,16 +254,45 @@ loongarch_split_args_by_comma (char *args, const char *arg_strs[])
 {
   size_t num = 0;
 
+  /* Supporting <b ".L1"> or <beq "r1", "r2", ".L1">, ignore the first '"'.
+     Mismatched '"' is judged by common code and the white characters also
+     removed by common code. The code like <b ".L1"> or <b "r1","r2",".L1">.  */
+  if ('"' == *args)
+    args++;
+
   if (*args)
     arg_strs[num++] = args;
   for (; *args; args++)
-    if (*args == ',')
-      {
-	if (MAX_ARG_NUM_PLUS_2 - 1 == num)
+    {
+      /* Supporting <b ".L1"> or <beq "r1","r2",".L1>",
+	 ignore the last '"'.  */
+      if (('"' == *args) && ('\0' == *(args+1)))
+	{
+	  *args = '\0';
 	  break;
-	else
-	  *args = '\0', arg_strs[num++] = args + 1;
-      }
+	}
+
+      /* Supporting <b ".L1"> or <beq "r1","r2",".L1>",
+	 ignore the '"' before ','.  */
+      if (('"' == *args) && (',' == *(args+1)))
+	*args = '\0';
+
+      if (*args == ',')
+	{
+	  if (MAX_ARG_NUM_PLUS_2 - 1 == num)
+	    break;
+	  else
+	    {
+	      *args = '\0';
+	      /* Supporting <b ".L1"> or <beq "r1","r2",".L1">,
+		 ignore the '"' after ','.  */
+	      if('"' == *(args+1))
+		arg_strs[num++] = args + 2;
+	      else
+		arg_strs[num++] = args + 1;
+	    }
+	}
+    }
   arg_strs[num] = NULL;
   return num;
 }
