@@ -2598,7 +2598,7 @@
      "move ${Ps},${Rd-sfield}"
      (+ Ps RFIX_MOVE_S_R MODE_REGISTER SIZE_FIXED Rd-sfield)
      (sequence
-       ((SI grno) (SI prno) (SI newval))
+       ((SI prno) (SI newval))
        (set prno (regno Ps))
        ; CGEN-FIXME: Can't use the following and then "grno" below because
        ; CGEN will emit a "tmp_grno" *also* in decodev32.c:crisv32f_decode
@@ -3837,7 +3837,7 @@
  "$Rs,$Rd"
  (+ Rd MODE_REGISTER RFIX_BTST SIZE_FIXED Rs)
  (sequence
-   ((SI tmpd) (SI cnt))
+   ((SI tmpd))
    (set tmpd (sll Rd (sub 31 (and Rs 31))))
    (setf-move SI tmpd))
 )
