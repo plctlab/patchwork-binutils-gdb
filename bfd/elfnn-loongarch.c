@@ -3275,16 +3275,13 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  relocation -= elf_hash_table (info)->tls_sec->vma;
 	  break;
 
-	/* TLS IE LD/GD process separately is troublesome.
-	   When a symbol is both ie and LD/GD, h->got.off |= 1
-	   make only one type be relocated.  We must use
-	   h->got.offset |= 1 and h->got.offset |= 2
-	   diff IE and LD/GD.  And all (got_off & (~(bfd_vma)1))
-	   (IE LD/GD and reusable GOT reloc) must change to
-	   (got_off & (~(bfd_vma)3)), beause we use lowest 2 bits
-	   as a tag.
-	   Now, LD and GD is both GOT_TLS_GD type, LD seems to
-	   can be omitted.  */
+	/* The bottom bit of h->got.offset is (ab)used as a flag.
+	   Upon encountering the first TLS relocation, we initialize all GOT
+	   slots for the corresponding symbol and set the bottom bit to 1.
+
+	   The second and subsequent relocations will check the flag, see that
+	   the slot is already initialized, and move on to just relocating the
+	   entry.  */
 	case R_LARCH_TLS_IE_PC_HI20:
 	case R_LARCH_TLS_IE_HI20:
 	case R_LARCH_TLS_LD_PC_HI20:
