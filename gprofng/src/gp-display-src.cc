@@ -33,6 +33,10 @@
 #include "DbeFile.h"
 #include "Command.h"
 
+#ifndef O_LARGEFILE
+#define O_LARGEFILE 0
+#endif
+
 class er_src : public DbeApplication
 {
 public:

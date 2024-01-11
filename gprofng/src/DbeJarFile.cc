@@ -30,6 +30,10 @@
 #include "Data_window.h"
 #include "vec.h"
 
+#ifndef O_LARGEFILE
+#define O_LARGEFILE 0
+#endif
+
 static uint32_t
 get_u1 (unsigned char *b)
 {

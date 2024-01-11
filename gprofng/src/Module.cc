@@ -41,6 +41,10 @@
 #include "PathTree.h"
 #include "Elf.h"
 
+#ifndef O_LARGEFILE
+#define O_LARGEFILE 0
+#endif
+
 Module::Module ()
 {
   lang_code = Sp_lang_unknown;
