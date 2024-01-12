@@ -159,6 +159,17 @@ if test "${enable_gprofng_debug}" = yes; then
     AC_DEFINE(DEBUG, 1, [Enable debugging output.])
 fi
 
+AC_MSG_CHECKING(for O_LARGEFILE in fcntl.h)
+AC_EGREP_CPP([MACRO_UNDEFINED], [
+#include <fcntl.h>
+#ifndef O_LARGEFILE
+MACRO_UNDEFINED
+#endif
+  ],[
+    AC_DEFINE(O_LARGEFILE, 0, [Define if O_LARGEFILE is not in fcntl.h])
+    AC_MSG_RESULT(O_LARGEFILE is undefined) ],
+  AC_MSG_RESULT(O_LARGEFILE is defined))
+
 cat > "dummy.c" << EOF
 #include <features.h>
 #if defined(__UCLIBC__)
