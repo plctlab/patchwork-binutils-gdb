@@ -45,6 +45,19 @@
 #include <iconv.h>
 #endif
 
+/* Best effort attempt to find out if we're running on a big endian
+ * system (only old ppc64 and s390x these days).  Assume little endian
+ * if the macros are not defined.  On big endian, unichar will be a
+ * big endian short.
+ */
+#if defined(__BYTE_ORDER__) && \
+    defined(__ORDER_BIG_ENDIAN__) && \
+    __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#define IS_LITTLE_ENDIAN 0
+#else
+#define IS_LITTLE_ENDIAN 1
+#endif
+
 static rc_uint_type wind_WideCharToMultiByte (rc_uint_type, const unichar *, char *, rc_uint_type);
 static rc_uint_type wind_MultiByteToWideChar (rc_uint_type, const char *, unichar *, rc_uint_type);
 static int unichar_isascii (const unichar *, rc_uint_type);
@@ -771,7 +784,8 @@ wind_MultiByteToWideChar (rc_uint_type cp, const char *mb,
 
   if (!mb || !iconv_name)
     return 0;
-  iconv_t cd = iconv_open ("UTF-16LE", iconv_name);
+  iconv_t cd = iconv_open (IS_LITTLE_ENDIAN ? "UTF-16LE" : "UTF-16BE",
+			   iconv_name);
 
   while (1)
     {
@@ -844,7 +858,8 @@ wind_WideCharToMultiByte (rc_uint_type cp, const unichar *u, char *mb, rc_uint_t
 
   if (!u || !iconv_name)
     return 0;
-  iconv_t cd = iconv_open (iconv_name, "UTF-16LE");
+  iconv_t cd = iconv_open (iconv_name,
+			   IS_LITTLE_ENDIAN ? "UTF-16LE" : "UTF-16BE");
 
   while (1)
     {
