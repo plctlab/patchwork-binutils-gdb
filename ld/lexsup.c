@@ -1875,6 +1875,11 @@ parse_args (unsigned argc, char **argv)
       && command_line.check_section_addresses < 0)
     command_line.check_section_addresses = 0;
 
+  /* Override --no-error-execstack and turn on --error-execstack for
+    --warn-execstack --fatal-warnings.  */
+  if (link_info.warn_execstack && config.fatal_warnings)
+    link_info.error_execstack = 1;
+
   if (export_list)
     {
       struct bfd_elf_version_expr *head = export_list->head.list;
