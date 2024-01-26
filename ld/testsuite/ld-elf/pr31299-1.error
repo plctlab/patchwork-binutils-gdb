@@ -1,0 +1,2 @@
+.*: error: .*\.o: is triggering the generation of an executable stack because it does not have a \.note\.GNU-stack section
+.*: failed to set dynamic section sizes: file format not recognized

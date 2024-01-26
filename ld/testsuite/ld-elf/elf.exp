@@ -289,7 +289,23 @@ if {   [istarget *-*-*linux*]
 	    {nobits-1.s} \
 	     {} \
 	    "rwx-segments-3.exe"] \
-	  ]
+	[list "Ensure that an error issued when creating a segment with RWX permissions" \
+	    "-e 0 -Tnobits-1.t --warn-rwx-segments \
+	     --fatal-warnings --no-error-rwx-segments" \
+	    "" \
+	    "" \
+	    {nobits-1.s} \
+	    {{ld pr31299-2.error}} \
+	    "pr31299-2.exe"] \
+	[list "Ensure that an error issued when creating a TLS segment with execute permission" \
+	    "-e 0 -T rwx-segments-2.t --warn-rwx-segments \
+	     --fatal-warnings --no-error-rwx-segments" \
+	    "" \
+	    "" \
+	    {size-2.s} \
+	    {{ld pr31299-3.error}} \
+	    "pr31299-3.exe"] \
+    ]
 
     set LDFLAGS $curr_ldflags
 
@@ -302,6 +318,14 @@ if {   [istarget *-*-*linux*]
 	    {pr29072-b.s} \
 	    {{ld pr29072.b.warn}} \
 	    "pr29072-b.exe"] \
+	   [list "PR ld/31299 (error about absent .note.GNU-stack)" \
+	    "-e 0 -z stack-size=0x123400 --warn-execstack \
+	     --fatal-warnings --no-error-execstack" \
+	    "" \
+	    "" \
+	    {pr29072-b.s} \
+	    {{ld pr31299-1.error}} \
+	    "pr31299-1.exe"] \
 	]
     } else {
 	run_ld_link_tests [list \
