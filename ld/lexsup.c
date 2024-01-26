@@ -1875,6 +1875,17 @@ parse_args (unsigned argc, char **argv)
       && command_line.check_section_addresses < 0)
     command_line.check_section_addresses = 0;
 
+  /* Override --no-error-execstack and --no-warn-execstack and turn on
+     --error-execstack for --warn-execstack and --error-rwx-segments for
+     --warn-rwx-segments if --fatal-warnings is used.  */
+  if (config.fatal_warnings)
+    {
+      if (link_info.warn_execstack)
+	link_info.error_execstack = 1;
+      if (!link_info.no_warn_rwx_segments)
+	link_info.warn_is_error_for_rwx_segments = 1;
+    }
+
   if (export_list)
     {
       struct bfd_elf_version_expr *head = export_list->head.list;
