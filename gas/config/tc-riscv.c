@@ -3987,6 +3987,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	  bfd_vma target = S_GET_VALUE (fixP->fx_addsy) + *valP;
 	  bfd_vma delta = target - md_pcrel_from (fixP);
 	  bfd_putl32 (bfd_getl32 (buf) | ENCODE_JTYPE_IMM (delta), buf);
+	  if (!riscv_opts.relax && S_IS_LOCAL (fixP->fx_addsy))
+	    fixP->fx_done = 1;
 	}
       break;
 
@@ -3997,6 +3999,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	  bfd_vma target = S_GET_VALUE (fixP->fx_addsy) + *valP;
 	  bfd_vma delta = target - md_pcrel_from (fixP);
 	  bfd_putl32 (bfd_getl32 (buf) | ENCODE_BTYPE_IMM (delta), buf);
+	  if (!riscv_opts.relax && S_IS_LOCAL (fixP->fx_addsy))
+	    fixP->fx_done = 1;
 	}
       break;
 
@@ -4007,6 +4011,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	  bfd_vma target = S_GET_VALUE (fixP->fx_addsy) + *valP;
 	  bfd_vma delta = target - md_pcrel_from (fixP);
 	  bfd_putl16 (bfd_getl16 (buf) | ENCODE_CBTYPE_IMM (delta), buf);
+	  if (!riscv_opts.relax && S_IS_LOCAL (fixP->fx_addsy))
+	    fixP->fx_done = 1;
 	}
       break;
 
@@ -4017,6 +4023,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	  bfd_vma target = S_GET_VALUE (fixP->fx_addsy) + *valP;
 	  bfd_vma delta = target - md_pcrel_from (fixP);
 	  bfd_putl16 (bfd_getl16 (buf) | ENCODE_CJTYPE_IMM (delta), buf);
+	  if (!riscv_opts.relax && S_IS_LOCAL (fixP->fx_addsy))
+	    fixP->fx_done = 1;
 	}
       break;
 
