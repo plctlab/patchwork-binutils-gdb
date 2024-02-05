@@ -17724,6 +17724,16 @@ pic_need_relax (symbolS *sym)
   if (symbol_section_p (sym))
     return true;
 
+  if (strstr (S_GET_NAME (sym), ".L") == S_GET_NAME (sym)
+      || ((mips_abi == O64_ABI || mips_abi == O32_ABI)
+	   && strstr (S_GET_NAME (sym), "$") == S_GET_NAME (sym)))
+    {
+      if (!S_IS_DEFINED (sym))
+	as_fatal (_("undefined temporary symbol: %s"),
+		  S_GET_NAME (sym));
+      return true;
+    }
+
   symsec = S_GET_SEGMENT (sym);
 
   /* This must duplicate the test in adjust_reloc_syms.  */
