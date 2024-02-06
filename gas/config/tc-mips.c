@@ -7561,6 +7561,9 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 		ip->insn_opcode |= ((address_expr->X_add_number >> shift)
 				    & 0xffff);
 	      }
+	    if (mips_pic != NO_PIC && address_expr->X_op == O_constant)
+	      as_bad (_("PIC code branch to absolute address (0x%lx)"),
+		      (unsigned long) address_expr->X_add_number);
 	  }
 	  break;
 
@@ -7578,6 +7581,9 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 		      (unsigned long) address_expr->X_add_number);
 	    ip->insn_opcode |= ((address_expr->X_add_number >> shift)
 				& 0x1fffff);
+	    if (mips_pic != NO_PIC && address_expr->X_op == O_constant)
+	      as_bad (_("PIC code branch to absolute address (0x%lx)"),
+		      (unsigned long) address_expr->X_add_number);
 	  }
 	  break;
 
@@ -7595,6 +7601,9 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 		      (unsigned long) address_expr->X_add_number);
 	    ip->insn_opcode |= ((address_expr->X_add_number >> shift)
 				& 0x3ffffff);
+	    if (mips_pic != NO_PIC && address_expr->X_op == O_constant)
+	      as_bad (_("PIC code branch to absolute address (0x%lx)"),
+		      (unsigned long) address_expr->X_add_number);
 	  }
 	  break;
 
