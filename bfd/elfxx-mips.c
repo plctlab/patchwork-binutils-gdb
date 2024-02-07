@@ -9261,6 +9261,15 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		   (h) ? h->root.root.string : "a local symbol");
 	      break;
 	    default:
+	      if (branch_reloc_p (r_type) && r_symndx == STN_UNDEF)
+		{
+		  howto = MIPS_ELF_RTYPE_TO_HOWTO (abfd, r_type, NEWABI_P (abfd));
+		  info->callbacks->einfo
+		    /* xgettext:c-format */
+		    (_("%X%H: relocation %s against `*ABS*' cannot be used"
+		       " when making a PIC/PIE object\n"),
+		     abfd, sec, rel->r_offset, howto->name);
+		}
 	      break;
 	    }
 	}
