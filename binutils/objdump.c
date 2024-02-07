@@ -3783,6 +3783,7 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
     {
       non_fatal (_("Reading section %s failed because: %s"),
 		 section->name, bfd_errmsg (bfd_get_error ()));
+      free (rel_ppstart);
       return;
     }
 
@@ -4063,9 +4064,7 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
     }
 
   free (data);
-
-  if (rel_ppstart != NULL)
-    free (rel_ppstart);
+  free (rel_ppstart);
 }
 
 /* Disassemble the contents of an object file.  */
