@@ -2932,7 +2932,7 @@ symbol_removed_p (symbolS *s)
   return s->flags.removed;
 }
 
-/* Mark a symbol has having been resolved.  */
+/* Mark a symbol as having been resolved.  */
 
 void
 symbol_mark_resolved (symbolS *s)
@@ -2946,6 +2946,28 @@ int
 symbol_resolved_p (symbolS *s)
 {
   return s->flags.resolved;
+}
+
+/* Mark a symbol as being resolved.  */
+
+void
+symbol_mark_resolving (symbolS *s)
+{
+  s->flags.resolving = 1;
+}
+
+void
+symbol_clear_resolving (symbolS *s)
+{
+  s->flags.resolving = 0;
+}
+
+/* Return whether a symbol is being resolved.  */
+
+int
+symbol_resolving_p (symbolS *s)
+{
+  return s->flags.resolving;
 }
 
 /* Return whether a symbol is a section symbol.  */
