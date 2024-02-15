@@ -1521,8 +1521,10 @@ md_gather_operands (char *str,
       else if (operand->flags & S390_OPERAND_BASE)
 	{
 	  /* After the base register the parenthesised block ends.  */
-	  if (*str++ != ')')
+	  if (*str != ')')
 	    as_bad (_("syntax error; missing ')' after base register"));
+	  else
+	    str++;
 	  skip_optional = 0;
 
 	  if (*str == '\0' && skip_optargs_p (opcode->flags, &opindex_ptr[1]))
@@ -1579,7 +1581,7 @@ md_gather_operands (char *str,
     }
 
   while (ISSPACE (*str))
-    ++str;
+    str++;
 
   /* Check for tls instruction marker.  */
   reloc = s390_tls_suffix (&str, &ex);
