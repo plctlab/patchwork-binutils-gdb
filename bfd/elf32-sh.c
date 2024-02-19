@@ -64,8 +64,7 @@ static bfd_vma tpoff
    not.  If the symbol is protected, we want the local address, but
    its function descriptor must be assigned by the dynamic linker.  */
 #define SYMBOL_FUNCDESC_LOCAL(INFO, H) \
-  (SYMBOL_REFERENCES_LOCAL (INFO, H) \
-   || ! elf_hash_table (INFO)->dynamic_sections_created)
+  _bfd_elf_symbol_refs_local_p (H, INFO, 1)
 
 #define SH_PARTIAL32 true
 #define SH_SRC_MASK32 0xffffffff
