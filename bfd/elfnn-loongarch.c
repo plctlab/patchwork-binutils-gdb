@@ -2303,6 +2303,7 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
       char tls_type;
       bfd_vma relocation, off, ie_off;
       int i, j;
+      bool ignored = false;
 
       howto = loongarch_elf_rtype_to_howto (input_bfd, r_type);
       if (howto == NULL || r_type == R_LARCH_GNU_VTINHERIT
@@ -2344,7 +2345,7 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	}
       else
 	{
-	  bool warned, ignored;
+	  bool warned;
 
 	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
 				   r_symndx, symtab_hdr, sym_hashes,
@@ -2497,7 +2498,7 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		{
 		  if (h->dynindx == -1)
 		    {
-		      if (h->root.type == bfd_link_hash_undefined)
+		      if (h->root.type == bfd_link_hash_undefined && !ignored)
 			(*info->callbacks->undefined_symbol)
 			  (info, name, input_bfd, input_section,
 			   rel->r_offset, true);
