@@ -367,11 +367,11 @@ extern void x86_cleanup (void);
 extern bool x86_support_sframe_p (void);
 #define support_sframe_p x86_support_sframe_p
 
-/* The stack-pointer register number for SFrame stack trace info.  */
+/* The stack-pointer register number for CFA tracking.  */
 extern unsigned int x86_sframe_cfa_sp_reg;
 #define SFRAME_CFA_SP_REG x86_sframe_cfa_sp_reg
 
-/* The frame-pointer register number for SFrame stack trace info.  */
+/* The frame-pointer register number for CFA and FP tracking.  */
 extern unsigned int x86_sframe_cfa_fp_reg;
 #define SFRAME_CFA_FP_REG x86_sframe_cfa_fp_reg
 
