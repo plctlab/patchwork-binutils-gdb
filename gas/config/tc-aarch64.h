@@ -271,11 +271,11 @@ extern bool aarch64_support_sframe_p (void);
 extern unsigned int aarch64_sframe_cfa_sp_reg;
 #define SFRAME_CFA_SP_REG aarch64_sframe_cfa_sp_reg
 
-/* The base-pointer register number for CFA stack trace info.  */
+/* The frame-pointer register number for SFrame stack trace info.  */
 extern unsigned int aarch64_sframe_cfa_fp_reg;
 #define SFRAME_CFA_FP_REG aarch64_sframe_cfa_fp_reg
 
-/* The return address register number for CFA stack trace info.  */
+/* The return address register number for SFrame stack trace info.  */
 extern unsigned int aarch64_sframe_cfa_ra_reg;
 #define SFRAME_CFA_RA_REG aarch64_sframe_cfa_ra_reg
 
