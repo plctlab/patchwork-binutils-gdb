@@ -5262,17 +5262,22 @@ size_input_section
       bfd_size_type alignment_needed;
 
       /* Align this section first to the input sections requirement,
-	 then to the output section's requirement.  If this alignment
-	 is greater than any seen before, then record it too.  Perform
-	 the alignment by inserting a magic 'padding' statement.  */
+         then to the output section's requirement.  If this alignment
+         is greater than any seen before, then record it too.  Perform
+         the alignment by inserting a magic 'padding' statement. 
+         We can force input section alignment within an output section 
+         by using SUBALIGN. The value specified overrides any alignment 
+         given by input sections, whether larger or smaller.  */
 
-      if (output_section_statement->subsection_alignment != NULL)
-	i->alignment_power
-	  = exp_get_power (output_section_statement->subsection_alignment,
-			   "subsection alignment");
+      if (output_section_statement->subsection_alignment != NULL) {
+        i->alignment_power =
+            exp_get_power(output_section_statement->subsection_alignment,
+                          "subsection alignment");
+        o->alignment_power = i->alignment_power;
+      }
 
-      if (o->alignment_power < i->alignment_power)
-	o->alignment_power = i->alignment_power;
+      else if (o->alignment_power < i->alignment_power)
+        o->alignment_power = i->alignment_power;
 
       alignment_needed = align_power (dot, i->alignment_power) - dot;
 
