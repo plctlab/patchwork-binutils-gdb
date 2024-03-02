@@ -1823,7 +1823,26 @@ _bfd_abort (const char *file, int line, const char *fn)
       /* xgettext:c-format */
       (_("BFD %s internal error, aborting at %s:%d\n"),
        BFD_VERSION_STRING, file, line);
-  _bfd_error_handler (_("Please report this bug.\n"));
+
+  struct per_xvec_message **list
+    = _bfd_per_xvec_warn (error_handler_bfd->xvec, 0);
+  if (*list)
+    {
+      fflush (stdout);
+      for (struct per_xvec_message *warn = *list; warn;)
+	{
+	  struct per_xvec_message *next = warn->next;
+	  fputs (warn->message, stderr);
+	  fputc ('\n', stderr);
+	  free (warn);
+	  warn = next;
+	}
+      fputs (_("Please report this bug.\n"), stderr);
+      fflush (stderr);
+    }
+  else
+    _bfd_error_handler (_("Please report this bug.\n"));
+
   _exit (EXIT_FAILURE);
 }
 
