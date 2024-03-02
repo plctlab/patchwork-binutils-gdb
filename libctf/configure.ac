@@ -258,7 +258,8 @@ AC_CACHE_CHECK([for linker versioning flags], [ac_cv_libctf_version_script],
    CFLAGS="$CFLAGS -fPIC"
    AC_LINK_IFELSE([AC_LANG_SOURCE([[int ctf_foo (void) { return 0; }
 				    int main (void) { return ctf_foo(); }]])],
-		  [ac_cv_libctf_version_script="-Wl,--version-script='$srcdir/libctf.ver'"],
+		  [ac_cv_libctf_version_script="-Wl,--version-script"
+		   decommented_version_script=t],
 		  [])
    LDFLAGS="$old_LDFLAGS"
 
