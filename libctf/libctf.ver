@@ -80,9 +80,6 @@ LIBCTF_1.0 {
 	ctf_enum_name;
 	ctf_enum_value;
 
-	ctf_label_set;
-	ctf_label_get;
-
 	ctf_label_topmost;
 	ctf_label_info;
 
